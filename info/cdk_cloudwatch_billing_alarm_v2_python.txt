@@ -1,0 +1,37 @@
+# AWS CDK v2 Python - CloudWatch Billing Alarm Guide
+
+When creating a CloudWatch Billing Alarm in AWS CDK v2 (Python), you should typically use the L2 `aws_cloudwatch.Alarm` construct.
+
+To trigger notifications to an SNS Topic, you must use the `aws_cloudwatch_actions` module. Do not attempt to pass an SNS `Topic` directly to `add_alarm_action` without wrapping it in an `SnsAction`, and never re-instantiate the topic inside the method.
+
+Also, `aws_budgets` has NO `BillingMetric`. Always use `aws_cloudwatch.Metric` to track billing.
+
+Example AWS CloudWatch Billing Alarm structure:
+```python
+from aws_cdk import aws_cloudwatch
+from aws_cdk import aws_cloudwatch_actions
+from aws_cdk import aws_sns
+from aws_cdk import Duration
+
+# Assume sns_topic is an already defined `aws_sns.Topic(self, "BudgetAlerts")`
+
+billing_alarm = aws_cloudwatch.Alarm(
+    self, "BillingAlarm",
+    metric=aws_cloudwatch.Metric(
+        namespace="AWS/Billing",
+        metric_name="EstimatedCharges",
+        dimensions_map={"Currency": "USD"},
+        statistic="Maximum",
+        period=Duration.hours(6)
+    ),
+    threshold=1.00,
+    evaluation_periods=1,
+    comparison_operator=aws_cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD
+)
+
+billing_alarm.add_alarm_action(
+    aws_cloudwatch_actions.SnsAction(sns_topic)
+)
+```
+
+If the LLM strictly uses `aws_cloudwatch.CfnAlarm` instead of `Alarm`, you MUST import `from aws_cdk import aws_cloudwatch` and pass explicitly typed `aws_cloudwatch.CfnAlarm.DimensionProperty(name="Currency", value="USD")` rather than raw dictionaries. However, using the L2 `aws_cloudwatch.Alarm` (shown above) is highly preferred and far less likely to fail JSII deserialization.

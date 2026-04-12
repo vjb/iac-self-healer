@@ -1,0 +1,10 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.gemini/
+cdk-testing-ground/cdk.out/
+cdk-testing-ground/node_modules/
+FINAL_PROMPT.md
+optimized_factory.json

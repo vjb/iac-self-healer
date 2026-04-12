@@ -1,0 +1,4338 @@
+# BOTO3 SNS MODULE
+
+
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/add_permission.html
+
+[SNS](../../sns.html) / Client / add\_permission
+
+# add\_permission[Â¶](#add-permission "Link to this heading")
+
+SNS.Client.add\_permission(*\*\*kwargs*)[Â¶](#SNS.Client.add_permission "Link to this definition")
+:   Adds a statement to a topicâs access control policy, granting access for the specified Amazon Web Services accounts to the specified actions.
+
+    ### Note
+
+    To remove the ability to change topic permissions, you must deny permissions to the `AddPermission`, `RemovePermission`, and `SetTopicAttributes` actions in your IAM policy.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/AddPermission)
+
+    ### Request Syntax
+
+    ```
+    response = client.add_permission(
+        TopicArn='string',
+        Label='string',
+        AWSAccountId=[
+            'string',
+        ],
+        ActionName=[
+            'string',
+        ]
+    )
+    ```
+
+    Parameters:
+    :   * **TopicArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The ARN of the topic whose access control policy you wish to modify.
+        * **Label** (*string*) â
+
+          **[REQUIRED]**
+
+          A unique identifier for the new policy statement.
+        * **AWSAccountId** (*list*) â
+
+          **[REQUIRED]**
+
+          The Amazon Web Services account IDs of the users (principals) who will be given access to the specified actions. The users must have Amazon Web Services account, but do not need to be signed up for this service.
+
+          + *(string) â*
+        * **ActionName** (*list*) â
+
+          **[REQUIRED]**
+
+          The action you want to allow for the specified principal(s).
+
+          Valid values: Any Amazon SNS action name, for example `Publish`.
+
+          + *(string) â*
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/can_paginate.html
+
+[SNS](../../sns.html) / Client / can\_paginate
+
+# can\_paginate[Â¶](#can-paginate "Link to this heading")
+
+SNS.Client.can\_paginate(*operation\_name*)[Â¶](#SNS.Client.can_paginate "Link to this definition")
+:   Check if an operation can be paginated.
+
+    Parameters:
+    :   **operation\_name** (*string*) â The operation name. This is the same name
+        as the method name on the client. For example, if the
+        method name is `create_foo`, and youâd normally invoke the
+        operation as `client.create_foo(**kwargs)`, if the
+        `create_foo` operation can be paginated, you can use the
+        call `client.get_paginator("create_foo")`.
+
+    Returns:
+    :   `True` if the operation can be paginated,
+        `False` otherwise.
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/check_if_phone_number_is_opted_out.html
+
+[SNS](../../sns.html) / Client / check\_if\_phone\_number\_is\_opted\_out
+
+# check\_if\_phone\_number\_is\_opted\_out[Â¶](#check-if-phone-number-is-opted-out "Link to this heading")
+
+SNS.Client.check\_if\_phone\_number\_is\_opted\_out(*\*\*kwargs*)[Â¶](#SNS.Client.check_if_phone_number_is_opted_out "Link to this definition")
+:   Accepts a phone number and indicates whether the phone holder has opted out of receiving SMS messages from your Amazon Web Services account. You cannot send SMS messages to a number that is opted out.
+
+    To resume sending messages, you can opt in the number by using the `OptInPhoneNumber` action.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/CheckIfPhoneNumberIsOptedOut)
+
+    ### Request Syntax
+
+    ```
+    response = client.check_if_phone_number_is_opted_out(
+        phoneNumber='string'
+    )
+    ```
+
+    Parameters:
+    :   **phoneNumber** (*string*) â
+
+        **[REQUIRED]**
+
+        The phone number for which you want to check the opt out status.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'isOptedOut': True|False
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          The response from the `CheckIfPhoneNumberIsOptedOut` action.
+
+          + **isOptedOut** *(boolean) â*
+
+            Indicates whether the phone number is opted out:
+
+            - `true` â The phone number is opted out, meaning you cannot publish SMS messages to it.
+            - `false` â The phone number is opted in, meaning you can publish SMS messages to it.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.ThrottledException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/close.html
+
+[SNS](../../sns.html) / Client / close
+
+# close[Â¶](#close "Link to this heading")
+
+SNS.Client.close()[Â¶](#SNS.Client.close "Link to this definition")
+:   Closes underlying endpoint connections.
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/confirm_subscription.html
+
+[SNS](../../sns.html) / Client / confirm\_subscription
+
+# confirm\_subscription[Â¶](#confirm-subscription "Link to this heading")
+
+SNS.Client.confirm\_subscription(*\*\*kwargs*)[Â¶](#SNS.Client.confirm_subscription "Link to this definition")
+:   Verifies an endpoint ownerâs intent to receive messages by validating the token sent to the endpoint by an earlier `Subscribe` action. If the token is valid, the action creates a new subscription and returns its Amazon Resource Name (ARN). This call requires an AWS signature only when the `AuthenticateOnUnsubscribe` flag is set to âtrueâ.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ConfirmSubscription)
+
+    ### Request Syntax
+
+    ```
+    response = client.confirm_subscription(
+        TopicArn='string',
+        Token='string',
+        AuthenticateOnUnsubscribe='string'
+    )
+    ```
+
+    Parameters:
+    :   * **TopicArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The ARN of the topic for which you wish to confirm a subscription.
+        * **Token** (*string*) â
+
+          **[REQUIRED]**
+
+          Short-lived token sent to an endpoint during the `Subscribe` action.
+        * **AuthenticateOnUnsubscribe** (*string*) â Disallows unauthenticated unsubscribes of the subscription. If the value of this parameter is `true` and the request has an Amazon Web Services signature, then only the topic owner and the subscription owner can unsubscribe the endpoint. The unsubscribe action requires Amazon Web Services authentication.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'SubscriptionArn': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for ConfirmSubscriptions action.
+
+          + **SubscriptionArn** *(string) â*
+
+            The ARN of the created subscription.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.SubscriptionLimitExceededException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.FilterPolicyLimitExceededException`
+    * `SNS.Client.exceptions.ReplayLimitExceededException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/create_platform_application.html
+
+[SNS](../../sns.html) / Client / create\_platform\_application
+
+# create\_platform\_application[Â¶](#create-platform-application "Link to this heading")
+
+SNS.Client.create\_platform\_application(*\*\*kwargs*)[Â¶](#SNS.Client.create_platform_application "Link to this definition")
+:   Creates a platform application object for one of the supported push notification services, such as APNS and GCM (Firebase Cloud Messaging), to which devices and mobile apps may register. You must specify `PlatformPrincipal` and `PlatformCredential` attributes when using the `CreatePlatformApplication` action.
+
+    `PlatformPrincipal` and `PlatformCredential` are received from the notification service.
+
+    * For ADM, `PlatformPrincipal` is `client id` and `PlatformCredential` is `client secret`.
+    * For APNS and `APNS_SANDBOX` using certificate credentials, `PlatformPrincipal` is `SSL certificate` and `PlatformCredential` is `private key`.
+    * For APNS and `APNS_SANDBOX` using token credentials, `PlatformPrincipal` is `signing key ID` and `PlatformCredential` is `signing key`.
+    * For Baidu, `PlatformPrincipal` is `API key` and `PlatformCredential` is `secret key`.
+    * For GCM (Firebase Cloud Messaging) using key credentials, there is no `PlatformPrincipal`. The `PlatformCredential` is `API key`.
+    * For GCM (Firebase Cloud Messaging) using token credentials, there is no `PlatformPrincipal`. The `PlatformCredential` is a JSON formatted private key file. When using the Amazon Web Services CLI or Amazon Web Services SDKs, the file must be in string format and special characters must be ignored. To format the file correctly, Amazon SNS recommends using the following command: `SERVICE_JSON=$(jq @json < service.json)`.
+    * For MPNS, `PlatformPrincipal` is `TLS certificate` and `PlatformCredential` is `private key`.
+    * For WNS, `PlatformPrincipal` is `Package Security Identifier` and `PlatformCredential` is `secret key`.
+
+    You can use the returned `PlatformApplicationArn` as an attribute for the `CreatePlatformEndpoint` action.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/CreatePlatformApplication)
+
+    ### Request Syntax
+
+    ```
+    response = client.create_platform_application(
+        Name='string',
+        Platform='string',
+        Attributes={
+            'string': 'string'
+        }
+    )
+    ```
+
+    Parameters:
+    :   * **Name** (*string*) â
+
+          **[REQUIRED]**
+
+          Application names must be made up of only uppercase and lowercase ASCII letters, numbers, underscores, hyphens, and periods, and must be between 1 and 256 characters long.
+        * **Platform** (*string*) â
+
+          **[REQUIRED]**
+
+          The following platforms are supported: ADM (Amazon Device Messaging), APNS (Apple Push Notification Service), APNS\_SANDBOX, and GCM (Firebase Cloud Messaging).
+        * **Attributes** (*dict*) â
+
+          **[REQUIRED]**
+
+          For a list of attributes, see [SetPlatformApplicationAttributes](https://docs.aws.amazon.com/sns/latest/api/API_SetPlatformApplicationAttributes.html).
+
+          + *(string) â*
+
+            - *(string) â*
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'PlatformApplicationArn': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response from CreatePlatformApplication action.
+
+          + **PlatformApplicationArn** *(string) â*
+
+            `PlatformApplicationArn` is returned.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/create_platform_endpoint.html
+
+[SNS](../../sns.html) / Client / create\_platform\_endpoint
+
+# create\_platform\_endpoint[Â¶](#create-platform-endpoint "Link to this heading")
+
+SNS.Client.create\_platform\_endpoint(*\*\*kwargs*)[Â¶](#SNS.Client.create_platform_endpoint "Link to this definition")
+:   Creates an endpoint for a device and mobile app on one of the supported push notification services, such as GCM (Firebase Cloud Messaging) and APNS. `CreatePlatformEndpoint` requires the `PlatformApplicationArn` that is returned from `CreatePlatformApplication`. You can use the returned `EndpointArn` to send a message to a mobile app or by the `Subscribe` action for subscription to a topic. The `CreatePlatformEndpoint` action is idempotent, so if the requester already owns an endpoint with the same device token and attributes, that endpointâs ARN is returned without creating a new endpoint. For more information, see [Using Amazon SNS Mobile Push Notifications](https://docs.aws.amazon.com/sns/latest/dg/SNSMobilePush.html).
+
+    When using `CreatePlatformEndpoint` with Baidu, two attributes must be provided: ChannelId and UserId. The token field must also contain the ChannelId. For more information, see [Creating an Amazon SNS Endpoint for Baidu](https://docs.aws.amazon.com/sns/latest/dg/SNSMobilePushBaiduEndpoint.html).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/CreatePlatformEndpoint)
+
+    ### Request Syntax
+
+    ```
+    response = client.create_platform_endpoint(
+        PlatformApplicationArn='string',
+        Token='string',
+        CustomUserData='string',
+        Attributes={
+            'string': 'string'
+        }
+    )
+    ```
+
+    Parameters:
+    :   * **PlatformApplicationArn** (*string*) â
+
+          **[REQUIRED]**
+
+          `PlatformApplicationArn` returned from CreatePlatformApplication is used to create a an endpoint.
+        * **Token** (*string*) â
+
+          **[REQUIRED]**
+
+          Unique identifier created by the notification service for an app on a device. The specific name for Token will vary, depending on which notification service is being used. For example, when using APNS as the notification service, you need the device token. Alternatively, when using GCM (Firebase Cloud Messaging) or ADM, the device token equivalent is called the registration ID.
+        * **CustomUserData** (*string*) â Arbitrary user data to associate with the endpoint. Amazon SNS does not use this data. The data must be in UTF-8 format and less than 2KB.
+        * **Attributes** (*dict*) â
+
+          For a list of attributes, see [SetEndpointAttributes](https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
+
+          + *(string) â*
+
+            - *(string) â*
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'EndpointArn': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response from CreateEndpoint action.
+
+          + **EndpointArn** *(string) â*
+
+            EndpointArn returned from CreateEndpoint action.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/create_sms_sandbox_phone_number.html
+
+[SNS](../../sns.html) / Client / create\_sms\_sandbox\_phone\_number
+
+# create\_sms\_sandbox\_phone\_number[Â¶](#create-sms-sandbox-phone-number "Link to this heading")
+
+SNS.Client.create\_sms\_sandbox\_phone\_number(*\*\*kwargs*)[Â¶](#SNS.Client.create_sms_sandbox_phone_number "Link to this definition")
+:   Adds a destination phone number to an Amazon Web Services account in the SMS sandbox and sends a one-time password (OTP) to that phone number.
+
+    When you start using Amazon SNS to send SMS messages, your Amazon Web Services account is in the *SMS sandbox*. The SMS sandbox provides a safe environment for you to try Amazon SNS features without risking your reputation as an SMS sender. While your Amazon Web Services account is in the SMS sandbox, you can use all of the features of Amazon SNS. However, you can send SMS messages only to verified destination phone numbers. For more information, including how to move out of the sandbox to send messages without restrictions, see [SMS sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) in the *Amazon SNS Developer Guide*.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/CreateSMSSandboxPhoneNumber)
+
+    ### Request Syntax
+
+    ```
+    response = client.create_sms_sandbox_phone_number(
+        PhoneNumber='string',
+        LanguageCode='en-US'|'en-GB'|'es-419'|'es-ES'|'de-DE'|'fr-CA'|'fr-FR'|'it-IT'|'ja-JP'|'pt-BR'|'kr-KR'|'zh-CN'|'zh-TW'
+    )
+    ```
+
+    Parameters:
+    :   * **PhoneNumber** (*string*) â
+
+          **[REQUIRED]**
+
+          The destination phone number to verify. On verification, Amazon SNS adds this phone number to the list of verified phone numbers that you can send SMS messages to.
+        * **LanguageCode** (*string*) â The language to use for sending the OTP. The default value is `en-US`.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {}
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.OptedOutException`
+    * `SNS.Client.exceptions.UserErrorException`
+    * `SNS.Client.exceptions.ThrottledException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/create_topic.html
+
+[SNS](../../sns.html) / Client / create\_topic
+
+# create\_topic[Â¶](#create-topic "Link to this heading")
+
+SNS.Client.create\_topic(*\*\*kwargs*)[Â¶](#SNS.Client.create_topic "Link to this definition")
+:   Creates a topic to which notifications can be published. Users can create at most 100,000 standard topics (at most 1,000 FIFO topics). For more information, see [Creating an Amazon SNS topic](https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html) in the *Amazon SNS Developer Guide*. This action is idempotent, so if the requester already owns a topic with the specified name, that topicâs ARN is returned without creating a new topic.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/CreateTopic)
+
+    ### Request Syntax
+
+    ```
+    response = client.create_topic(
+        Name='string',
+        Attributes={
+            'string': 'string'
+        },
+        Tags=[
+            {
+                'Key': 'string',
+                'Value': 'string'
+            },
+        ],
+        DataProtectionPolicy='string'
+    )
+    ```
+
+    Parameters:
+    :   * **Name** (*string*) â
+
+          **[REQUIRED]**
+
+          The name of the topic you want to create.
+
+          Constraints: Topic names must be made up of only uppercase and lowercase ASCII letters, numbers, underscores, and hyphens, and must be between 1 and 256 characters long.
+
+          For a FIFO (first-in-first-out) topic, the name must end with the `.fifo` suffix.
+        * **Attributes** (*dict*) â
+
+          A map of attributes with their corresponding values.
+
+          The following lists names, descriptions, and values of the special request parameters that the `CreateTopic` action uses:
+
+          + `DeliveryPolicy` â The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints.
+          + `DisplayName` â The display name to use for a topic with SMS subscriptions.
+          + `Policy` â The policy that defines who can access your topic. By default, only the topic owner can publish or subscribe to the topic.
+          + `TracingConfig` â Tracing mode of an Amazon SNS topic. By default `TracingConfig` is set to `PassThrough`, and the topic passes through the tracing header it receives from an Amazon SNS publisher to its subscriptions. If set to `Active`, Amazon SNS will vend X-Ray segment data to topic owner account if the sampled flag in the tracing header is true. This is only supported on standard topics.
+          + HTTP
+
+            - `HTTPSuccessFeedbackRoleArn` â Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an HTTP endpoint.
+            - `HTTPSuccessFeedbackSampleRate` â Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an HTTP endpoint.
+            - `HTTPFailureFeedbackRoleArn` â Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an HTTP endpoint.
+          + Amazon Data Firehose
+
+            - `FirehoseSuccessFeedbackRoleArn` â Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint.
+            - `FirehoseSuccessFeedbackSampleRate` â Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint.
+            - `FirehoseFailureFeedbackRoleArn` â Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint.
+          + Lambda
+
+            - `LambdaSuccessFeedbackRoleArn` â Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Lambda endpoint.
+            - `LambdaSuccessFeedbackSampleRate` â Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Lambda endpoint.
+            - `LambdaFailureFeedbackRoleArn` â Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Lambda endpoint.
+          + Platform application endpoint
+
+            - `ApplicationSuccessFeedbackRoleArn` â Indicates successful message delivery status for an Amazon SNS topic that is subscribed to a platform application endpoint.
+            - `ApplicationSuccessFeedbackSampleRate` â Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an platform application endpoint.
+            - `ApplicationFailureFeedbackRoleArn` â Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an platform application endpoint.
+
+          ### Note
+
+          In addition to being able to configure topic attributes for message delivery status of notification messages sent to Amazon SNS application endpoints, you can also configure application attributes for the delivery status of push notification messages sent to push notification services.
+
+          For example, For more information, see [Using Amazon SNS Application Attributes for Message Delivery Status](https://docs.aws.amazon.com/sns/latest/dg/sns-msg-status.html).
+
+          + Amazon SQS
+
+            - `SQSSuccessFeedbackRoleArn` â Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint.
+            - `SQSSuccessFeedbackSampleRate` â Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint.
+            - `SQSFailureFeedbackRoleArn` â Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint.
+
+          ### Note
+
+          The <ENDPOINT>SuccessFeedbackRoleArn and <ENDPOINT>FailureFeedbackRoleArn attributes are used to give Amazon SNS write access to use CloudWatch Logs on your behalf. The <ENDPOINT>SuccessFeedbackSampleRate attribute is for specifying the sample rate percentage (0-100) of successfully delivered messages. After you configure the <ENDPOINT>FailureFeedbackRoleArn attribute, then all failed message deliveries generate CloudWatch Logs.
+
+          The following attribute applies only to [server-side encryption](https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html):
+
+          + `KmsMasterKeyId` â The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see [Key Terms](https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html#sse-key-terms). For more examples, see [KeyId](https://docs.aws.amazon.com/kms/latest/APIReference/API_DescribeKey.html#API_DescribeKey_RequestParameters) in the *Key Management Service API Reference*.
+
+          The following attributes apply only to [FIFO topics](https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+
+          + `ArchivePolicy` â The policy that sets the retention period for messages stored in the message archive of an Amazon SNS FIFO topic.
+          + `ContentBasedDeduplication` â Enables content-based deduplication for FIFO topics.
+
+            - By default, `ContentBasedDeduplication` is set to `false`. If you create a FIFO topic and this attribute is `false`, you must specify a value for the `MessageDeduplicationId` parameter for the [Publish](https://docs.aws.amazon.com/sns/latest/api/API_Publish.html) action.
+            - When you set `ContentBasedDeduplication` to `true`, Amazon SNS uses a SHA-256 hash to generate the `MessageDeduplicationId` using the body of the message (but not the attributes of the message). (Optional) To override the generated value, you can specify a value for the `MessageDeduplicationId` parameter for the `Publish` action.
+          + `FifoThroughputScope` â Enables higher throughput for your FIFO topic by adjusting the scope of deduplication. This attribute has two possible values:
+
+            - `Topic` â The scope of message deduplication is across the entire topic. This is the default value and maintains existing behavior, with a maximum throughput of 3000 messages per second or 20MB per second, whichever comes first.
+            - `MessageGroup` â The scope of deduplication is within each individual message group, which enables higher throughput per topic subject to regional quotas. For more information on quotas or to request an increase, see [Amazon SNS service quotas](https://docs.aws.amazon.com/general/latest/gr/sns.html) in the Amazon Web Services General Reference.
+          + *(string) â*
+
+            - *(string) â*
+        * **Tags** (*list*) â
+
+          The list of tags to add to a new topic.
+
+          ### Note
+
+          To be able to tag a topic on creation, you must have the `sns:CreateTopic` and `sns:TagResource` permissions.
+
+          + *(dict) â*
+
+            The list of tags to be added to the specified topic.
+
+            - **Key** *(string) â* **[REQUIRED]**
+
+              The required key portion of the tag.
+            - **Value** *(string) â* **[REQUIRED]**
+
+              The optional value portion of the tag.
+        * **DataProtectionPolicy** (*string*) â
+
+          The body of the policy document you want to use for this topic.
+
+          You can only add one policy per topic.
+
+          The policy must be in JSON string format.
+
+          Length Constraints: Maximum length of 30,720.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'TopicArn': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response from CreateTopic action.
+
+          + **TopicArn** *(string) â*
+
+            The Amazon Resource Name (ARN) assigned to the created topic.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.TopicLimitExceededException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InvalidSecurityException`
+    * `SNS.Client.exceptions.TagLimitExceededException`
+    * `SNS.Client.exceptions.StaleTagException`
+    * `SNS.Client.exceptions.TagPolicyException`
+    * `SNS.Client.exceptions.ConcurrentAccessException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/delete_endpoint.html
+
+[SNS](../../sns.html) / Client / delete\_endpoint
+
+# delete\_endpoint[Â¶](#delete-endpoint "Link to this heading")
+
+SNS.Client.delete\_endpoint(*\*\*kwargs*)[Â¶](#SNS.Client.delete_endpoint "Link to this definition")
+:   Deletes the endpoint for a device and mobile app from Amazon SNS. This action is idempotent. For more information, see [Using Amazon SNS Mobile Push Notifications](https://docs.aws.amazon.com/sns/latest/dg/SNSMobilePush.html).
+
+    When you delete an endpoint that is also subscribed to a topic, then you must also unsubscribe the endpoint from the topic.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/DeleteEndpoint)
+
+    ### Request Syntax
+
+    ```
+    response = client.delete_endpoint(
+        EndpointArn='string'
+    )
+    ```
+
+    Parameters:
+    :   **EndpointArn** (*string*) â
+
+        **[REQUIRED]**
+
+        `EndpointArn` of endpoint to delete.
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/delete_platform_application.html
+
+[SNS](../../sns.html) / Client / delete\_platform\_application
+
+# delete\_platform\_application[Â¶](#delete-platform-application "Link to this heading")
+
+SNS.Client.delete\_platform\_application(*\*\*kwargs*)[Â¶](#SNS.Client.delete_platform_application "Link to this definition")
+:   Deletes a platform application object for one of the supported push notification services, such as APNS and GCM (Firebase Cloud Messaging). For more information, see [Using Amazon SNS Mobile Push Notifications](https://docs.aws.amazon.com/sns/latest/dg/SNSMobilePush.html).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/DeletePlatformApplication)
+
+    ### Request Syntax
+
+    ```
+    response = client.delete_platform_application(
+        PlatformApplicationArn='string'
+    )
+    ```
+
+    Parameters:
+    :   **PlatformApplicationArn** (*string*) â
+
+        **[REQUIRED]**
+
+        `PlatformApplicationArn` of platform application object to delete.
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/delete_sms_sandbox_phone_number.html
+
+[SNS](../../sns.html) / Client / delete\_sms\_sandbox\_phone\_number
+
+# delete\_sms\_sandbox\_phone\_number[Â¶](#delete-sms-sandbox-phone-number "Link to this heading")
+
+SNS.Client.delete\_sms\_sandbox\_phone\_number(*\*\*kwargs*)[Â¶](#SNS.Client.delete_sms_sandbox_phone_number "Link to this definition")
+:   Deletes an Amazon Web Services accountâs verified or pending phone number from the SMS sandbox.
+
+    When you start using Amazon SNS to send SMS messages, your Amazon Web Services account is in the *SMS sandbox*. The SMS sandbox provides a safe environment for you to try Amazon SNS features without risking your reputation as an SMS sender. While your Amazon Web Services account is in the SMS sandbox, you can use all of the features of Amazon SNS. However, you can send SMS messages only to verified destination phone numbers. For more information, including how to move out of the sandbox to send messages without restrictions, see [SMS sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) in the *Amazon SNS Developer Guide*.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/DeleteSMSSandboxPhoneNumber)
+
+    ### Request Syntax
+
+    ```
+    response = client.delete_sms_sandbox_phone_number(
+        PhoneNumber='string'
+    )
+    ```
+
+    Parameters:
+    :   **PhoneNumber** (*string*) â
+
+        **[REQUIRED]**
+
+        The destination phone number to delete.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {}
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.ResourceNotFoundException`
+    * `SNS.Client.exceptions.UserErrorException`
+    * `SNS.Client.exceptions.ThrottledException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/delete_topic.html
+
+[SNS](../../sns.html) / Client / delete\_topic
+
+# delete\_topic[Â¶](#delete-topic "Link to this heading")
+
+SNS.Client.delete\_topic(*\*\*kwargs*)[Â¶](#SNS.Client.delete_topic "Link to this definition")
+:   Deletes a topic and all its subscriptions. Deleting a topic might prevent some messages previously sent to the topic from being delivered to subscribers. This action is idempotent, so deleting a topic that does not exist does not result in an error.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/DeleteTopic)
+
+    ### Request Syntax
+
+    ```
+    response = client.delete_topic(
+        TopicArn='string'
+    )
+    ```
+
+    Parameters:
+    :   **TopicArn** (*string*) â
+
+        **[REQUIRED]**
+
+        The ARN of the topic you want to delete.
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InvalidStateException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.StaleTagException`
+    * `SNS.Client.exceptions.TagPolicyException`
+    * `SNS.Client.exceptions.ConcurrentAccessException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/get_data_protection_policy.html
+
+[SNS](../../sns.html) / Client / get\_data\_protection\_policy
+
+# get\_data\_protection\_policy[Â¶](#get-data-protection-policy "Link to this heading")
+
+SNS.Client.get\_data\_protection\_policy(*\*\*kwargs*)[Â¶](#SNS.Client.get_data_protection_policy "Link to this definition")
+:   Retrieves the specified inline `DataProtectionPolicy` document that is stored in the specified Amazon SNS topic.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/GetDataProtectionPolicy)
+
+    ### Request Syntax
+
+    ```
+    response = client.get_data_protection_policy(
+        ResourceArn='string'
+    )
+    ```
+
+    Parameters:
+    :   **ResourceArn** (*string*) â
+
+        **[REQUIRED]**
+
+        The ARN of the topic whose `DataProtectionPolicy` you want to get.
+
+        For more information about ARNs, see [Amazon Resource Names (ARNs)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) in the Amazon Web Services General Reference.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'DataProtectionPolicy': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          + **DataProtectionPolicy** *(string) â*
+
+            Retrieves the `DataProtectionPolicy` in JSON string format.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InvalidSecurityException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/get_endpoint_attributes.html
+
+[SNS](../../sns.html) / Client / get\_endpoint\_attributes
+
+# get\_endpoint\_attributes[Â¶](#get-endpoint-attributes "Link to this heading")
+
+SNS.Client.get\_endpoint\_attributes(*\*\*kwargs*)[Â¶](#SNS.Client.get_endpoint_attributes "Link to this definition")
+:   Retrieves the endpoint attributes for a device on one of the supported push notification services, such as GCM (Firebase Cloud Messaging) and APNS. For more information, see [Using Amazon SNS Mobile Push Notifications](https://docs.aws.amazon.com/sns/latest/dg/SNSMobilePush.html).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/GetEndpointAttributes)
+
+    ### Request Syntax
+
+    ```
+    response = client.get_endpoint_attributes(
+        EndpointArn='string'
+    )
+    ```
+
+    Parameters:
+    :   **EndpointArn** (*string*) â
+
+        **[REQUIRED]**
+
+        `EndpointArn` for `GetEndpointAttributes` input.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'Attributes': {
+                'string': 'string'
+            }
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response from `GetEndpointAttributes` of the `EndpointArn`.
+
+          + **Attributes** *(dict) â*
+
+            Attributes include the following:
+
+            - `CustomUserData` â arbitrary user data to associate with the endpoint. Amazon SNS does not use this data. The data must be in UTF-8 format and less than 2KB.
+            - `Enabled` â flag that enables/disables delivery to the endpoint. Amazon SNS will set this to false when a notification service indicates to Amazon SNS that the endpoint is invalid. Users can set it back to true, typically after updating Token.
+            - `Token` â device token, also referred to as a registration id, for an app and mobile device. This is returned from the notification service when an app and mobile device are registered with the notification service.
+
+            ### Note
+
+            The device token for the iOS platform is returned in lowercase.
+
+            - *(string) â*
+
+              * *(string) â*
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/get_paginator.html
+
+[SNS](../../sns.html) / Client / get\_paginator
+
+# get\_paginator[Â¶](#get-paginator "Link to this heading")
+
+SNS.Client.get\_paginator(*operation\_name*)[Â¶](#SNS.Client.get_paginator "Link to this definition")
+:   Create a paginator for an operation.
+
+    Parameters:
+    :   **operation\_name** (*string*) â The operation name. This is the same name
+        as the method name on the client. For example, if the
+        method name is `create_foo`, and youâd normally invoke the
+        operation as `client.create_foo(**kwargs)`, if the
+        `create_foo` operation can be paginated, you can use the
+        call `client.get_paginator("create_foo")`.
+
+    Raises:
+    :   **OperationNotPageableError** â Raised if the operation is not
+        pageable. You can use the `client.can_paginate` method to
+        check if an operation is pageable.
+
+    Return type:
+    :   `botocore.paginate.Paginator`
+
+    Returns:
+    :   A paginator object.
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/get_platform_application_attributes.html
+
+[SNS](../../sns.html) / Client / get\_platform\_application\_attributes
+
+# get\_platform\_application\_attributes[Â¶](#get-platform-application-attributes "Link to this heading")
+
+SNS.Client.get\_platform\_application\_attributes(*\*\*kwargs*)[Â¶](#SNS.Client.get_platform_application_attributes "Link to this definition")
+:   Retrieves the attributes of the platform application object for the supported push notification services, such as APNS and GCM (Firebase Cloud Messaging). For more information, see [Using Amazon SNS Mobile Push Notifications](https://docs.aws.amazon.com/sns/latest/dg/SNSMobilePush.html).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/GetPlatformApplicationAttributes)
+
+    ### Request Syntax
+
+    ```
+    response = client.get_platform_application_attributes(
+        PlatformApplicationArn='string'
+    )
+    ```
+
+    Parameters:
+    :   **PlatformApplicationArn** (*string*) â
+
+        **[REQUIRED]**
+
+        `PlatformApplicationArn` for GetPlatformApplicationAttributesInput.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'Attributes': {
+                'string': 'string'
+            }
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for `GetPlatformApplicationAttributes` action.
+
+          + **Attributes** *(dict) â*
+
+            Attributes include the following:
+
+            - `AppleCertificateExpiryDate` â The expiry date of the SSL certificate used to configure certificate-based authentication.
+            - `ApplePlatformTeamID` â The Apple developer account ID used to configure token-based authentication.
+            - `ApplePlatformBundleID` â The app identifier used to configure token-based authentication.
+            - `AuthenticationMethod` â Returns the credential type used when sending push notifications from application to APNS/APNS\_Sandbox, or application to GCM.
+
+              * APNS â Returns the token or certificate.
+              * GCM â Returns the token or key.
+            - `EventEndpointCreated` â Topic ARN to which EndpointCreated event notifications should be sent.
+            - `EventEndpointDeleted` â Topic ARN to which EndpointDeleted event notifications should be sent.
+            - `EventEndpointUpdated` â Topic ARN to which EndpointUpdate event notifications should be sent.
+            - `EventDeliveryFailure` â Topic ARN to which DeliveryFailure event notifications should be sent upon Direct Publish delivery failure (permanent) to one of the applicationâs endpoints.
+            - *(string) â*
+
+              * *(string) â*
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/get_sms_attributes.html
+
+[SNS](../../sns.html) / Client / get\_sms\_attributes
+
+# get\_sms\_attributes[Â¶](#get-sms-attributes "Link to this heading")
+
+SNS.Client.get\_sms\_attributes(*\*\*kwargs*)[Â¶](#SNS.Client.get_sms_attributes "Link to this definition")
+:   Returns the settings for sending SMS messages from your Amazon Web Services account.
+
+    These settings are set with the `SetSMSAttributes` action.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/GetSMSAttributes)
+
+    ### Request Syntax
+
+    ```
+    response = client.get_sms_attributes(
+        attributes=[
+            'string',
+        ]
+    )
+    ```
+
+    Parameters:
+    :   **attributes** (*list*) â
+
+        A list of the individual attribute names, such as `MonthlySpendLimit`, for which you want values.
+
+        For all attribute names, see [SetSMSAttributes](https://docs.aws.amazon.com/sns/latest/api/API_SetSMSAttributes.html).
+
+        If you donât use this parameter, Amazon SNS returns all SMS attributes.
+
+        * *(string) â*
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'attributes': {
+                'string': 'string'
+            }
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          The response from the `GetSMSAttributes` request.
+
+          + **attributes** *(dict) â*
+
+            The SMS attribute names and their values.
+
+            - *(string) â*
+
+              * *(string) â*
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.ThrottledException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/get_sms_sandbox_account_status.html
+
+[SNS](../../sns.html) / Client / get\_sms\_sandbox\_account\_status
+
+# get\_sms\_sandbox\_account\_status[Â¶](#get-sms-sandbox-account-status "Link to this heading")
+
+SNS.Client.get\_sms\_sandbox\_account\_status()[Â¶](#SNS.Client.get_sms_sandbox_account_status "Link to this definition")
+:   Retrieves the SMS sandbox status for the calling Amazon Web Services account in the target Amazon Web Services Region.
+
+    When you start using Amazon SNS to send SMS messages, your Amazon Web Services account is in the *SMS sandbox*. The SMS sandbox provides a safe environment for you to try Amazon SNS features without risking your reputation as an SMS sender. While your Amazon Web Services account is in the SMS sandbox, you can use all of the features of Amazon SNS. However, you can send SMS messages only to verified destination phone numbers. For more information, including how to move out of the sandbox to send messages without restrictions, see [SMS sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) in the *Amazon SNS Developer Guide*.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/GetSMSSandboxAccountStatus)
+
+    ### Request Syntax
+
+    ```
+    response = client.get_sms_sandbox_account_status()
+    ```
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'IsInSandbox': True|False
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          + **IsInSandbox** *(boolean) â*
+
+            Indicates whether the calling Amazon Web Services account is in the SMS sandbox.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.ThrottledException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/get_subscription_attributes.html
+
+[SNS](../../sns.html) / Client / get\_subscription\_attributes
+
+# get\_subscription\_attributes[Â¶](#get-subscription-attributes "Link to this heading")
+
+SNS.Client.get\_subscription\_attributes(*\*\*kwargs*)[Â¶](#SNS.Client.get_subscription_attributes "Link to this definition")
+:   Returns all of the properties of a subscription.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/GetSubscriptionAttributes)
+
+    ### Request Syntax
+
+    ```
+    response = client.get_subscription_attributes(
+        SubscriptionArn='string'
+    )
+    ```
+
+    Parameters:
+    :   **SubscriptionArn** (*string*) â
+
+        **[REQUIRED]**
+
+        The ARN of the subscription whose properties you want to get.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'Attributes': {
+                'string': 'string'
+            }
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for GetSubscriptionAttributes action.
+
+          + **Attributes** *(dict) â*
+
+            A map of the subscriptionâs attributes. Attributes in this map include the following:
+
+            - `ConfirmationWasAuthenticated` â `true` if the subscription confirmation request was authenticated.
+            - `DeliveryPolicy` â The JSON serialization of the subscriptionâs delivery policy.
+            - `EffectiveDeliveryPolicy` â The JSON serialization of the effective delivery policy that takes into account the topic delivery policy and account system defaults.
+            - `FilterPolicy` â The filter policy JSON that is assigned to the subscription. For more information, see [Amazon SNS Message Filtering](https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html) in the *Amazon SNS Developer Guide*.
+            - `FilterPolicyScope` â This attribute lets you choose the filtering scope by using one of the following string value types:
+
+              * `MessageAttributes` (default) â The filter is applied on the message attributes.
+              * `MessageBody` â The filter is applied on the message body.
+            - `Owner` â The Amazon Web Services account ID of the subscriptionâs owner.
+            - `PendingConfirmation` â `true` if the subscription hasnât been confirmed. To confirm a pending subscription, call the `ConfirmSubscription` action with a confirmation token.
+            - `RawMessageDelivery` â `true` if raw message delivery is enabled for the subscription. Raw messages are free of JSON formatting and can be sent to HTTP/S and Amazon SQS endpoints.
+            - `RedrivePolicy` â When specified, sends undeliverable messages to the specified Amazon SQS dead-letter queue. Messages that canât be delivered due to client errors (for example, when the subscribed endpoint is unreachable) or server errors (for example, when the service that powers the subscribed endpoint becomes unavailable) are held in the dead-letter queue for further analysis or reprocessing.
+            - `SubscriptionArn` â The subscriptionâs ARN.
+            - `TopicArn` â The topic ARN that the subscription is associated with.
+
+            The following attribute applies only to Amazon Data Firehose delivery stream subscriptions:
+
+            - `SubscriptionRoleArn` â The ARN of the IAM role that has the following:
+
+              * Permission to write to the Firehose delivery stream
+              * Amazon SNS listed as a trusted entity
+
+            Specifying a valid ARN for this attribute is required for Firehose delivery stream subscriptions. For more information, see [Fanout to Firehose delivery streams](https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html) in the *Amazon SNS Developer Guide*.
+
+            - *(string) â*
+
+              * *(string) â*
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/get_topic_attributes.html
+
+[SNS](../../sns.html) / Client / get\_topic\_attributes
+
+# get\_topic\_attributes[Â¶](#get-topic-attributes "Link to this heading")
+
+SNS.Client.get\_topic\_attributes(*\*\*kwargs*)[Â¶](#SNS.Client.get_topic_attributes "Link to this definition")
+:   Returns all of the properties of a topic. Topic properties returned might differ based on the authorization of the user.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/GetTopicAttributes)
+
+    ### Request Syntax
+
+    ```
+    response = client.get_topic_attributes(
+        TopicArn='string'
+    )
+    ```
+
+    Parameters:
+    :   **TopicArn** (*string*) â
+
+        **[REQUIRED]**
+
+        The ARN of the topic whose properties you want to get.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'Attributes': {
+                'string': 'string'
+            }
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for GetTopicAttributes action.
+
+          + **Attributes** *(dict) â*
+
+            A map of the topicâs attributes. Attributes in this map include the following:
+
+            - `DeliveryPolicy` â The JSON serialization of the topicâs delivery policy.
+            - `DisplayName` â The human-readable name used in the `From` field for notifications to `email` and `email-json` endpoints.
+            - `EffectiveDeliveryPolicy` â The JSON serialization of the effective delivery policy, taking system defaults into account.
+            - `Owner` â The Amazon Web Services account ID of the topicâs owner.
+            - `Policy` â The JSON serialization of the topicâs access control policy.
+            - `SignatureVersion` â The signature version corresponds to the hashing algorithm used while creating the signature of the notifications, subscription confirmations, or unsubscribe confirmation messages sent by Amazon SNS.
+
+              * By default, `SignatureVersion` is set to **1**. The signature is a Base64-encoded **SHA1withRSA** signature.
+              * When you set `SignatureVersion` to **2**. Amazon SNS uses a Base64-encoded **SHA256withRSA** signature.
+
+              ### Note
+
+              If the API response does not include the `SignatureVersion` attribute, it means that the `SignatureVersion` for the topic has value **1**.
+            - `SubscriptionsConfirmed` â The number of confirmed subscriptions for the topic.
+            - `SubscriptionsDeleted` â The number of deleted subscriptions for the topic.
+            - `SubscriptionsPending` â The number of subscriptions pending confirmation for the topic.
+            - `TopicArn` â The topicâs ARN.
+            - `TracingConfig` â Tracing mode of an Amazon SNS topic. By default `TracingConfig` is set to `PassThrough`, and the topic passes through the tracing header it receives from an Amazon SNS publisher to its subscriptions. If set to `Active`, Amazon SNS will vend X-Ray segment data to topic owner account if the sampled flag in the tracing header is true. This is only supported on standard topics.
+
+            The following attribute applies only to [server-side-encryption](https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html):
+
+            - `KmsMasterKeyId` - The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see [Key Terms](https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html#sse-key-terms). For more examples, see [KeyId](https://docs.aws.amazon.com/kms/latest/APIReference/API_DescribeKey.html#API_DescribeKey_RequestParameters) in the *Key Management Service API Reference*.
+
+            The following attributes apply only to [FIFO topics](https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+
+            - `ArchivePolicy` â The policy that sets the retention period for messages stored in the message archive of an Amazon SNS FIFO topic.
+            - `BeginningArchiveTime` â The earliest starting point at which a message in the topicâs archive can be replayed from. This point in time is based on the configured message retention period set by the topicâs message archiving policy.
+            - `ContentBasedDeduplication` â Enables content-based deduplication for FIFO topics.
+
+              * By default, `ContentBasedDeduplication` is set to `false`. If you create a FIFO topic and this attribute is `false`, you must specify a value for the `MessageDeduplicationId` parameter for the [Publish](https://docs.aws.amazon.com/sns/latest/api/API_Publish.html) action.
+              * When you set `ContentBasedDeduplication` to `true`, Amazon SNS uses a SHA-256 hash to generate the `MessageDeduplicationId` using the body of the message (but not the attributes of the message). (Optional) To override the generated value, you can specify a value for the `MessageDeduplicationId` parameter for the `Publish` action.
+            - `FifoTopic` â When this is set to `true`, a FIFO topic is created.
+            - *(string) â*
+
+              * *(string) â*
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InvalidSecurityException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/get_waiter.html
+
+[SNS](../../sns.html) / Client / get\_waiter
+
+# get\_waiter[Â¶](#get-waiter "Link to this heading")
+
+SNS.Client.get\_waiter(*waiter\_name*)[Â¶](#SNS.Client.get_waiter "Link to this definition")
+:   Returns an object that can wait for some condition.
+
+    Parameters:
+    :   **waiter\_name** (*str*) â The name of the waiter to get. See the waiters
+        section of the service docs for a list of available waiters.
+
+    Returns:
+    :   The specified waiter object.
+
+    Return type:
+    :   `botocore.waiter.Waiter`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/list_endpoints_by_platform_application.html
+
+[SNS](../../sns.html) / Client / list\_endpoints\_by\_platform\_application
+
+# list\_endpoints\_by\_platform\_application[Â¶](#list-endpoints-by-platform-application "Link to this heading")
+
+SNS.Client.list\_endpoints\_by\_platform\_application(*\*\*kwargs*)[Â¶](#SNS.Client.list_endpoints_by_platform_application "Link to this definition")
+:   Lists the endpoints and endpoint attributes for devices in a supported push notification service, such as GCM (Firebase Cloud Messaging) and APNS. The results for `ListEndpointsByPlatformApplication` are paginated and return a limited list of endpoints, up to 100. If additional records are available after the first page results, then a NextToken string will be returned. To receive the next page, you call `ListEndpointsByPlatformApplication` again using the NextToken string received from the previous call. When there are no more records to return, NextToken will be null. For more information, see [Using Amazon SNS Mobile Push Notifications](https://docs.aws.amazon.com/sns/latest/dg/SNSMobilePush.html).
+
+    This action is throttled at 30 transactions per second (TPS).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListEndpointsByPlatformApplication)
+
+    ### Request Syntax
+
+    ```
+    response = client.list_endpoints_by_platform_application(
+        PlatformApplicationArn='string',
+        NextToken='string'
+    )
+    ```
+
+    Parameters:
+    :   * **PlatformApplicationArn** (*string*) â
+
+          **[REQUIRED]**
+
+          `PlatformApplicationArn` for `ListEndpointsByPlatformApplicationInput` action.
+        * **NextToken** (*string*) â `NextToken` string is used when calling `ListEndpointsByPlatformApplication` action to retrieve additional records that are available after the first page results.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'Endpoints': [
+                {
+                    'EndpointArn': 'string',
+                    'Attributes': {
+                        'string': 'string'
+                    }
+                },
+            ],
+            'NextToken': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for `ListEndpointsByPlatformApplication` action.
+
+          + **Endpoints** *(list) â*
+
+            Endpoints returned for `ListEndpointsByPlatformApplication` action.
+
+            - *(dict) â*
+
+              The endpoint for mobile app and device.
+
+              * **EndpointArn** *(string) â*
+
+                The `EndpointArn` for mobile app and device.
+              * **Attributes** *(dict) â*
+
+                Attributes for endpoint.
+
+                + *(string) â*
+
+                  - *(string) â*
+          + **NextToken** *(string) â*
+
+            `NextToken` string is returned when calling `ListEndpointsByPlatformApplication` action if additional records are available after the first page results.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/list_origination_numbers.html
+
+[SNS](../../sns.html) / Client / list\_origination\_numbers
+
+# list\_origination\_numbers[Â¶](#list-origination-numbers "Link to this heading")
+
+SNS.Client.list\_origination\_numbers(*\*\*kwargs*)[Â¶](#SNS.Client.list_origination_numbers "Link to this definition")
+:   Lists the calling Amazon Web Services accountâs dedicated origination numbers and their metadata. For more information about origination numbers, see [Origination numbers](https://docs.aws.amazon.com/sns/latest/dg/channels-sms-originating-identities-origination-numbers.html) in the *Amazon SNS Developer Guide*.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListOriginationNumbers)
+
+    ### Request Syntax
+
+    ```
+    response = client.list_origination_numbers(
+        NextToken='string',
+        MaxResults=123
+    )
+    ```
+
+    Parameters:
+    :   * **NextToken** (*string*) â Token that the previous `ListOriginationNumbers` request returns.
+        * **MaxResults** (*integer*) â The maximum number of origination numbers to return.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'NextToken': 'string',
+            'PhoneNumbers': [
+                {
+                    'CreatedAt': datetime(2015, 1, 1),
+                    'PhoneNumber': 'string',
+                    'Status': 'string',
+                    'Iso2CountryCode': 'string',
+                    'RouteType': 'Transactional'|'Promotional'|'Premium',
+                    'NumberCapabilities': [
+                        'SMS'|'MMS'|'VOICE',
+                    ]
+                },
+            ]
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          + **NextToken** *(string) â*
+
+            A `NextToken` string is returned when you call the `ListOriginationNumbers` operation if additional pages of records are available.
+          + **PhoneNumbers** *(list) â*
+
+            A list of the calling accountâs verified and pending origination numbers.
+
+            - *(dict) â*
+
+              A list of phone numbers and their metadata.
+
+              * **CreatedAt** *(datetime) â*
+
+                The date and time when the phone number was created.
+              * **PhoneNumber** *(string) â*
+
+                The phone number.
+              * **Status** *(string) â*
+
+                The status of the phone number.
+              * **Iso2CountryCode** *(string) â*
+
+                The two-character code for the country or region, in ISO 3166-1 alpha-2 format.
+              * **RouteType** *(string) â*
+
+                The list of supported routes.
+              * **NumberCapabilities** *(list) â*
+
+                The capabilities of each phone number.
+
+                + *(string) â* Enum listing out all supported number capabilities.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.ThrottledException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.ValidationException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/list_phone_numbers_opted_out.html
+
+[SNS](../../sns.html) / Client / list\_phone\_numbers\_opted\_out
+
+# list\_phone\_numbers\_opted\_out[Â¶](#list-phone-numbers-opted-out "Link to this heading")
+
+SNS.Client.list\_phone\_numbers\_opted\_out(*\*\*kwargs*)[Â¶](#SNS.Client.list_phone_numbers_opted_out "Link to this definition")
+:   Returns a list of phone numbers that are opted out, meaning you cannot send SMS messages to them.
+
+    The results for `ListPhoneNumbersOptedOut` are paginated, and each page returns up to 100 phone numbers. If additional phone numbers are available after the first page of results, then a `NextToken` string will be returned. To receive the next page, you call `ListPhoneNumbersOptedOut` again using the `NextToken` string received from the previous call. When there are no more records to return, `NextToken` will be null.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListPhoneNumbersOptedOut)
+
+    ### Request Syntax
+
+    ```
+    response = client.list_phone_numbers_opted_out(
+        nextToken='string'
+    )
+    ```
+
+    Parameters:
+    :   **nextToken** (*string*) â A `NextToken` string is used when you call the `ListPhoneNumbersOptedOut` action to retrieve additional records that are available after the first page of results.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'phoneNumbers': [
+                'string',
+            ],
+            'nextToken': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          The response from the `ListPhoneNumbersOptedOut` action.
+
+          + **phoneNumbers** *(list) â*
+
+            A list of phone numbers that are opted out of receiving SMS messages. The list is paginated, and each page can contain up to 100 phone numbers.
+
+            - *(string) â*
+          + **nextToken** *(string) â*
+
+            A `NextToken` string is returned when you call the `ListPhoneNumbersOptedOut` action if additional records are available after the first page of results.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.ThrottledException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/list_platform_applications.html
+
+[SNS](../../sns.html) / Client / list\_platform\_applications
+
+# list\_platform\_applications[Â¶](#list-platform-applications "Link to this heading")
+
+SNS.Client.list\_platform\_applications(*\*\*kwargs*)[Â¶](#SNS.Client.list_platform_applications "Link to this definition")
+:   Lists the platform application objects for the supported push notification services, such as APNS and GCM (Firebase Cloud Messaging). The results for `ListPlatformApplications` are paginated and return a limited list of applications, up to 100. If additional records are available after the first page results, then a NextToken string will be returned. To receive the next page, you call `ListPlatformApplications` using the NextToken string received from the previous call. When there are no more records to return, `NextToken` will be null. For more information, see [Using Amazon SNS Mobile Push Notifications](https://docs.aws.amazon.com/sns/latest/dg/SNSMobilePush.html).
+
+    This action is throttled at 15 transactions per second (TPS).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListPlatformApplications)
+
+    ### Request Syntax
+
+    ```
+    response = client.list_platform_applications(
+        NextToken='string'
+    )
+    ```
+
+    Parameters:
+    :   **NextToken** (*string*) â `NextToken` string is used when calling `ListPlatformApplications` action to retrieve additional records that are available after the first page results.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'PlatformApplications': [
+                {
+                    'PlatformApplicationArn': 'string',
+                    'Attributes': {
+                        'string': 'string'
+                    }
+                },
+            ],
+            'NextToken': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for `ListPlatformApplications` action.
+
+          + **PlatformApplications** *(list) â*
+
+            Platform applications returned when calling `ListPlatformApplications` action.
+
+            - *(dict) â*
+
+              Platform application object.
+
+              * **PlatformApplicationArn** *(string) â*
+
+                PlatformApplicationArn for platform application object.
+              * **Attributes** *(dict) â*
+
+                Attributes for platform application object.
+
+                + *(string) â*
+
+                  - *(string) â*
+          + **NextToken** *(string) â*
+
+            `NextToken` string is returned when calling `ListPlatformApplications` action if additional records are available after the first page results.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/list_sms_sandbox_phone_numbers.html
+
+[SNS](../../sns.html) / Client / list\_sms\_sandbox\_phone\_numbers
+
+# list\_sms\_sandbox\_phone\_numbers[Â¶](#list-sms-sandbox-phone-numbers "Link to this heading")
+
+SNS.Client.list\_sms\_sandbox\_phone\_numbers(*\*\*kwargs*)[Â¶](#SNS.Client.list_sms_sandbox_phone_numbers "Link to this definition")
+:   Lists the calling Amazon Web Services accountâs current verified and pending destination phone numbers in the SMS sandbox.
+
+    When you start using Amazon SNS to send SMS messages, your Amazon Web Services account is in the *SMS sandbox*. The SMS sandbox provides a safe environment for you to try Amazon SNS features without risking your reputation as an SMS sender. While your Amazon Web Services account is in the SMS sandbox, you can use all of the features of Amazon SNS. However, you can send SMS messages only to verified destination phone numbers. For more information, including how to move out of the sandbox to send messages without restrictions, see [SMS sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) in the *Amazon SNS Developer Guide*.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListSMSSandboxPhoneNumbers)
+
+    ### Request Syntax
+
+    ```
+    response = client.list_sms_sandbox_phone_numbers(
+        NextToken='string',
+        MaxResults=123
+    )
+    ```
+
+    Parameters:
+    :   * **NextToken** (*string*) â Token that the previous `ListSMSSandboxPhoneNumbersInput` request returns.
+        * **MaxResults** (*integer*) â The maximum number of phone numbers to return.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'PhoneNumbers': [
+                {
+                    'PhoneNumber': 'string',
+                    'Status': 'Pending'|'Verified'
+                },
+            ],
+            'NextToken': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          + **PhoneNumbers** *(list) â*
+
+            A list of the calling accountâs pending and verified phone numbers.
+
+            - *(dict) â*
+
+              A verified or pending destination phone number in the SMS sandbox.
+
+              When you start using Amazon SNS to send SMS messages, your Amazon Web Services account is in the *SMS sandbox*. The SMS sandbox provides a safe environment for you to try Amazon SNS features without risking your reputation as an SMS sender. While your Amazon Web Services account is in the SMS sandbox, you can use all of the features of Amazon SNS. However, you can send SMS messages only to verified destination phone numbers. For more information, including how to move out of the sandbox to send messages without restrictions, see [SMS sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) in the *Amazon SNS Developer Guide*.
+
+              * **PhoneNumber** *(string) â*
+
+                The destination phone number.
+              * **Status** *(string) â*
+
+                The destination phone numberâs verification status.
+          + **NextToken** *(string) â*
+
+            A `NextToken` string is returned when you call the `ListSMSSandboxPhoneNumbersInput` operation if additional pages of records are available.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.ResourceNotFoundException`
+    * `SNS.Client.exceptions.ThrottledException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/list_subscriptions.html
+
+[SNS](../../sns.html) / Client / list\_subscriptions
+
+# list\_subscriptions[Â¶](#list-subscriptions "Link to this heading")
+
+SNS.Client.list\_subscriptions(*\*\*kwargs*)[Â¶](#SNS.Client.list_subscriptions "Link to this definition")
+:   Returns a list of the requesterâs subscriptions. Each call returns a limited list of subscriptions, up to 100. If there are more subscriptions, a `NextToken` is also returned. Use the `NextToken` parameter in a new `ListSubscriptions` call to get further results.
+
+    This action is throttled at 30 transactions per second (TPS).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListSubscriptions)
+
+    ### Request Syntax
+
+    ```
+    response = client.list_subscriptions(
+        NextToken='string'
+    )
+    ```
+
+    Parameters:
+    :   **NextToken** (*string*) â Token returned by the previous `ListSubscriptions` request.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'Subscriptions': [
+                {
+                    'SubscriptionArn': 'string',
+                    'Owner': 'string',
+                    'Protocol': 'string',
+                    'Endpoint': 'string',
+                    'TopicArn': 'string'
+                },
+            ],
+            'NextToken': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for ListSubscriptions action
+
+          + **Subscriptions** *(list) â*
+
+            A list of subscriptions.
+
+            - *(dict) â*
+
+              A wrapper type for the attributes of an Amazon SNS subscription.
+
+              * **SubscriptionArn** *(string) â*
+
+                The subscriptionâs ARN.
+              * **Owner** *(string) â*
+
+                The subscriptionâs owner.
+              * **Protocol** *(string) â*
+
+                The subscriptionâs protocol.
+              * **Endpoint** *(string) â*
+
+                The subscriptionâs endpoint (format depends on the protocol).
+              * **TopicArn** *(string) â*
+
+                The ARN of the subscriptionâs topic.
+          + **NextToken** *(string) â*
+
+            Token to pass along to the next `ListSubscriptions` request. This element is returned if there are more subscriptions to retrieve.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/list_subscriptions_by_topic.html
+
+[SNS](../../sns.html) / Client / list\_subscriptions\_by\_topic
+
+# list\_subscriptions\_by\_topic[Â¶](#list-subscriptions-by-topic "Link to this heading")
+
+SNS.Client.list\_subscriptions\_by\_topic(*\*\*kwargs*)[Â¶](#SNS.Client.list_subscriptions_by_topic "Link to this definition")
+:   Returns a list of the subscriptions to a specific topic. Each call returns a limited list of subscriptions, up to 100. If there are more subscriptions, a `NextToken` is also returned. Use the `NextToken` parameter in a new `ListSubscriptionsByTopic` call to get further results.
+
+    This action is throttled at 30 transactions per second (TPS).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListSubscriptionsByTopic)
+
+    ### Request Syntax
+
+    ```
+    response = client.list_subscriptions_by_topic(
+        TopicArn='string',
+        NextToken='string'
+    )
+    ```
+
+    Parameters:
+    :   * **TopicArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The ARN of the topic for which you wish to find subscriptions.
+        * **NextToken** (*string*) â Token returned by the previous `ListSubscriptionsByTopic` request.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'Subscriptions': [
+                {
+                    'SubscriptionArn': 'string',
+                    'Owner': 'string',
+                    'Protocol': 'string',
+                    'Endpoint': 'string',
+                    'TopicArn': 'string'
+                },
+            ],
+            'NextToken': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for ListSubscriptionsByTopic action.
+
+          + **Subscriptions** *(list) â*
+
+            A list of subscriptions.
+
+            - *(dict) â*
+
+              A wrapper type for the attributes of an Amazon SNS subscription.
+
+              * **SubscriptionArn** *(string) â*
+
+                The subscriptionâs ARN.
+              * **Owner** *(string) â*
+
+                The subscriptionâs owner.
+              * **Protocol** *(string) â*
+
+                The subscriptionâs protocol.
+              * **Endpoint** *(string) â*
+
+                The subscriptionâs endpoint (format depends on the protocol).
+              * **TopicArn** *(string) â*
+
+                The ARN of the subscriptionâs topic.
+          + **NextToken** *(string) â*
+
+            Token to pass along to the next `ListSubscriptionsByTopic` request. This element is returned if there are more subscriptions to retrieve.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/list_tags_for_resource.html
+
+[SNS](../../sns.html) / Client / list\_tags\_for\_resource
+
+# list\_tags\_for\_resource[Â¶](#list-tags-for-resource "Link to this heading")
+
+SNS.Client.list\_tags\_for\_resource(*\*\*kwargs*)[Â¶](#SNS.Client.list_tags_for_resource "Link to this definition")
+:   List all tags added to the specified Amazon SNS topic. For an overview, see [Amazon SNS Tags](https://docs.aws.amazon.com/sns/latest/dg/sns-tags.html) in the *Amazon Simple Notification Service Developer Guide*.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListTagsForResource)
+
+    ### Request Syntax
+
+    ```
+    response = client.list_tags_for_resource(
+        ResourceArn='string'
+    )
+    ```
+
+    Parameters:
+    :   **ResourceArn** (*string*) â
+
+        **[REQUIRED]**
+
+        The ARN of the topic for which to list tags.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'Tags': [
+                {
+                    'Key': 'string',
+                    'Value': 'string'
+                },
+            ]
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          + **Tags** *(list) â*
+
+            The tags associated with the specified topic.
+
+            - *(dict) â*
+
+              The list of tags to be added to the specified topic.
+
+              * **Key** *(string) â*
+
+                The required key portion of the tag.
+              * **Value** *(string) â*
+
+                The optional value portion of the tag.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.ResourceNotFoundException`
+    * `SNS.Client.exceptions.TagPolicyException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.ConcurrentAccessException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/list_topics.html
+
+[SNS](../../sns.html) / Client / list\_topics
+
+# list\_topics[Â¶](#list-topics "Link to this heading")
+
+SNS.Client.list\_topics(*\*\*kwargs*)[Â¶](#SNS.Client.list_topics "Link to this definition")
+:   Returns a list of the requesterâs topics. Each call returns a limited list of topics, up to 100. If there are more topics, a `NextToken` is also returned. Use the `NextToken` parameter in a new `ListTopics` call to get further results.
+
+    This action is throttled at 30 transactions per second (TPS).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListTopics)
+
+    ### Request Syntax
+
+    ```
+    response = client.list_topics(
+        NextToken='string'
+    )
+    ```
+
+    Parameters:
+    :   **NextToken** (*string*) â Token returned by the previous `ListTopics` request.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'Topics': [
+                {
+                    'TopicArn': 'string'
+                },
+            ],
+            'NextToken': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for ListTopics action.
+
+          + **Topics** *(list) â*
+
+            A list of topic ARNs.
+
+            - *(dict) â*
+
+              A wrapper type for the topicâs Amazon Resource Name (ARN). To retrieve a topicâs attributes, use `GetTopicAttributes`.
+
+              * **TopicArn** *(string) â*
+
+                The topicâs ARN.
+          + **NextToken** *(string) â*
+
+            Token to pass along to the next `ListTopics` request. This element is returned if there are additional topics to retrieve.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/opt_in_phone_number.html
+
+[SNS](../../sns.html) / Client / opt\_in\_phone\_number
+
+# opt\_in\_phone\_number[Â¶](#opt-in-phone-number "Link to this heading")
+
+SNS.Client.opt\_in\_phone\_number(*\*\*kwargs*)[Â¶](#SNS.Client.opt_in_phone_number "Link to this definition")
+:   Use this request to opt in a phone number that is opted out, which enables you to resume sending SMS messages to the number.
+
+    You can opt in a phone number only once every 30 days.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/OptInPhoneNumber)
+
+    ### Request Syntax
+
+    ```
+    response = client.opt_in_phone_number(
+        phoneNumber='string'
+    )
+    ```
+
+    Parameters:
+    :   **phoneNumber** (*string*) â
+
+        **[REQUIRED]**
+
+        The phone number to opt in. Use E.164 format.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {}
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          The response for the OptInPhoneNumber action.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.ThrottledException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/publish.html
+
+[SNS](../../sns.html) / Client / publish
+
+# publish[Â¶](#publish "Link to this heading")
+
+SNS.Client.publish(*\*\*kwargs*)[Â¶](#SNS.Client.publish "Link to this definition")
+:   Sends a message to an Amazon SNS topic, a text message (SMS message) directly to a phone number, or a message to a mobile platform endpoint (when you specify the `TargetArn`).
+
+    If you send a message to a topic, Amazon SNS delivers the message to each endpoint that is subscribed to the topic. The format of the message depends on the notification protocol for each subscribed endpoint.
+
+    When a `messageId` is returned, the message is saved and Amazon SNS immediately delivers it to subscribers.
+
+    To use the `Publish` action for publishing a message to a mobile endpoint, such as an app on a Kindle device or mobile phone, you must specify the EndpointArn for the TargetArn parameter. The EndpointArn is returned when making a call with the `CreatePlatformEndpoint` action.
+
+    For more information about formatting messages, see [Send Custom Platform-Specific Payloads in Messages to Mobile Devices](https://docs.aws.amazon.com/sns/latest/dg/mobile-push-send-custommessage.html).
+
+    ### Warning
+
+    You can publish messages only to topics and endpoints in the same Amazon Web Services Region.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/Publish)
+
+    ### Request Syntax
+
+    ```
+    response = client.publish(
+        TopicArn='string',
+        TargetArn='string',
+        PhoneNumber='string',
+        Message='string',
+        Subject='string',
+        MessageStructure='string',
+        MessageAttributes={
+            'string': {
+                'DataType': 'string',
+                'StringValue': 'string',
+                'BinaryValue': b'bytes'
+            }
+        },
+        MessageDeduplicationId='string',
+        MessageGroupId='string'
+    )
+    ```
+
+    Parameters:
+    :   * **TopicArn** (*string*) â
+
+          The topic you want to publish to.
+
+          If you donât specify a value for the `TopicArn` parameter, you must specify a value for the `PhoneNumber` or `TargetArn` parameters.
+        * **TargetArn** (*string*) â If you donât specify a value for the `TargetArn` parameter, you must specify a value for the `PhoneNumber` or `TopicArn` parameters.
+        * **PhoneNumber** (*string*) â
+
+          The phone number to which you want to deliver an SMS message. Use E.164 format.
+
+          If you donât specify a value for the `PhoneNumber` parameter, you must specify a value for the `TargetArn` or `TopicArn` parameters.
+        * **Message** (*string*) â
+
+          **[REQUIRED]**
+
+          The message you want to send.
+
+          If you are publishing to a topic and you want to send the same message to all transport protocols, include the text of the message as a String value. If you want to send different messages for each transport protocol, set the value of the `MessageStructure` parameter to `json` and use a JSON object for the `Message` parameter.
+
+          Constraints:
+
+          + With the exception of SMS, messages must be UTF-8 encoded strings and at most 256 KB in size (262,144 bytes, not 262,144 characters).
+          + For SMS, each message can contain up to 140 characters. This character limit depends on the encoding schema. For example, an SMS message can contain 160 GSM characters, 140 ASCII characters, or 70 UCS-2 characters. If you publish a message that exceeds this size limit, Amazon SNS sends the message as multiple messages, each fitting within the size limit. Messages arenât truncated mid-word but are cut off at whole-word boundaries. The total size limit for a single SMS `Publish` action is 1,600 characters.
+
+          JSON-specific constraints:
+
+          + Keys in the JSON object that correspond to supported transport protocols must have simple JSON string values.
+          + The values will be parsed (unescaped) before they are used in outgoing messages.
+          + Outbound notifications are JSON encoded (meaning that the characters will be reescaped for sending).
+          + Values have a minimum length of 0 (the empty string, ââ, is allowed).
+          + Values have a maximum length bounded by the overall message size (so, including multiple protocols may limit message sizes).
+          + Non-string values will cause the key to be ignored.
+          + Keys that do not correspond to supported transport protocols are ignored.
+          + Duplicate keys are not allowed.
+          + Failure to parse or validate any key or value in the message will cause the `Publish` call to return an error (no partial delivery).
+        * **Subject** (*string*) â
+
+          Optional parameter to be used as the âSubjectâ line when the message is delivered to email endpoints. This field will also be included, if present, in the standard JSON messages delivered to other endpoints.
+
+          Constraints: Subjects must be UTF-8 text with no line breaks or control characters, and less than 100 characters long.
+        * **MessageStructure** (*string*) â
+
+          Set `MessageStructure` to `json` if you want to send a different message for each protocol. For example, using one publish action, you can send a short message to your SMS subscribers and a longer message to your email subscribers. If you set `MessageStructure` to `json`, the value of the `Message` parameter must:
+
+          + be a syntactically valid JSON object; and
+          + contain at least a top-level JSON key of âdefaultâ with a value that is a string.
+
+          You can define other top-level keys that define the message you want to send to a specific transport protocol (e.g., âhttpâ).
+
+          Valid value: `json`
+        * **MessageAttributes** (*dict*) â
+
+          Message attributes for Publish action.
+
+          + *(string) â*
+
+            - *(dict) â*
+
+              The user-specified message attribute value. For string data types, the value attribute has the same restrictions on the content as the message body. For more information, see [Publish](https://docs.aws.amazon.com/sns/latest/api/API_Publish.html).
+
+              Name, type, and value must not be empty or null. In addition, the message body should not be empty or null. All parts of the message attribute, including name, type, and value, are included in the message size restriction, which is currently 256 KB (262,144 bytes). For more information, see [Amazon SNS message attributes](https://docs.aws.amazon.com/sns/latest/dg/SNSMessageAttributes.html) and [Publishing to a mobile phone](https://docs.aws.amazon.com/sns/latest/dg/sms_publish-to-phone.html) in the *Amazon SNS Developer Guide.*
+
+              * **DataType** *(string) â* **[REQUIRED]**
+
+                Amazon SNS supports the following logical data types: String, String.Array, Number, and Binary. For more information, see [Message Attribute Data Types](https://docs.aws.amazon.com/sns/latest/dg/SNSMessageAttributes.html#SNSMessageAttributes.DataTypes).
+              * **StringValue** *(string) â*
+
+                Strings are Unicode with UTF8 binary encoding. For a list of code values, see [ASCII Printable Characters](https://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters).
+              * **BinaryValue** *(bytes) â*
+
+                Binary type attributes can store any binary data, for example, compressed data, encrypted data, or images.
+        * **MessageDeduplicationId** (*string*) â
+          + This parameter applies only to FIFO (first-in-first-out) topics. The `MessageDeduplicationId` can contain up to 128 alphanumeric characters `(a-z, A-Z, 0-9)` and punctuation `` (!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~) ``.
+          + Every message must have a unique `MessageDeduplicationId`, which is a token used for deduplication of sent messages within the 5 minute minimum deduplication interval.
+          + The scope of deduplication depends on the `FifoThroughputScope` attribute, when set to `Topic` the message deduplication scope is across the entire topic, when set to `MessageGroup` the message deduplication scope is within each individual message group.
+          + If a message with a particular `MessageDeduplicationId` is sent successfully, subsequent messages within the deduplication scope and interval, with the same `MessageDeduplicationId`, are accepted successfully but arenât delivered.
+          + Every message must have a unique `MessageDeduplicationId`:
+
+            - You may provide a `MessageDeduplicationId` explicitly.
+            - If you arenât able to provide a `MessageDeduplicationId` and you enable `ContentBasedDeduplication` for your topic, Amazon SNS uses a SHA-256 hash to generate the `MessageDeduplicationId` using the body of the message (but not the attributes of the message).
+            - If you donât provide a `MessageDeduplicationId` and the topic doesnât have `ContentBasedDeduplication` set, the action fails with an error.
+            - If the topic has a `ContentBasedDeduplication` set, your `MessageDeduplicationId` overrides the generated one.
+          + When `ContentBasedDeduplication` is in effect, messages with identical content sent within the deduplication scope and interval are treated as duplicates and only one copy of the message is delivered.
+          + If you send one message with `ContentBasedDeduplication` enabled, and then another message with a `MessageDeduplicationId` that is the same as the one generated for the first `MessageDeduplicationId`, the two messages are treated as duplicates, within the deduplication scope and interval, and only one copy of the message is delivered.
+        * **MessageGroupId** (*string*) â
+
+          The `MessageGroupId` can contain up to 128 alphanumeric characters `(a-z, A-Z, 0-9)` and punctuation `` (!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~) ``.
+
+          For FIFO topics: The `MessageGroupId` is a tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). Every message must include a `MessageGroupId`.
+
+          For standard topics: The `MessageGroupId` is optional and is forwarded only to Amazon SQS standard subscriptions to activate [fair queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fair-queues.html). The `MessageGroupId` is not used for, or sent to, any other endpoint types. When provided, the same validation rules apply as for FIFO topics.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'MessageId': 'string',
+            'SequenceNumber': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for Publish action.
+
+          + **MessageId** *(string) â*
+
+            Unique identifier assigned to the published message.
+
+            Length Constraint: Maximum 100 characters
+          + **SequenceNumber** *(string) â*
+
+            This response element applies only to FIFO (first-in-first-out) topics.
+
+            The sequence number is a large, non-consecutive number that Amazon SNS assigns to each message. The length of `SequenceNumber` is 128 bits. `SequenceNumber` continues to increase for each `MessageGroupId`.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InvalidParameterValueException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.EndpointDisabledException`
+    * `SNS.Client.exceptions.PlatformApplicationDisabledException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.KMSDisabledException`
+    * `SNS.Client.exceptions.KMSInvalidStateException`
+    * `SNS.Client.exceptions.KMSNotFoundException`
+    * `SNS.Client.exceptions.KMSOptInRequired`
+    * `SNS.Client.exceptions.KMSThrottlingException`
+    * `SNS.Client.exceptions.KMSAccessDeniedException`
+    * `SNS.Client.exceptions.InvalidSecurityException`
+    * `SNS.Client.exceptions.ValidationException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/publish_batch.html
+
+[SNS](../../sns.html) / Client / publish\_batch
+
+# publish\_batch[Â¶](#publish-batch "Link to this heading")
+
+SNS.Client.publish\_batch(*\*\*kwargs*)[Â¶](#SNS.Client.publish_batch "Link to this definition")
+:   Publishes up to 10 messages to the specified topic in a single batch. This is a batch version of the `Publish` API. If you try to send more than 10 messages in a single batch request, you will receive a `TooManyEntriesInBatchRequest` exception.
+
+    For FIFO topics, multiple messages within a single batch are published in the order they are sent, and messages are deduplicated within the batch and across batches for five minutes.
+
+    The result of publishing each message is reported individually in the response. Because the batch request can result in a combination of successful and unsuccessful actions, you should check for batch errors even when the call returns an HTTP status code of 200.
+
+    The maximum allowed individual message size and the maximum total payload size (the sum of the individual lengths of all of the batched messages) are both 256 KB (262,144 bytes).
+
+    ### Warning
+
+    The `PublishBatch` API can send up to 10 messages at a time. If you attempt to send more than 10 messages in one request, you will encounter a `TooManyEntriesInBatchRequest` exception. In such cases, split your messages into multiple requests, each containing no more than 10 messages.
+
+    Some actions take lists of parameters. These lists are specified using the `param.n` notation. Values of `n` are integers starting from **1**. For example, a parameter list with two elements looks like this:
+
+    `&AttributeName.1=first`
+
+    `&AttributeName.2=second`
+
+    If you send a batch message to a topic, Amazon SNS publishes the batch message to each endpoint that is subscribed to the topic. The format of the batch message depends on the notification protocol for each subscribed endpoint.
+
+    When a `messageId` is returned, the batch message is saved, and Amazon SNS immediately delivers the message to subscribers.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/PublishBatch)
+
+    ### Request Syntax
+
+    ```
+    response = client.publish_batch(
+        TopicArn='string',
+        PublishBatchRequestEntries=[
+            {
+                'Id': 'string',
+                'Message': 'string',
+                'Subject': 'string',
+                'MessageStructure': 'string',
+                'MessageAttributes': {
+                    'string': {
+                        'DataType': 'string',
+                        'StringValue': 'string',
+                        'BinaryValue': b'bytes'
+                    }
+                },
+                'MessageDeduplicationId': 'string',
+                'MessageGroupId': 'string'
+            },
+        ]
+    )
+    ```
+
+    Parameters:
+    :   * **TopicArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The Amazon resource name (ARN) of the topic you want to batch publish to.
+        * **PublishBatchRequestEntries** (*list*) â
+
+          **[REQUIRED]**
+
+          A list of `PublishBatch` request entries to be sent to the SNS topic.
+
+          + *(dict) â*
+
+            Contains the details of a single Amazon SNS message along with an `Id` that identifies a message within the batch.
+
+            - **Id** *(string) â* **[REQUIRED]**
+
+              An identifier for the message in this batch.
+
+              ### Note
+
+              The `Ids` of a batch request must be unique within a request.
+
+              This identifier can have up to 80 characters. The following characters are accepted: alphanumeric characters, hyphens(-), and underscores (\_).
+            - **Message** *(string) â* **[REQUIRED]**
+
+              The body of the message.
+            - **Subject** *(string) â*
+
+              The subject of the batch message.
+            - **MessageStructure** *(string) â*
+
+              Set `MessageStructure` to `json` if you want to send a different message for each protocol. For example, using one publish action, you can send a short message to your SMS subscribers and a longer message to your email subscribers. If you set `MessageStructure` to `json`, the value of the `Message` parameter must:
+
+              * be a syntactically valid JSON object; and
+              * contain at least a top-level JSON key of âdefaultâ with a value that is a string.
+
+              You can define other top-level keys that define the message you want to send to a specific transport protocol (for example, http).
+            - **MessageAttributes** *(dict) â*
+
+              Each message attribute consists of a `Name`, `Type`, and `Value`. For more information, see [Amazon SNS message attributes](https://docs.aws.amazon.com/sns/latest/dg/sns-message-attributes.html) in the Amazon SNS Developer Guide.
+
+              * *(string) â*
+
+                + *(dict) â*
+
+                  The user-specified message attribute value. For string data types, the value attribute has the same restrictions on the content as the message body. For more information, see [Publish](https://docs.aws.amazon.com/sns/latest/api/API_Publish.html).
+
+                  Name, type, and value must not be empty or null. In addition, the message body should not be empty or null. All parts of the message attribute, including name, type, and value, are included in the message size restriction, which is currently 256 KB (262,144 bytes). For more information, see [Amazon SNS message attributes](https://docs.aws.amazon.com/sns/latest/dg/SNSMessageAttributes.html) and [Publishing to a mobile phone](https://docs.aws.amazon.com/sns/latest/dg/sms_publish-to-phone.html) in the *Amazon SNS Developer Guide.*
+
+                  - **DataType** *(string) â* **[REQUIRED]**
+
+                    Amazon SNS supports the following logical data types: String, String.Array, Number, and Binary. For more information, see [Message Attribute Data Types](https://docs.aws.amazon.com/sns/latest/dg/SNSMessageAttributes.html#SNSMessageAttributes.DataTypes).
+                  - **StringValue** *(string) â*
+
+                    Strings are Unicode with UTF8 binary encoding. For a list of code values, see [ASCII Printable Characters](https://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters).
+                  - **BinaryValue** *(bytes) â*
+
+                    Binary type attributes can store any binary data, for example, compressed data, encrypted data, or images.
+            - **MessageDeduplicationId** *(string) â*
+
+              This parameter applies only to FIFO (first-in-first-out) topics.
+
+              * This parameter applies only to FIFO (first-in-first-out) topics. The `MessageDeduplicationId` can contain up to 128 alphanumeric characters `(a-z, A-Z, 0-9)` and punctuation `` (!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~) ``.
+              * Every message must have a unique `MessageDeduplicationId`, which is a token used for deduplication of sent messages within the 5 minute minimum deduplication interval.
+              * The scope of deduplication depends on the `FifoThroughputScope` attribute, when set to `Topic` the message deduplication scope is across the entire topic, when set to `MessageGroup` the message deduplication scope is within each individual message group.
+              * If a message with a particular `MessageDeduplicationId` is sent successfully, subsequent messages within the deduplication scope and interval, with the same `MessageDeduplicationId`, are accepted successfully but arenât delivered.
+              * Every message must have a unique `MessageDeduplicationId`.
+
+                + You may provide a `MessageDeduplicationId` explicitly.
+                + If you arenât able to provide a `MessageDeduplicationId` and you enable `ContentBasedDeduplication` for your topic, Amazon SNS uses a SHA-256 hash to generate the `MessageDeduplicationId` using the body of the message (but not the attributes of the message).
+                + If you donât provide a `MessageDeduplicationId` and the topic doesnât have `ContentBasedDeduplication` set, the action fails with an error.
+                + If the topic has a `ContentBasedDeduplication` set, your `MessageDeduplicationId` overrides the generated one.
+              * When `ContentBasedDeduplication` is in effect, messages with identical content sent within the deduplication scope and interval are treated as duplicates and only one copy of the message is delivered.
+              * If you send one message with `ContentBasedDeduplication` enabled, and then another message with a `MessageDeduplicationId` that is the same as the one generated for the first `MessageDeduplicationId`, the two messages are treated as duplicates, within the deduplication scope and interval, and only one copy of the message is delivered.
+
+              ### Note
+
+              The `MessageDeduplicationId` is available to the consumer of the message (this can be useful for troubleshooting delivery issues).
+
+              If a message is sent successfully but the acknowledgement is lost and the message is resent with the same `MessageDeduplicationId` after the deduplication interval, Amazon SNS canât detect duplicate messages.
+
+              Amazon SNS continues to keep track of the message deduplication ID even after the message is received and deleted.
+            - **MessageGroupId** *(string) â*
+
+              FIFO topics: The tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). To interleave multiple ordered streams within a single topic, use `MessageGroupId` values (for example, session data for multiple users). In this scenario, multiple consumers can process the topic, but the session data of each user is processed in a FIFO fashion. You must associate a non-empty `MessageGroupId` with a message. If you do not provide a `MessageGroupId`, the action fails.
+
+              Standard topics: The `MessageGroupId` is optional and is forwarded only to Amazon SQS standard subscriptions to activate [fair queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fair-queues.html). The `MessageGroupId` is not used for, or sent to, any other endpoint types.
+
+              The length of `MessageGroupId` is 128 characters.
+
+              `MessageGroupId` can contain alphanumeric characters `(a-z, A-Z, 0-9)` and punctuation `` (!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~) ``.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'Successful': [
+                {
+                    'Id': 'string',
+                    'MessageId': 'string',
+                    'SequenceNumber': 'string'
+                },
+            ],
+            'Failed': [
+                {
+                    'Id': 'string',
+                    'Code': 'string',
+                    'Message': 'string',
+                    'SenderFault': True|False
+                },
+            ]
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          + **Successful** *(list) â*
+
+            A list of successful `PublishBatch` responses.
+
+            - *(dict) â*
+
+              Encloses data related to a successful message in a batch request for topic.
+
+              * **Id** *(string) â*
+
+                The `Id` of an entry in a batch request.
+              * **MessageId** *(string) â*
+
+                An identifier for the message.
+              * **SequenceNumber** *(string) â*
+
+                This parameter applies only to FIFO (first-in-first-out) topics.
+
+                The large, non-consecutive number that Amazon SNS assigns to each message.
+
+                The length of `SequenceNumber` is 128 bits. `SequenceNumber` continues to increase for a particular `MessageGroupId`.
+          + **Failed** *(list) â*
+
+            A list of failed `PublishBatch` responses.
+
+            - *(dict) â*
+
+              Gives a detailed description of failed messages in the batch.
+
+              * **Id** *(string) â*
+
+                The `Id` of an entry in a batch request
+              * **Code** *(string) â*
+
+                An error code representing why the action failed on this entry.
+              * **Message** *(string) â*
+
+                A message explaining why the action failed on this entry.
+              * **SenderFault** *(boolean) â*
+
+                Specifies whether the error happened due to the caller of the batch API action.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InvalidParameterValueException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.EndpointDisabledException`
+    * `SNS.Client.exceptions.PlatformApplicationDisabledException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.BatchEntryIdsNotDistinctException`
+    * `SNS.Client.exceptions.BatchRequestTooLongException`
+    * `SNS.Client.exceptions.EmptyBatchRequestException`
+    * `SNS.Client.exceptions.InvalidBatchEntryIdException`
+    * `SNS.Client.exceptions.TooManyEntriesInBatchRequestException`
+    * `SNS.Client.exceptions.KMSDisabledException`
+    * `SNS.Client.exceptions.KMSInvalidStateException`
+    * `SNS.Client.exceptions.KMSNotFoundException`
+    * `SNS.Client.exceptions.KMSOptInRequired`
+    * `SNS.Client.exceptions.KMSThrottlingException`
+    * `SNS.Client.exceptions.KMSAccessDeniedException`
+    * `SNS.Client.exceptions.InvalidSecurityException`
+    * `SNS.Client.exceptions.ValidationException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/put_data_protection_policy.html
+
+[SNS](../../sns.html) / Client / put\_data\_protection\_policy
+
+# put\_data\_protection\_policy[Â¶](#put-data-protection-policy "Link to this heading")
+
+SNS.Client.put\_data\_protection\_policy(*\*\*kwargs*)[Â¶](#SNS.Client.put_data_protection_policy "Link to this definition")
+:   Adds or updates an inline policy document that is stored in the specified Amazon SNS topic.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/PutDataProtectionPolicy)
+
+    ### Request Syntax
+
+    ```
+    response = client.put_data_protection_policy(
+        ResourceArn='string',
+        DataProtectionPolicy='string'
+    )
+    ```
+
+    Parameters:
+    :   * **ResourceArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The ARN of the topic whose `DataProtectionPolicy` you want to add or update.
+
+          For more information about ARNs, see [Amazon Resource Names (ARNs)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) in the Amazon Web Services General Reference.
+        * **DataProtectionPolicy** (*string*) â
+
+          **[REQUIRED]**
+
+          The JSON serialization of the topicâs `DataProtectionPolicy`.
+
+          The `DataProtectionPolicy` must be in JSON string format.
+
+          Length Constraints: Maximum length of 30,720.
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InvalidSecurityException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/remove_permission.html
+
+[SNS](../../sns.html) / Client / remove\_permission
+
+# remove\_permission[Â¶](#remove-permission "Link to this heading")
+
+SNS.Client.remove\_permission(*\*\*kwargs*)[Â¶](#SNS.Client.remove_permission "Link to this definition")
+:   Removes a statement from a topicâs access control policy.
+
+    ### Note
+
+    To remove the ability to change topic permissions, you must deny permissions to the `AddPermission`, `RemovePermission`, and `SetTopicAttributes` actions in your IAM policy.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/RemovePermission)
+
+    ### Request Syntax
+
+    ```
+    response = client.remove_permission(
+        TopicArn='string',
+        Label='string'
+    )
+    ```
+
+    Parameters:
+    :   * **TopicArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The ARN of the topic whose access control policy you wish to modify.
+        * **Label** (*string*) â
+
+          **[REQUIRED]**
+
+          The unique label of the statement you want to remove.
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/set_endpoint_attributes.html
+
+[SNS](../../sns.html) / Client / set\_endpoint\_attributes
+
+# set\_endpoint\_attributes[Â¶](#set-endpoint-attributes "Link to this heading")
+
+SNS.Client.set\_endpoint\_attributes(*\*\*kwargs*)[Â¶](#SNS.Client.set_endpoint_attributes "Link to this definition")
+:   Sets the attributes for an endpoint for a device on one of the supported push notification services, such as GCM (Firebase Cloud Messaging) and APNS. For more information, see [Using Amazon SNS Mobile Push Notifications](https://docs.aws.amazon.com/sns/latest/dg/SNSMobilePush.html).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/SetEndpointAttributes)
+
+    ### Request Syntax
+
+    ```
+    response = client.set_endpoint_attributes(
+        EndpointArn='string',
+        Attributes={
+            'string': 'string'
+        }
+    )
+    ```
+
+    Parameters:
+    :   * **EndpointArn** (*string*) â
+
+          **[REQUIRED]**
+
+          EndpointArn used for `SetEndpointAttributes` action.
+        * **Attributes** (*dict*) â
+
+          **[REQUIRED]**
+
+          A map of the endpoint attributes. Attributes in this map include the following:
+
+          + `CustomUserData` â arbitrary user data to associate with the endpoint. Amazon SNS does not use this data. The data must be in UTF-8 format and less than 2KB.
+          + `Enabled` â flag that enables/disables delivery to the endpoint. Amazon SNS will set this to false when a notification service indicates to Amazon SNS that the endpoint is invalid. Users can set it back to true, typically after updating Token.
+          + `Token` â device token, also referred to as a registration id, for an app and mobile device. This is returned from the notification service when an app and mobile device are registered with the notification service.
+          + *(string) â*
+
+            - *(string) â*
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/set_platform_application_attributes.html
+
+[SNS](../../sns.html) / Client / set\_platform\_application\_attributes
+
+# set\_platform\_application\_attributes[Â¶](#set-platform-application-attributes "Link to this heading")
+
+SNS.Client.set\_platform\_application\_attributes(*\*\*kwargs*)[Â¶](#SNS.Client.set_platform_application_attributes "Link to this definition")
+:   Sets the attributes of the platform application object for the supported push notification services, such as APNS and GCM (Firebase Cloud Messaging). For more information, see [Using Amazon SNS Mobile Push Notifications](https://docs.aws.amazon.com/sns/latest/dg/SNSMobilePush.html). For information on configuring attributes for message delivery status, see [Using Amazon SNS Application Attributes for Message Delivery Status](https://docs.aws.amazon.com/sns/latest/dg/sns-msg-status.html).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/SetPlatformApplicationAttributes)
+
+    ### Request Syntax
+
+    ```
+    response = client.set_platform_application_attributes(
+        PlatformApplicationArn='string',
+        Attributes={
+            'string': 'string'
+        }
+    )
+    ```
+
+    Parameters:
+    :   * **PlatformApplicationArn** (*string*) â
+
+          **[REQUIRED]**
+
+          `PlatformApplicationArn` for `SetPlatformApplicationAttributes` action.
+        * **Attributes** (*dict*) â
+
+          **[REQUIRED]**
+
+          A map of the platform application attributes. Attributes in this map include the following:
+
+          + `PlatformCredential` â The credential received from the notification service.
+
+            - For ADM, [``](#id1)PlatformCredential``is client secret.
+            - For Apple Services using certificate credentials, `PlatformCredential` is private key.
+            - For Apple Services using token credentials, `PlatformCredential` is signing key.
+            - For GCM (Firebase Cloud Messaging) using key credentials, there is no `PlatformPrincipal`. The `PlatformCredential` is `API key`.
+            - For GCM (Firebase Cloud Messaging) using token credentials, there is no `PlatformPrincipal`. The `PlatformCredential` is a JSON formatted private key file. When using the Amazon Web Services CLI, the file must be in string format and special characters must be ignored. To format the file correctly, Amazon SNS recommends using the following command: `` SERVICE_JSON=`jq @json <<< cat service.json` ``.
+          + `PlatformPrincipal` â The principal received from the notification service.
+
+            - For ADM, [``](#id3)PlatformPrincipal``is client id.
+            - For Apple Services using certificate credentials, `PlatformPrincipal` is SSL certificate.
+            - For Apple Services using token credentials, `PlatformPrincipal` is signing key ID.
+            - For GCM (Firebase Cloud Messaging), there is no `PlatformPrincipal`.
+          + `EventEndpointCreated` â Topic ARN to which `EndpointCreated` event notifications are sent.
+          + `EventEndpointDeleted` â Topic ARN to which `EndpointDeleted` event notifications are sent.
+          + `EventEndpointUpdated` â Topic ARN to which `EndpointUpdate` event notifications are sent.
+          + `EventDeliveryFailure` â Topic ARN to which `DeliveryFailure` event notifications are sent upon Direct Publish delivery failure (permanent) to one of the applicationâs endpoints.
+          + `SuccessFeedbackRoleArn` â IAM role ARN used to give Amazon SNS write access to use CloudWatch Logs on your behalf.
+          + `FailureFeedbackRoleArn` â IAM role ARN used to give Amazon SNS write access to use CloudWatch Logs on your behalf.
+          + `SuccessFeedbackSampleRate` â Sample rate percentage (0-100) of successfully delivered messages.
+
+          The following attributes only apply to `APNs` token-based authentication:
+
+          + `ApplePlatformTeamID` â The identifier thatâs assigned to your Apple developer account team.
+          + `ApplePlatformBundleID` â The bundle identifier thatâs assigned to your iOS app.
+          + *(string) â*
+
+            - *(string) â*
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/set_sms_attributes.html
+
+[SNS](../../sns.html) / Client / set\_sms\_attributes
+
+# set\_sms\_attributes[Â¶](#set-sms-attributes "Link to this heading")
+
+SNS.Client.set\_sms\_attributes(*\*\*kwargs*)[Â¶](#SNS.Client.set_sms_attributes "Link to this definition")
+:   Use this request to set the default settings for sending SMS messages and receiving daily SMS usage reports.
+
+    You can override some of these settings for a single message when you use the `Publish` action with the `MessageAttributes.entry.N` parameter. For more information, see [Publishing to a mobile phone](https://docs.aws.amazon.com/sns/latest/dg/sms_publish-to-phone.html) in the *Amazon SNS Developer Guide*.
+
+    ### Note
+
+    To use this operation, you must grant the Amazon SNS service principal ( `sns.amazonaws.com`) permission to perform the `s3:ListBucket` action.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/SetSMSAttributes)
+
+    ### Request Syntax
+
+    ```
+    response = client.set_sms_attributes(
+        attributes={
+            'string': 'string'
+        }
+    )
+    ```
+
+    Parameters:
+    :   **attributes** (*dict*) â
+
+        **[REQUIRED]**
+
+        The default settings for sending SMS messages from your Amazon Web Services account. You can set values for the following attribute names:
+
+        `MonthlySpendLimit` â The maximum amount in USD that you are willing to spend each month to send SMS messages. When Amazon SNS determines that sending an SMS message would incur a cost that exceeds this limit, it stops sending SMS messages within minutes.
+
+        ### Warning
+
+        Amazon SNS stops sending SMS messages within minutes of the limit being crossed. During that interval, if you continue to send SMS messages, you will incur costs that exceed your limit.
+
+        By default, the spend limit is set to the maximum allowed by Amazon SNS. If you want to raise the limit, submit an [SNS Limit Increase case](https://console.aws.amazon.com/support/home#/case/create?issueType=service-limit-increase&limitType=service-code-sns). For **New limit value**, enter your desired monthly spend limit. In the **Use Case Description** field, explain that you are requesting an SMS monthly spend limit increase.
+
+        `DeliveryStatusIAMRole` â The ARN of the IAM role that allows Amazon SNS to write logs about SMS deliveries in CloudWatch Logs. For each SMS message that you send, Amazon SNS writes a log that includes the message price, the success or failure status, the reason for failure (if the message failed), the message dwell time, and other information.
+
+        `DeliveryStatusSuccessSamplingRate` â The percentage of successful SMS deliveries for which Amazon SNS will write logs in CloudWatch Logs. The value can be an integer from 0 - 100. For example, to write logs only for failed deliveries, set this value to `0`. To write logs for 10% of your successful deliveries, set it to `10`.
+
+        `DefaultSenderID` â A string, such as your business brand, that is displayed as the sender on the receiving device. Support for sender IDs varies by country. The sender ID can be 1 - 11 alphanumeric characters, and it must contain at least one letter.
+
+        `DefaultSMSType` â The type of SMS message that you will send by default. You can assign the following values:
+
+        * `Promotional` â (Default) Noncritical messages, such as marketing messages. Amazon SNS optimizes the message delivery to incur the lowest cost.
+        * `Transactional` â Critical messages that support customer transactions, such as one-time passcodes for multi-factor authentication. Amazon SNS optimizes the message delivery to achieve the highest reliability.
+
+        `UsageReportS3Bucket` â The name of the Amazon S3 bucket to receive daily SMS usage reports from Amazon SNS. Each day, Amazon SNS will deliver a usage report as a CSV file to the bucket. The report includes the following information for each SMS message that was successfully delivered by your Amazon Web Services account:
+
+        * Time that the message was published (in UTC)
+        * Message ID
+        * Destination phone number
+        * Message type
+        * Delivery status
+        * Message price (in USD)
+        * Part number (a message is split into multiple parts if it is too long for a single message)
+        * Total number of parts
+
+        To receive the report, the bucket must have a policy that allows the Amazon SNS service principal to perform the `s3:PutObject` and `s3:GetBucketLocation` actions.
+
+        For an example bucket policy and usage report, see [Monitoring SMS Activity](https://docs.aws.amazon.com/sns/latest/dg/sms_stats.html) in the *Amazon SNS Developer Guide*.
+
+        * *(string) â*
+
+          + *(string) â*
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {}
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          The response for the SetSMSAttributes action.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.ThrottledException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/set_subscription_attributes.html
+
+[SNS](../../sns.html) / Client / set\_subscription\_attributes
+
+# set\_subscription\_attributes[Â¶](#set-subscription-attributes "Link to this heading")
+
+SNS.Client.set\_subscription\_attributes(*\*\*kwargs*)[Â¶](#SNS.Client.set_subscription_attributes "Link to this definition")
+:   Allows a subscription owner to set an attribute of the subscription to a new value.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/SetSubscriptionAttributes)
+
+    ### Request Syntax
+
+    ```
+    response = client.set_subscription_attributes(
+        SubscriptionArn='string',
+        AttributeName='string',
+        AttributeValue='string'
+    )
+    ```
+
+    Parameters:
+    :   * **SubscriptionArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The ARN of the subscription to modify.
+        * **AttributeName** (*string*) â
+
+          **[REQUIRED]**
+
+          A map of attributes with their corresponding values.
+
+          The following lists the names, descriptions, and values of the special request parameters that this action uses:
+
+          + `DeliveryPolicy` â The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints.
+          + `FilterPolicy` â The simple JSON object that lets your subscriber receive only a subset of messages, rather than receiving every message published to the topic.
+          + `FilterPolicyScope` â This attribute lets you choose the filtering scope by using one of the following string value types:
+
+            - `MessageAttributes` (default) â The filter is applied on the message attributes.
+            - `MessageBody` â The filter is applied on the message body.
+          + `RawMessageDelivery` â When set to `true`, enables raw message delivery to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints to process JSON formatting, which is otherwise created for Amazon SNS metadata.
+          + `RedrivePolicy` â When specified, sends undeliverable messages to the specified Amazon SQS dead-letter queue. Messages that canât be delivered due to client errors (for example, when the subscribed endpoint is unreachable) or server errors (for example, when the service that powers the subscribed endpoint becomes unavailable) are held in the dead-letter queue for further analysis or reprocessing.
+
+          The following attribute applies only to Amazon Data Firehose delivery stream subscriptions:
+
+          + `SubscriptionRoleArn` â The ARN of the IAM role that has the following:
+
+            - Permission to write to the Firehose delivery stream
+            - Amazon SNS listed as a trusted entity
+
+          Specifying a valid ARN for this attribute is required for Firehose delivery stream subscriptions. For more information, see [Fanout to Firehose delivery streams](https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html) in the *Amazon SNS Developer Guide*.
+        * **AttributeValue** (*string*) â The new value for the attribute in JSON format.
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.FilterPolicyLimitExceededException`
+    * `SNS.Client.exceptions.ReplayLimitExceededException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/set_topic_attributes.html
+
+[SNS](../../sns.html) / Client / set\_topic\_attributes
+
+# set\_topic\_attributes[Â¶](#set-topic-attributes "Link to this heading")
+
+SNS.Client.set\_topic\_attributes(*\*\*kwargs*)[Â¶](#SNS.Client.set_topic_attributes "Link to this definition")
+:   Allows a topic owner to set an attribute of the topic to a new value.
+
+    ### Note
+
+    To remove the ability to change topic permissions, you must deny permissions to the `AddPermission`, `RemovePermission`, and `SetTopicAttributes` actions in your IAM policy.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/SetTopicAttributes)
+
+    ### Request Syntax
+
+    ```
+    response = client.set_topic_attributes(
+        TopicArn='string',
+        AttributeName='string',
+        AttributeValue='string'
+    )
+    ```
+
+    Parameters:
+    :   * **TopicArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The ARN of the topic to modify.
+        * **AttributeName** (*string*) â
+
+          **[REQUIRED]**
+
+          A map of attributes with their corresponding values.
+
+          The following lists the names, descriptions, and values of the special request parameters that the `SetTopicAttributes` action uses:
+
+          + `DeliveryPolicy` â The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints.
+          + `DisplayName` â The display name to use for a topic with SMS subscriptions.
+          + `Policy` â The policy that defines who can access your topic. By default, only the topic owner can publish or subscribe to the topic.
+          + `TracingConfig` â Tracing mode of an Amazon SNS topic. By default `TracingConfig` is set to `PassThrough`, and the topic passes through the tracing header it receives from an Amazon SNS publisher to its subscriptions. If set to `Active`, Amazon SNS will vend X-Ray segment data to topic owner account if the sampled flag in the tracing header is true. This is only supported on standard topics.
+          + HTTP
+
+            - `HTTPSuccessFeedbackRoleArn` â Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an HTTP endpoint.
+            - `HTTPSuccessFeedbackSampleRate` â Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an HTTP endpoint.
+            - `HTTPFailureFeedbackRoleArn` â Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an HTTP endpoint.
+          + Amazon Data Firehose
+
+            - `FirehoseSuccessFeedbackRoleArn` â Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint.
+            - `FirehoseSuccessFeedbackSampleRate` â Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint.
+            - `FirehoseFailureFeedbackRoleArn` â Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint.
+          + Lambda
+
+            - `LambdaSuccessFeedbackRoleArn` â Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Lambda endpoint.
+            - `LambdaSuccessFeedbackSampleRate` â Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Lambda endpoint.
+            - `LambdaFailureFeedbackRoleArn` â Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Lambda endpoint.
+          + Platform application endpoint
+
+            - `ApplicationSuccessFeedbackRoleArn` â Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an platform application endpoint.
+            - `ApplicationSuccessFeedbackSampleRate` â Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an platform application endpoint.
+            - `ApplicationFailureFeedbackRoleArn` â Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an platform application endpoint.
+
+          ### Note
+
+          In addition to being able to configure topic attributes for message delivery status of notification messages sent to Amazon SNS application endpoints, you can also configure application attributes for the delivery status of push notification messages sent to push notification services.
+
+          For example, For more information, see [Using Amazon SNS Application Attributes for Message Delivery Status](https://docs.aws.amazon.com/sns/latest/dg/sns-msg-status.html).
+
+          + Amazon SQS
+
+            - `SQSSuccessFeedbackRoleArn` â Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint.
+            - `SQSSuccessFeedbackSampleRate` â Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint.
+            - `SQSFailureFeedbackRoleArn` â Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint.
+
+          ### Note
+
+          The <ENDPOINT>SuccessFeedbackRoleArn and <ENDPOINT>FailureFeedbackRoleArn attributes are used to give Amazon SNS write access to use CloudWatch Logs on your behalf. The <ENDPOINT>SuccessFeedbackSampleRate attribute is for specifying the sample rate percentage (0-100) of successfully delivered messages. After you configure the <ENDPOINT>FailureFeedbackRoleArn attribute, then all failed message deliveries generate CloudWatch Logs.
+
+          The following attribute applies only to [server-side-encryption](https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html):
+
+          + `KmsMasterKeyId` â The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see [Key Terms](https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html#sse-key-terms). For more examples, see [KeyId](https://docs.aws.amazon.com/kms/latest/APIReference/API_DescribeKey.html#API_DescribeKey_RequestParameters) in the *Key Management Service API Reference*.
+          + `SignatureVersion` â The signature version corresponds to the hashing algorithm used while creating the signature of the notifications, subscription confirmations, or unsubscribe confirmation messages sent by Amazon SNS. By default, `SignatureVersion` is set to `1`.
+
+          The following attribute applies only to [FIFO topics](https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+
+          + `ArchivePolicy` â The policy that sets the retention period for messages stored in the message archive of an Amazon SNS FIFO topic.
+          + `ContentBasedDeduplication` â Enables content-based deduplication for FIFO topics.
+
+            - By default, `ContentBasedDeduplication` is set to `false`. If you create a FIFO topic and this attribute is `false`, you must specify a value for the `MessageDeduplicationId` parameter for the [Publish](https://docs.aws.amazon.com/sns/latest/api/API_Publish.html) action.
+            - When you set `ContentBasedDeduplication` to `true`, Amazon SNS uses a SHA-256 hash to generate the `MessageDeduplicationId` using the body of the message (but not the attributes of the message). (Optional) To override the generated value, you can specify a value for the `MessageDeduplicationId` parameter for the `Publish` action.
+          + `FifoThroughputScope` â Enables higher throughput for your FIFO topic by adjusting the scope of deduplication. This attribute has two possible values:
+
+            - `Topic` â The scope of message deduplication is across the entire topic. This is the default value and maintains existing behavior, with a maximum throughput of 3000 messages per second or 20MB per second, whichever comes first.
+            - `MessageGroup` â The scope of deduplication is within each individual message group, which enables higher throughput per topic subject to regional quotas. For more information on quotas or to request an increase, see [Amazon SNS service quotas](https://docs.aws.amazon.com/general/latest/gr/sns.html) in the Amazon Web Services General Reference.
+        * **AttributeValue** (*string*) â The new value for the attribute.
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InvalidSecurityException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/subscribe.html
+
+[SNS](../../sns.html) / Client / subscribe
+
+# subscribe[Â¶](#subscribe "Link to this heading")
+
+SNS.Client.subscribe(*\*\*kwargs*)[Â¶](#SNS.Client.subscribe "Link to this definition")
+:   Subscribes an endpoint to an Amazon SNS topic. If the endpoint type is HTTP/S or email, or if the endpoint and the topic are not in the same Amazon Web Services account, the endpoint owner must run the `ConfirmSubscription` action to confirm the subscription.
+
+    You call the `ConfirmSubscription` action with the token from the subscription response. Confirmation tokens are valid for two days.
+
+    This action is throttled at 100 transactions per second (TPS).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/Subscribe)
+
+    ### Request Syntax
+
+    ```
+    response = client.subscribe(
+        TopicArn='string',
+        Protocol='string',
+        Endpoint='string',
+        Attributes={
+            'string': 'string'
+        },
+        ReturnSubscriptionArn=True|False
+    )
+    ```
+
+    Parameters:
+    :   * **TopicArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The ARN of the topic you want to subscribe to.
+        * **Protocol** (*string*) â
+
+          **[REQUIRED]**
+
+          The protocol that you want to use. Supported protocols include:
+
+          + `http` â delivery of JSON-encoded message via HTTP POST
+          + `https` â delivery of JSON-encoded message via HTTPS POST
+          + `email` â delivery of message via SMTP
+          + `email-json` â delivery of JSON-encoded message via SMTP
+          + `sms` â delivery of message via SMS
+          + `sqs` â delivery of JSON-encoded message to an Amazon SQS queue
+          + `application` â delivery of JSON-encoded message to an EndpointArn for a mobile app and device
+          + `lambda` â delivery of JSON-encoded message to an Lambda function
+          + `firehose` â delivery of JSON-encoded message to an Amazon Data Firehose delivery stream.
+        * **Endpoint** (*string*) â
+
+          The endpoint that you want to receive notifications. Endpoints vary by protocol:
+
+          + For the `http` protocol, the (public) endpoint is a URL beginning with `http://`.
+          + For the `https` protocol, the (public) endpoint is a URL beginning with `https://`.
+          + For the `email` protocol, the endpoint is an email address.
+          + For the `email-json` protocol, the endpoint is an email address.
+          + For the `sms` protocol, the endpoint is a phone number of an SMS-enabled device.
+          + For the `sqs` protocol, the endpoint is the ARN of an Amazon SQS queue.
+          + For the `application` protocol, the endpoint is the EndpointArn of a mobile app and device.
+          + For the `lambda` protocol, the endpoint is the ARN of an Lambda function.
+          + For the `firehose` protocol, the endpoint is the ARN of an Amazon Data Firehose delivery stream.
+        * **Attributes** (*dict*) â
+
+          A map of attributes with their corresponding values.
+
+          The following lists the names, descriptions, and values of the special request parameters that the `Subscribe` action uses:
+
+          + `DeliveryPolicy` â The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints.
+          + `FilterPolicy` â The simple JSON object that lets your subscriber receive only a subset of messages, rather than receiving every message published to the topic.
+          + `FilterPolicyScope` â This attribute lets you choose the filtering scope by using one of the following string value types:
+
+            - `MessageAttributes` (default) â The filter is applied on the message attributes.
+            - `MessageBody` â The filter is applied on the message body.
+          + `RawMessageDelivery` â When set to `true`, enables raw message delivery to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints to process JSON formatting, which is otherwise created for Amazon SNS metadata.
+          + `RedrivePolicy` â When specified, sends undeliverable messages to the specified Amazon SQS dead-letter queue. Messages that canât be delivered due to client errors (for example, when the subscribed endpoint is unreachable) or server errors (for example, when the service that powers the subscribed endpoint becomes unavailable) are held in the dead-letter queue for further analysis or reprocessing.
+
+          The following attribute applies only to Amazon Data Firehose delivery stream subscriptions:
+
+          + `SubscriptionRoleArn` â The ARN of the IAM role that has the following:
+
+            - Permission to write to the Firehose delivery stream
+            - Amazon SNS listed as a trusted entity
+
+          Specifying a valid ARN for this attribute is required for Firehose delivery stream subscriptions. For more information, see [Fanout to Firehose delivery streams](https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html) in the *Amazon SNS Developer Guide*.
+
+          The following attributes apply only to [FIFO topics](https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+
+          + `ReplayPolicy` â Adds or updates an inline policy document for a subscription to replay messages stored in the specified Amazon SNS topic.
+          + `ReplayStatus` â Retrieves the status of the subscription message replay, which can be one of the following:
+
+            - `Completed` â The replay has successfully redelivered all messages, and is now delivering newly published messages. If an ending point was specified in the `ReplayPolicy` then the subscription will no longer receive newly published messages.
+            - `In progress` â The replay is currently replaying the selected messages.
+            - `Failed` â The replay was unable to complete.
+            - `Pending` â The default state while the replay initiates.
+          + *(string) â*
+
+            - *(string) â*
+        * **ReturnSubscriptionArn** (*boolean*) â
+
+          Sets whether the response from the `Subscribe` request includes the subscription ARN, even if the subscription is not yet confirmed.
+
+          If you set this parameter to `true`, the response includes the ARN in all cases, even if the subscription is not yet confirmed. In addition to the ARN for confirmed subscriptions, the response also includes the `pending subscription` ARN value for subscriptions that arenât yet confirmed. A subscription becomes confirmed when the subscriber calls the `ConfirmSubscription` action with a confirmation token.
+
+          The default value is `false`.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {
+            'SubscriptionArn': 'string'
+        }
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          Response for Subscribe action.
+
+          + **SubscriptionArn** *(string) â*
+
+            The ARN of the subscription if it is confirmed, or the string âpending confirmationâ if the subscription requires confirmation. However, if the API request parameter `ReturnSubscriptionArn` is true, then the value is always the subscription ARN, even if the subscription requires confirmation.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.SubscriptionLimitExceededException`
+    * `SNS.Client.exceptions.FilterPolicyLimitExceededException`
+    * `SNS.Client.exceptions.ReplayLimitExceededException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InvalidSecurityException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/tag_resource.html
+
+[SNS](../../sns.html) / Client / tag\_resource
+
+# tag\_resource[Â¶](#tag-resource "Link to this heading")
+
+SNS.Client.tag\_resource(*\*\*kwargs*)[Â¶](#SNS.Client.tag_resource "Link to this definition")
+:   Add tags to the specified Amazon SNS topic. For an overview, see [Amazon SNS Tags](https://docs.aws.amazon.com/sns/latest/dg/sns-tags.html) in the *Amazon SNS Developer Guide*.
+
+    When you use topic tags, keep the following guidelines in mind:
+
+    * Adding more than 50 tags to a topic isnât recommended.
+    * Tags donât have any semantic meaning. Amazon SNS interprets tags as character strings.
+    * Tags are case-sensitive.
+    * A new tag with a key identical to that of an existing tag overwrites the existing tag.
+    * Tagging actions are limited to 10 TPS per Amazon Web Services account, per Amazon Web Services Region. If your application requires a higher throughput, file a [technical support request](https://console.aws.amazon.com/support/home#/case/create?issueType=technical).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/TagResource)
+
+    ### Request Syntax
+
+    ```
+    response = client.tag_resource(
+        ResourceArn='string',
+        Tags=[
+            {
+                'Key': 'string',
+                'Value': 'string'
+            },
+        ]
+    )
+    ```
+
+    Parameters:
+    :   * **ResourceArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The ARN of the topic to which to add tags.
+        * **Tags** (*list*) â
+
+          **[REQUIRED]**
+
+          The tags to be added to the specified topic. A tag consists of a required key and an optional value.
+
+          + *(dict) â*
+
+            The list of tags to be added to the specified topic.
+
+            - **Key** *(string) â* **[REQUIRED]**
+
+              The required key portion of the tag.
+            - **Value** *(string) â* **[REQUIRED]**
+
+              The optional value portion of the tag.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {}
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.ResourceNotFoundException`
+    * `SNS.Client.exceptions.TagLimitExceededException`
+    * `SNS.Client.exceptions.StaleTagException`
+    * `SNS.Client.exceptions.TagPolicyException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.ConcurrentAccessException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/unsubscribe.html
+
+[SNS](../../sns.html) / Client / unsubscribe
+
+# unsubscribe[Â¶](#unsubscribe "Link to this heading")
+
+SNS.Client.unsubscribe(*\*\*kwargs*)[Â¶](#SNS.Client.unsubscribe "Link to this definition")
+:   Deletes a subscription. If the subscription requires authentication for deletion, only the owner of the subscription or the topicâs owner can unsubscribe, and an Amazon Web Services signature is required. If the `Unsubscribe` call does not require authentication and the requester is not the subscription owner, a final cancellation message is delivered to the endpoint, so that the endpoint owner can easily resubscribe to the topic if the `Unsubscribe` request was unintended.
+
+    This action is throttled at 100 transactions per second (TPS).
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/Unsubscribe)
+
+    ### Request Syntax
+
+    ```
+    response = client.unsubscribe(
+        SubscriptionArn='string'
+    )
+    ```
+
+    Parameters:
+    :   **SubscriptionArn** (*string*) â
+
+        **[REQUIRED]**
+
+        The ARN of the subscription to be deleted.
+
+    Returns:
+    :   None
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.NotFoundException`
+    * `SNS.Client.exceptions.InvalidSecurityException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/untag_resource.html
+
+[SNS](../../sns.html) / Client / untag\_resource
+
+# untag\_resource[Â¶](#untag-resource "Link to this heading")
+
+SNS.Client.untag\_resource(*\*\*kwargs*)[Â¶](#SNS.Client.untag_resource "Link to this definition")
+:   Remove tags from the specified Amazon SNS topic. For an overview, see [Amazon SNS Tags](https://docs.aws.amazon.com/sns/latest/dg/sns-tags.html) in the *Amazon SNS Developer Guide*.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/UntagResource)
+
+    ### Request Syntax
+
+    ```
+    response = client.untag_resource(
+        ResourceArn='string',
+        TagKeys=[
+            'string',
+        ]
+    )
+    ```
+
+    Parameters:
+    :   * **ResourceArn** (*string*) â
+
+          **[REQUIRED]**
+
+          The ARN of the topic from which to remove tags.
+        * **TagKeys** (*list*) â
+
+          **[REQUIRED]**
+
+          The list of tag keys to remove from the specified topic.
+
+          + *(string) â*
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {}
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.ResourceNotFoundException`
+    * `SNS.Client.exceptions.TagLimitExceededException`
+    * `SNS.Client.exceptions.StaleTagException`
+    * `SNS.Client.exceptions.TagPolicyException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.ConcurrentAccessException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/client/verify_sms_sandbox_phone_number.html
+
+[SNS](../../sns.html) / Client / verify\_sms\_sandbox\_phone\_number
+
+# verify\_sms\_sandbox\_phone\_number[Â¶](#verify-sms-sandbox-phone-number "Link to this heading")
+
+SNS.Client.verify\_sms\_sandbox\_phone\_number(*\*\*kwargs*)[Â¶](#SNS.Client.verify_sms_sandbox_phone_number "Link to this definition")
+:   Verifies a destination phone number with a one-time password (OTP) for the calling Amazon Web Services account.
+
+    When you start using Amazon SNS to send SMS messages, your Amazon Web Services account is in the *SMS sandbox*. The SMS sandbox provides a safe environment for you to try Amazon SNS features without risking your reputation as an SMS sender. While your Amazon Web Services account is in the SMS sandbox, you can use all of the features of Amazon SNS. However, you can send SMS messages only to verified destination phone numbers. For more information, including how to move out of the sandbox to send messages without restrictions, see [SMS sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) in the *Amazon SNS Developer Guide*.
+
+    See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/VerifySMSSandboxPhoneNumber)
+
+    ### Request Syntax
+
+    ```
+    response = client.verify_sms_sandbox_phone_number(
+        PhoneNumber='string',
+        OneTimePassword='string'
+    )
+    ```
+
+    Parameters:
+    :   * **PhoneNumber** (*string*) â
+
+          **[REQUIRED]**
+
+          The destination phone number to verify.
+        * **OneTimePassword** (*string*) â
+
+          **[REQUIRED]**
+
+          The OTP sent to the destination number from the `CreateSMSSandBoxPhoneNumber` call.
+
+    Return type:
+    :   dict
+
+    Returns:
+    :   ### Response Syntax
+
+        ```
+        {}
+        ```
+
+        ### Response Structure
+
+        * *(dict) â*
+
+          The destination phone numberâs verification status.
+
+    ### Exceptions
+
+    * `SNS.Client.exceptions.AuthorizationErrorException`
+    * `SNS.Client.exceptions.InternalErrorException`
+    * `SNS.Client.exceptions.InvalidParameterException`
+    * `SNS.Client.exceptions.ResourceNotFoundException`
+    * `SNS.Client.exceptions.VerificationException`
+    * `SNS.Client.exceptions.ThrottledException`
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/paginator/ListEndpointsByPlatformApplication.html
+
+[SNS](../../sns.html) / Paginator / ListEndpointsByPlatformApplication
+
+# ListEndpointsByPlatformApplication[Â¶](#listendpointsbyplatformapplication "Link to this heading")
+
+*class* SNS.Paginator.ListEndpointsByPlatformApplication[Â¶](#SNS.Paginator.ListEndpointsByPlatformApplication "Link to this definition")
+:   ```
+    paginator = client.get_paginator('list_endpoints_by_platform_application')
+    ```
+
+    paginate(*\*\*kwargs*)[Â¶](#SNS.Paginator.ListEndpointsByPlatformApplication.paginate "Link to this definition")
+    :   Creates an iterator that will paginate through responses from [`SNS.Client.list_endpoints_by_platform_application()`](../client/list_endpoints_by_platform_application.html#SNS.Client.list_endpoints_by_platform_application "SNS.Client.list_endpoints_by_platform_application").
+
+        See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListEndpointsByPlatformApplication)
+
+        ### Request Syntax
+
+        ```
+        response_iterator = paginator.paginate(
+            PlatformApplicationArn='string',
+            PaginationConfig={
+                'MaxItems': 123,
+                'StartingToken': 'string'
+            }
+        )
+        ```
+
+        Parameters:
+        :   * **PlatformApplicationArn** (*string*) â
+
+              **[REQUIRED]**
+
+              `PlatformApplicationArn` for `ListEndpointsByPlatformApplicationInput` action.
+            * **PaginationConfig** (*dict*) â
+
+              A dictionary that provides parameters to control pagination.
+
+              + **MaxItems** *(integer) â*
+
+                The total number of items to return. If the total number of items available is more than the value specified in max-items then a `NextToken` will be provided in the output that you can use to resume pagination.
+              + **StartingToken** *(string) â*
+
+                A token to specify where to start paginating. This is the `NextToken` from a previous response.
+
+        Return type:
+        :   dict
+
+        Returns:
+        :   ### Response Syntax
+
+            ```
+            {
+                'Endpoints': [
+                    {
+                        'EndpointArn': 'string',
+                        'Attributes': {
+                            'string': 'string'
+                        }
+                    },
+                ],
+
+            }
+            ```
+
+            ### Response Structure
+
+            * *(dict) â*
+
+              Response for `ListEndpointsByPlatformApplication` action.
+
+              + **Endpoints** *(list) â*
+
+                Endpoints returned for `ListEndpointsByPlatformApplication` action.
+
+                - *(dict) â*
+
+                  The endpoint for mobile app and device.
+
+                  * **EndpointArn** *(string) â*
+
+                    The `EndpointArn` for mobile app and device.
+                  * **Attributes** *(dict) â*
+
+                    Attributes for endpoint.
+
+                    + *(string) â*
+
+                      - *(string) â*
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/paginator/ListOriginationNumbers.html
+
+[SNS](../../sns.html) / Paginator / ListOriginationNumbers
+
+# ListOriginationNumbers[Â¶](#listoriginationnumbers "Link to this heading")
+
+*class* SNS.Paginator.ListOriginationNumbers[Â¶](#SNS.Paginator.ListOriginationNumbers "Link to this definition")
+:   ```
+    paginator = client.get_paginator('list_origination_numbers')
+    ```
+
+    paginate(*\*\*kwargs*)[Â¶](#SNS.Paginator.ListOriginationNumbers.paginate "Link to this definition")
+    :   Creates an iterator that will paginate through responses from [`SNS.Client.list_origination_numbers()`](../client/list_origination_numbers.html#SNS.Client.list_origination_numbers "SNS.Client.list_origination_numbers").
+
+        See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListOriginationNumbers)
+
+        ### Request Syntax
+
+        ```
+        response_iterator = paginator.paginate(
+            PaginationConfig={
+                'MaxItems': 123,
+                'PageSize': 123,
+                'StartingToken': 'string'
+            }
+        )
+        ```
+
+        Parameters:
+        :   **PaginationConfig** (*dict*) â
+
+            A dictionary that provides parameters to control pagination.
+
+            * **MaxItems** *(integer) â*
+
+              The total number of items to return. If the total number of items available is more than the value specified in max-items then a `NextToken` will be provided in the output that you can use to resume pagination.
+            * **PageSize** *(integer) â*
+
+              The size of each page.
+            * **StartingToken** *(string) â*
+
+              A token to specify where to start paginating. This is the `NextToken` from a previous response.
+
+        Return type:
+        :   dict
+
+        Returns:
+        :   ### Response Syntax
+
+            ```
+            {
+                'PhoneNumbers': [
+                    {
+                        'CreatedAt': datetime(2015, 1, 1),
+                        'PhoneNumber': 'string',
+                        'Status': 'string',
+                        'Iso2CountryCode': 'string',
+                        'RouteType': 'Transactional'|'Promotional'|'Premium',
+                        'NumberCapabilities': [
+                            'SMS'|'MMS'|'VOICE',
+                        ]
+                    },
+                ]
+            }
+            ```
+
+            ### Response Structure
+
+            * *(dict) â*
+
+              + **PhoneNumbers** *(list) â*
+
+                A list of the calling accountâs verified and pending origination numbers.
+
+                - *(dict) â*
+
+                  A list of phone numbers and their metadata.
+
+                  * **CreatedAt** *(datetime) â*
+
+                    The date and time when the phone number was created.
+                  * **PhoneNumber** *(string) â*
+
+                    The phone number.
+                  * **Status** *(string) â*
+
+                    The status of the phone number.
+                  * **Iso2CountryCode** *(string) â*
+
+                    The two-character code for the country or region, in ISO 3166-1 alpha-2 format.
+                  * **RouteType** *(string) â*
+
+                    The list of supported routes.
+                  * **NumberCapabilities** *(list) â*
+
+                    The capabilities of each phone number.
+
+                    + *(string) â* Enum listing out all supported number capabilities.
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/paginator/ListPhoneNumbersOptedOut.html
+
+[SNS](../../sns.html) / Paginator / ListPhoneNumbersOptedOut
+
+# ListPhoneNumbersOptedOut[Â¶](#listphonenumbersoptedout "Link to this heading")
+
+*class* SNS.Paginator.ListPhoneNumbersOptedOut[Â¶](#SNS.Paginator.ListPhoneNumbersOptedOut "Link to this definition")
+:   ```
+    paginator = client.get_paginator('list_phone_numbers_opted_out')
+    ```
+
+    paginate(*\*\*kwargs*)[Â¶](#SNS.Paginator.ListPhoneNumbersOptedOut.paginate "Link to this definition")
+    :   Creates an iterator that will paginate through responses from [`SNS.Client.list_phone_numbers_opted_out()`](../client/list_phone_numbers_opted_out.html#SNS.Client.list_phone_numbers_opted_out "SNS.Client.list_phone_numbers_opted_out").
+
+        See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListPhoneNumbersOptedOut)
+
+        ### Request Syntax
+
+        ```
+        response_iterator = paginator.paginate(
+            PaginationConfig={
+                'MaxItems': 123,
+                'StartingToken': 'string'
+            }
+        )
+        ```
+
+        Parameters:
+        :   **PaginationConfig** (*dict*) â
+
+            A dictionary that provides parameters to control pagination.
+
+            * **MaxItems** *(integer) â*
+
+              The total number of items to return. If the total number of items available is more than the value specified in max-items then a `NextToken` will be provided in the output that you can use to resume pagination.
+            * **StartingToken** *(string) â*
+
+              A token to specify where to start paginating. This is the `NextToken` from a previous response.
+
+        Return type:
+        :   dict
+
+        Returns:
+        :   ### Response Syntax
+
+            ```
+            {
+                'phoneNumbers': [
+                    'string',
+                ],
+                'NextToken': 'string'
+            }
+            ```
+
+            ### Response Structure
+
+            * *(dict) â*
+
+              The response from the `ListPhoneNumbersOptedOut` action.
+
+              + **phoneNumbers** *(list) â*
+
+                A list of phone numbers that are opted out of receiving SMS messages. The list is paginated, and each page can contain up to 100 phone numbers.
+
+                - *(string) â*
+              + **NextToken** *(string) â*
+
+                A token to resume pagination.
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/paginator/ListPlatformApplications.html
+
+[SNS](../../sns.html) / Paginator / ListPlatformApplications
+
+# ListPlatformApplications[Â¶](#listplatformapplications "Link to this heading")
+
+*class* SNS.Paginator.ListPlatformApplications[Â¶](#SNS.Paginator.ListPlatformApplications "Link to this definition")
+:   ```
+    paginator = client.get_paginator('list_platform_applications')
+    ```
+
+    paginate(*\*\*kwargs*)[Â¶](#SNS.Paginator.ListPlatformApplications.paginate "Link to this definition")
+    :   Creates an iterator that will paginate through responses from [`SNS.Client.list_platform_applications()`](../client/list_platform_applications.html#SNS.Client.list_platform_applications "SNS.Client.list_platform_applications").
+
+        See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListPlatformApplications)
+
+        ### Request Syntax
+
+        ```
+        response_iterator = paginator.paginate(
+            PaginationConfig={
+                'MaxItems': 123,
+                'StartingToken': 'string'
+            }
+        )
+        ```
+
+        Parameters:
+        :   **PaginationConfig** (*dict*) â
+
+            A dictionary that provides parameters to control pagination.
+
+            * **MaxItems** *(integer) â*
+
+              The total number of items to return. If the total number of items available is more than the value specified in max-items then a `NextToken` will be provided in the output that you can use to resume pagination.
+            * **StartingToken** *(string) â*
+
+              A token to specify where to start paginating. This is the `NextToken` from a previous response.
+
+        Return type:
+        :   dict
+
+        Returns:
+        :   ### Response Syntax
+
+            ```
+            {
+                'PlatformApplications': [
+                    {
+                        'PlatformApplicationArn': 'string',
+                        'Attributes': {
+                            'string': 'string'
+                        }
+                    },
+                ],
+
+            }
+            ```
+
+            ### Response Structure
+
+            * *(dict) â*
+
+              Response for `ListPlatformApplications` action.
+
+              + **PlatformApplications** *(list) â*
+
+                Platform applications returned when calling `ListPlatformApplications` action.
+
+                - *(dict) â*
+
+                  Platform application object.
+
+                  * **PlatformApplicationArn** *(string) â*
+
+                    PlatformApplicationArn for platform application object.
+                  * **Attributes** *(dict) â*
+
+                    Attributes for platform application object.
+
+                    + *(string) â*
+
+                      - *(string) â*
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/paginator/ListSMSSandboxPhoneNumbers.html
+
+[SNS](../../sns.html) / Paginator / ListSMSSandboxPhoneNumbers
+
+# ListSMSSandboxPhoneNumbers[Â¶](#listsmssandboxphonenumbers "Link to this heading")
+
+*class* SNS.Paginator.ListSMSSandboxPhoneNumbers[Â¶](#SNS.Paginator.ListSMSSandboxPhoneNumbers "Link to this definition")
+:   ```
+    paginator = client.get_paginator('list_sms_sandbox_phone_numbers')
+    ```
+
+    paginate(*\*\*kwargs*)[Â¶](#SNS.Paginator.ListSMSSandboxPhoneNumbers.paginate "Link to this definition")
+    :   Creates an iterator that will paginate through responses from [`SNS.Client.list_sms_sandbox_phone_numbers()`](../client/list_sms_sandbox_phone_numbers.html#SNS.Client.list_sms_sandbox_phone_numbers "SNS.Client.list_sms_sandbox_phone_numbers").
+
+        See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListSMSSandboxPhoneNumbers)
+
+        ### Request Syntax
+
+        ```
+        response_iterator = paginator.paginate(
+            PaginationConfig={
+                'MaxItems': 123,
+                'PageSize': 123,
+                'StartingToken': 'string'
+            }
+        )
+        ```
+
+        Parameters:
+        :   **PaginationConfig** (*dict*) â
+
+            A dictionary that provides parameters to control pagination.
+
+            * **MaxItems** *(integer) â*
+
+              The total number of items to return. If the total number of items available is more than the value specified in max-items then a `NextToken` will be provided in the output that you can use to resume pagination.
+            * **PageSize** *(integer) â*
+
+              The size of each page.
+            * **StartingToken** *(string) â*
+
+              A token to specify where to start paginating. This is the `NextToken` from a previous response.
+
+        Return type:
+        :   dict
+
+        Returns:
+        :   ### Response Syntax
+
+            ```
+            {
+                'PhoneNumbers': [
+                    {
+                        'PhoneNumber': 'string',
+                        'Status': 'Pending'|'Verified'
+                    },
+                ],
+
+            }
+            ```
+
+            ### Response Structure
+
+            * *(dict) â*
+
+              + **PhoneNumbers** *(list) â*
+
+                A list of the calling accountâs pending and verified phone numbers.
+
+                - *(dict) â*
+
+                  A verified or pending destination phone number in the SMS sandbox.
+
+                  When you start using Amazon SNS to send SMS messages, your Amazon Web Services account is in the *SMS sandbox*. The SMS sandbox provides a safe environment for you to try Amazon SNS features without risking your reputation as an SMS sender. While your Amazon Web Services account is in the SMS sandbox, you can use all of the features of Amazon SNS. However, you can send SMS messages only to verified destination phone numbers. For more information, including how to move out of the sandbox to send messages without restrictions, see [SMS sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) in the *Amazon SNS Developer Guide*.
+
+                  * **PhoneNumber** *(string) â*
+
+                    The destination phone number.
+                  * **Status** *(string) â*
+
+                    The destination phone numberâs verification status.
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/paginator/ListSubscriptions.html
+
+[SNS](../../sns.html) / Paginator / ListSubscriptions
+
+# ListSubscriptions[Â¶](#listsubscriptions "Link to this heading")
+
+*class* SNS.Paginator.ListSubscriptions[Â¶](#SNS.Paginator.ListSubscriptions "Link to this definition")
+:   ```
+    paginator = client.get_paginator('list_subscriptions')
+    ```
+
+    paginate(*\*\*kwargs*)[Â¶](#SNS.Paginator.ListSubscriptions.paginate "Link to this definition")
+    :   Creates an iterator that will paginate through responses from [`SNS.Client.list_subscriptions()`](../client/list_subscriptions.html#SNS.Client.list_subscriptions "SNS.Client.list_subscriptions").
+
+        See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListSubscriptions)
+
+        ### Request Syntax
+
+        ```
+        response_iterator = paginator.paginate(
+            PaginationConfig={
+                'MaxItems': 123,
+                'StartingToken': 'string'
+            }
+        )
+        ```
+
+        Parameters:
+        :   **PaginationConfig** (*dict*) â
+
+            A dictionary that provides parameters to control pagination.
+
+            * **MaxItems** *(integer) â*
+
+              The total number of items to return. If the total number of items available is more than the value specified in max-items then a `NextToken` will be provided in the output that you can use to resume pagination.
+            * **StartingToken** *(string) â*
+
+              A token to specify where to start paginating. This is the `NextToken` from a previous response.
+
+        Return type:
+        :   dict
+
+        Returns:
+        :   ### Response Syntax
+
+            ```
+            {
+                'Subscriptions': [
+                    {
+                        'SubscriptionArn': 'string',
+                        'Owner': 'string',
+                        'Protocol': 'string',
+                        'Endpoint': 'string',
+                        'TopicArn': 'string'
+                    },
+                ],
+
+            }
+            ```
+
+            ### Response Structure
+
+            * *(dict) â*
+
+              Response for ListSubscriptions action
+
+              + **Subscriptions** *(list) â*
+
+                A list of subscriptions.
+
+                - *(dict) â*
+
+                  A wrapper type for the attributes of an Amazon SNS subscription.
+
+                  * **SubscriptionArn** *(string) â*
+
+                    The subscriptionâs ARN.
+                  * **Owner** *(string) â*
+
+                    The subscriptionâs owner.
+                  * **Protocol** *(string) â*
+
+                    The subscriptionâs protocol.
+                  * **Endpoint** *(string) â*
+
+                    The subscriptionâs endpoint (format depends on the protocol).
+                  * **TopicArn** *(string) â*
+
+                    The ARN of the subscriptionâs topic.
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/paginator/ListSubscriptionsByTopic.html
+
+[SNS](../../sns.html) / Paginator / ListSubscriptionsByTopic
+
+# ListSubscriptionsByTopic[Â¶](#listsubscriptionsbytopic "Link to this heading")
+
+*class* SNS.Paginator.ListSubscriptionsByTopic[Â¶](#SNS.Paginator.ListSubscriptionsByTopic "Link to this definition")
+:   ```
+    paginator = client.get_paginator('list_subscriptions_by_topic')
+    ```
+
+    paginate(*\*\*kwargs*)[Â¶](#SNS.Paginator.ListSubscriptionsByTopic.paginate "Link to this definition")
+    :   Creates an iterator that will paginate through responses from [`SNS.Client.list_subscriptions_by_topic()`](../client/list_subscriptions_by_topic.html#SNS.Client.list_subscriptions_by_topic "SNS.Client.list_subscriptions_by_topic").
+
+        See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListSubscriptionsByTopic)
+
+        ### Request Syntax
+
+        ```
+        response_iterator = paginator.paginate(
+            TopicArn='string',
+            PaginationConfig={
+                'MaxItems': 123,
+                'StartingToken': 'string'
+            }
+        )
+        ```
+
+        Parameters:
+        :   * **TopicArn** (*string*) â
+
+              **[REQUIRED]**
+
+              The ARN of the topic for which you wish to find subscriptions.
+            * **PaginationConfig** (*dict*) â
+
+              A dictionary that provides parameters to control pagination.
+
+              + **MaxItems** *(integer) â*
+
+                The total number of items to return. If the total number of items available is more than the value specified in max-items then a `NextToken` will be provided in the output that you can use to resume pagination.
+              + **StartingToken** *(string) â*
+
+                A token to specify where to start paginating. This is the `NextToken` from a previous response.
+
+        Return type:
+        :   dict
+
+        Returns:
+        :   ### Response Syntax
+
+            ```
+            {
+                'Subscriptions': [
+                    {
+                        'SubscriptionArn': 'string',
+                        'Owner': 'string',
+                        'Protocol': 'string',
+                        'Endpoint': 'string',
+                        'TopicArn': 'string'
+                    },
+                ],
+
+            }
+            ```
+
+            ### Response Structure
+
+            * *(dict) â*
+
+              Response for ListSubscriptionsByTopic action.
+
+              + **Subscriptions** *(list) â*
+
+                A list of subscriptions.
+
+                - *(dict) â*
+
+                  A wrapper type for the attributes of an Amazon SNS subscription.
+
+                  * **SubscriptionArn** *(string) â*
+
+                    The subscriptionâs ARN.
+                  * **Owner** *(string) â*
+
+                    The subscriptionâs owner.
+                  * **Protocol** *(string) â*
+
+                    The subscriptionâs protocol.
+                  * **Endpoint** *(string) â*
+
+                    The subscriptionâs endpoint (format depends on the protocol).
+                  * **TopicArn** *(string) â*
+
+                    The ARN of the subscriptionâs topic.
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/paginator/ListTopics.html
+
+[SNS](../../sns.html) / Paginator / ListTopics
+
+# ListTopics[Â¶](#listtopics "Link to this heading")
+
+*class* SNS.Paginator.ListTopics[Â¶](#SNS.Paginator.ListTopics "Link to this definition")
+:   ```
+    paginator = client.get_paginator('list_topics')
+    ```
+
+    paginate(*\*\*kwargs*)[Â¶](#SNS.Paginator.ListTopics.paginate "Link to this definition")
+    :   Creates an iterator that will paginate through responses from [`SNS.Client.list_topics()`](../client/list_topics.html#SNS.Client.list_topics "SNS.Client.list_topics").
+
+        See also: [AWS API Documentation](https://docs.aws.amazon.com/goto/WebAPI/sns-2010-03-31/ListTopics)
+
+        ### Request Syntax
+
+        ```
+        response_iterator = paginator.paginate(
+            PaginationConfig={
+                'MaxItems': 123,
+                'StartingToken': 'string'
+            }
+        )
+        ```
+
+        Parameters:
+        :   **PaginationConfig** (*dict*) â
+
+            A dictionary that provides parameters to control pagination.
+
+            * **MaxItems** *(integer) â*
+
+              The total number of items to return. If the total number of items available is more than the value specified in max-items then a `NextToken` will be provided in the output that you can use to resume pagination.
+            * **StartingToken** *(string) â*
+
+              A token to specify where to start paginating. This is the `NextToken` from a previous response.
+
+        Return type:
+        :   dict
+
+        Returns:
+        :   ### Response Syntax
+
+            ```
+            {
+                'Topics': [
+                    {
+                        'TopicArn': 'string'
+                    },
+                ],
+
+            }
+            ```
+
+            ### Response Structure
+
+            * *(dict) â*
+
+              Response for ListTopics action.
+
+              + **Topics** *(list) â*
+
+                A list of topic ARNs.
+
+                - *(dict) â*
+
+                  A wrapper type for the topicâs Amazon Resource Name (ARN). To retrieve a topicâs attributes, use `GetTopicAttributes`.
+
+                  * **TopicArn** *(string) â*
+
+                    The topicâs ARN.
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/platformapplication/index.html
+
+[SNS](../../sns.html) / Resource / PlatformApplication
+
+# PlatformApplication[Â¶](#platformapplication "Link to this heading")
+
+### Note
+
+Before using anything on this page, please refer to the resources [user guide](../../../../guide/resources.html) for the most recent guidance on using resources.
+
+*class* SNS.PlatformApplication(*arn*)[Â¶](#SNS.PlatformApplication "Link to this definition")
+:   A resource representing an Amazon Simple Notification Service (SNS) PlatformApplication:
+
+    ```
+    import boto3
+
+    sns = boto3.resource('sns')
+    platform_application = sns.PlatformApplication('arn')
+    ```
+
+    Parameters:
+    :   **arn** (*string*) â The PlatformApplicationâs arn identifier. This **must** be set.
+
+## Identifiers[Â¶](#identifiers "Link to this heading")
+
+Identifiers are properties of a resource that are set upon instantiation of the resource.
+For more information about identifiers refer to the [Resources Introduction Guide](../../../../guide/resources.html#identifiers-attributes-intro).
+
+These are the resourceâs available identifiers:
+
+* [arn](arn.html)
+
+## Attributes[Â¶](#attributes "Link to this heading")
+
+Attributes provide access to the properties of a resource. Attributes are lazy-loaded the first time one is accessed via the `load()` method.
+For more information about attributes refer to the [Resources Introduction Guide](../../../../guide/resources.html#identifiers-attributes-intro).
+
+These are the resourceâs available attributes:
+
+* [attributes](attributes.html)
+
+## Actions[Â¶](#actions "Link to this heading")
+
+Actions call operations on resources. They may automatically handle the passing in of arguments set from identifiers and some attributes.
+For more information about actions refer to the [Resources Introduction Guide](../../../../guide/resources.html#actions-intro).
+
+These are the resourceâs available actions:
+
+* [create\_platform\_endpoint](create_platform_endpoint.html)
+* [delete](delete.html)
+* [get\_available\_subresources](get_available_subresources.html)
+* [load](load.html)
+* [reload](reload.html)
+* [set\_attributes](set_attributes.html)
+
+## Collections[Â¶](#collections "Link to this heading")
+
+Collections provide an interface to iterate over and manipulate groups of resources.
+For more information about collections refer to the [Resources Introduction Guide](../../../../guide/collections.html#guide-collections).
+
+These are the resourceâs available collections:
+
+* [endpoints](endpoints.html)
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/platformendpoint/index.html
+
+[SNS](../../sns.html) / Resource / PlatformEndpoint
+
+# PlatformEndpoint[Â¶](#platformendpoint "Link to this heading")
+
+### Note
+
+Before using anything on this page, please refer to the resources [user guide](../../../../guide/resources.html) for the most recent guidance on using resources.
+
+*class* SNS.PlatformEndpoint(*arn*)[Â¶](#SNS.PlatformEndpoint "Link to this definition")
+:   A resource representing an Amazon Simple Notification Service (SNS) PlatformEndpoint:
+
+    ```
+    import boto3
+
+    sns = boto3.resource('sns')
+    platform_endpoint = sns.PlatformEndpoint('arn')
+    ```
+
+    Parameters:
+    :   **arn** (*string*) â The PlatformEndpointâs arn identifier. This **must** be set.
+
+## Identifiers[Â¶](#identifiers "Link to this heading")
+
+Identifiers are properties of a resource that are set upon instantiation of the resource.
+For more information about identifiers refer to the [Resources Introduction Guide](../../../../guide/resources.html#identifiers-attributes-intro).
+
+These are the resourceâs available identifiers:
+
+* [arn](arn.html)
+
+## Attributes[Â¶](#attributes "Link to this heading")
+
+Attributes provide access to the properties of a resource. Attributes are lazy-loaded the first time one is accessed via the `load()` method.
+For more information about attributes refer to the [Resources Introduction Guide](../../../../guide/resources.html#identifiers-attributes-intro).
+
+These are the resourceâs available attributes:
+
+* [attributes](attributes.html)
+
+## Actions[Â¶](#actions "Link to this heading")
+
+Actions call operations on resources. They may automatically handle the passing in of arguments set from identifiers and some attributes.
+For more information about actions refer to the [Resources Introduction Guide](../../../../guide/resources.html#actions-intro).
+
+These are the resourceâs available actions:
+
+* [delete](delete.html)
+* [get\_available\_subresources](get_available_subresources.html)
+* [load](load.html)
+* [publish](publish.html)
+* [reload](reload.html)
+* [set\_attributes](set_attributes.html)
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/service-resource/index.html
+
+[SNS](../../sns.html) / Resource / ServiceResource
+
+# Service Resource[Â¶](#service-resource "Link to this heading")
+
+### Note
+
+Before using anything on this page, please refer to the resources [user guide](../../../../guide/resources.html) for the most recent guidance on using resources.
+
+*class* SNS.ServiceResource[Â¶](#SNS.ServiceResource "Link to this definition")
+:   A resource representing Amazon Simple Notification Service (SNS):
+
+    ```
+    import boto3
+
+    sns = boto3.resource('sns')
+    ```
+
+## Actions[Â¶](#actions "Link to this heading")
+
+Actions call operations on resources. They may automatically handle the passing in of arguments set from identifiers and some attributes.
+For more information about actions refer to the [Resources Introduction Guide](../../../../guide/resources.html#actions-intro).
+
+These are the resourceâs available actions:
+
+* [create\_platform\_application](create_platform_application.html)
+* [create\_topic](create_topic.html)
+* [get\_available\_subresources](get_available_subresources.html)
+
+## Sub-resources[Â¶](#sub-resources "Link to this heading")
+
+Sub-resources are methods that create a new instance of a child resource. This resourceâs identifiers get passed along to the child.
+For more information about sub-resources refer to the [Resources Introduction Guide](../../../../guide/resources.html#subresources-intro).
+
+These are the resourceâs available sub-resources:
+
+* [PlatformApplication](PlatformApplication.html)
+* [PlatformEndpoint](PlatformEndpoint.html)
+* [Subscription](Subscription.html)
+* [Topic](Topic.html)
+
+## Collections[Â¶](#collections "Link to this heading")
+
+Collections provide an interface to iterate over and manipulate groups of resources.
+For more information about collections refer to the [Resources Introduction Guide](../../../../guide/collections.html#guide-collections).
+
+These are the resourceâs available collections:
+
+* [platform\_applications](platform_applications.html)
+* [subscriptions](subscriptions.html)
+* [topics](topics.html)
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/subscription/index.html
+
+[SNS](../../sns.html) / Resource / Subscription
+
+# Subscription[Â¶](#subscription "Link to this heading")
+
+### Note
+
+Before using anything on this page, please refer to the resources [user guide](../../../../guide/resources.html) for the most recent guidance on using resources.
+
+*class* SNS.Subscription(*arn*)[Â¶](#SNS.Subscription "Link to this definition")
+:   A resource representing an Amazon Simple Notification Service (SNS) Subscription:
+
+    ```
+    import boto3
+
+    sns = boto3.resource('sns')
+    subscription = sns.Subscription('arn')
+    ```
+
+    Parameters:
+    :   **arn** (*string*) â The Subscriptionâs arn identifier. This **must** be set.
+
+## Identifiers[Â¶](#identifiers "Link to this heading")
+
+Identifiers are properties of a resource that are set upon instantiation of the resource.
+For more information about identifiers refer to the [Resources Introduction Guide](../../../../guide/resources.html#identifiers-attributes-intro).
+
+These are the resourceâs available identifiers:
+
+* [arn](arn.html)
+
+## Attributes[Â¶](#attributes "Link to this heading")
+
+Attributes provide access to the properties of a resource. Attributes are lazy-loaded the first time one is accessed via the `load()` method.
+For more information about attributes refer to the [Resources Introduction Guide](../../../../guide/resources.html#identifiers-attributes-intro).
+
+These are the resourceâs available attributes:
+
+* [attributes](attributes.html)
+
+## Actions[Â¶](#actions "Link to this heading")
+
+Actions call operations on resources. They may automatically handle the passing in of arguments set from identifiers and some attributes.
+For more information about actions refer to the [Resources Introduction Guide](../../../../guide/resources.html#actions-intro).
+
+These are the resourceâs available actions:
+
+* [delete](delete.html)
+* [get\_available\_subresources](get_available_subresources.html)
+* [load](load.html)
+* [reload](reload.html)
+* [set\_attributes](set_attributes.html)
+
+## Source: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sns/topic/index.html
+
+[SNS](../../sns.html) / Resource / Topic
+
+# Topic[Â¶](#topic "Link to this heading")
+
+### Note
+
+Before using anything on this page, please refer to the resources [user guide](../../../../guide/resources.html) for the most recent guidance on using resources.
+
+*class* SNS.Topic(*arn*)[Â¶](#SNS.Topic "Link to this definition")
+:   A resource representing an Amazon Simple Notification Service (SNS) Topic:
+
+    ```
+    import boto3
+
+    sns = boto3.resource('sns')
+    topic = sns.Topic('arn')
+    ```
+
+    Parameters:
+    :   **arn** (*string*) â The Topicâs arn identifier. This **must** be set.
+
+## Identifiers[Â¶](#identifiers "Link to this heading")
+
+Identifiers are properties of a resource that are set upon instantiation of the resource.
+For more information about identifiers refer to the [Resources Introduction Guide](../../../../guide/resources.html#identifiers-attributes-intro).
+
+These are the resourceâs available identifiers:
+
+* [arn](arn.html)
+
+## Attributes[Â¶](#attributes "Link to this heading")
+
+Attributes provide access to the properties of a resource. Attributes are lazy-loaded the first time one is accessed via the `load()` method.
+For more information about attributes refer to the [Resources Introduction Guide](../../../../guide/resources.html#identifiers-attributes-intro).
+
+These are the resourceâs available attributes:
+
+* [attributes](attributes.html)
+
+## Actions[Â¶](#actions "Link to this heading")
+
+Actions call operations on resources. They may automatically handle the passing in of arguments set from identifiers and some attributes.
+For more information about actions refer to the [Resources Introduction Guide](../../../../guide/resources.html#actions-intro).
+
+These are the resourceâs available actions:
+
+* [add\_permission](add_permission.html)
+* [confirm\_subscription](confirm_subscription.html)
+* [delete](delete.html)
+* [get\_available\_subresources](get_available_subresources.html)
+* [load](load.html)
+* [publish](publish.html)
+* [reload](reload.html)
+* [remove\_permission](remove_permission.html)
+* [set\_attributes](set_attributes.html)
+* [subscribe](subscribe.html)
+
+## Collections[Â¶](#collections "Link to this heading")
+
+Collections provide an interface to iterate over and manipulate groups of resources.
+For more information about collections refer to the [Resources Introduction Guide](../../../../guide/collections.html#guide-collections).
+
+These are the resourceâs available collections:
+
+* [subscriptions](subscriptions.html)

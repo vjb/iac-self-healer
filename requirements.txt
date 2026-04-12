@@ -1,0 +1,6 @@
+pytest
+pytest-asyncio
+boto3
+dspy-ai
+aws-cdk-lib
+constructs

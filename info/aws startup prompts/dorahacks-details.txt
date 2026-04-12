@@ -1,0 +1,234 @@
+
+
+
+BUIDLs
+Hackathons
+
+
+
+Premium
+
+
+
+Prize pool
+
+$50,000 AWS Activate Credits
+
+event timeline
+58 days left for submission
+Upcoming
+Pre-registration
+2026/02/21 11:00
+Submission
+2026/03/09 12:00
+Deadline
+2026/06/10 11:59
+Virtual
+Hackathon Tags
+Cloud Architecture
+Developer Tools
+Generative AI
+Prompt Engineering
+Kiro
+AWS
+Platform technology
+Amazon Web Services
+Prompt Engineering
+Prompt Library
+
+Amazon Web Services
+AWS Prompt the Planet Challenge
+Details
+BUIDLs
+33
+Hackers
+169
+Join a Team
+New
+Tracks
+Resources
+Judges
+Ask Question
+1
+Ideas
+Outline
+
+AWS Prompt the Planet Challenge
+What We're Looking For
+Example Prompts from Our Library
+The Prize
+Who Can Join
+Timeline
+What Makes a Winner
+How to Submit Your Prompt
+Quality Standards
+Reference Examples
+Multiple Submissions Welcome
+After You Submit
+Agentic Coding Throughout Your Journey
+Why Use Kiro?
+Important Notes
+Questions?
+Your Ideas Can Help Thousands
+AWS Prompt the Planet Challenge
+Help Build the Future
+What if you could help thousands of developers build better applications? The AWS Prompt the Planet Challenge invites creators worldwide to contribute prompts that make cloud infrastructure accessible to everyone—from first-time builders to experienced teams.
+
+What We're Looking For
+Prompts That Simplify – Instructions that help anyone deploy infrastructure, solve problems, or automate tasks on AWS.
+
+Solutions for Real Challenges – Security setup, cost management, application deployment, data handling, automation—anything that makes building on AWS easier.
+
+Clear & Actionable – Prompts that guide users step-by-step, with examples and explanations included
+
+Example Prompts from Our Library
+Day 1 AWS Foundation Setup – Professional-grade AWS setup through self-service AI
+MVSP-Compliant Infrastructure Builder – Pass enterprise security audits automatically
+Karpenter + KEDA Cost-Optimized EKS – Production EKS with Spot instances and auto-scaling
+AWS Security Baseline Terraform Kit – Deploy comprehensive security controls in minutes
+RAG Chatbot with Claude – Serverless chatbot with PDF document capabilities
+View full library →
+
+The Prize
+$50,000 in AWS Activate Credits – 10 winners receive $5,000 each, plus featured placement in the AWS Startups Prompt Library viewed by hundreds of thousands of developers worldwide.
+
+Who Can Join
+Everyone is welcome. Students, developers, founders, researchers, hobbyists, career changers—whether you're just learning AWS or have years of experience. If you have an idea for making AWS easier to use, we want to hear it.
+
+Multiple submissions encouraged.
+
+Timeline
+90 days to submit your best work
+
+Submission Opens: March 10, 2026
+
+Deadline: June 10, 2026
+
+What Makes a Winner
+✅ Clear & Actionable – Specific instructions anyone can follow
+
+✅ Production-Ready – Security, monitoring, cost controls built-in
+
+✅ Well-Documented – Prerequisites, examples, troubleshooting included
+
+✅ Follows AWS Best Practices – Aligned with Well-Architected Framework
+
+How to Submit Your Prompt
+Submission Window: March 1 - June 1, 2026 (90 days)
+
+What You'll Submit
+Your submission should be a production-ready prompt that helps developers accomplish real AWS tasks. Think of it as contributing to a shared knowledge base that thousands will use to build their applications.
+
+Submission Requirements
+When you create your BUIDL, you'll provide:
+
+1. Your Complete Prompt (in the Details section) Include the full, verbatim prompt exactly as a developer would use it with an AI assistant. This should be copy-paste ready—not a description of what the prompt does, but the actual prompt itself.
+
+Example of what we're looking for:
+
+✅ "Create a production-ready EKS cluster with the following specifications: Use Karpenter for node provisioning with Spot instance support, implement KEDA for workload-based autoscaling, configure AWS Load Balancer Controller for ingress..."
+❌ "A prompt that helps set up Kubernetes clusters"
+2. Context & Documentation Help others understand when and how to use your prompt:
+
+Prerequisites: What does someone need before using this? (AWS account setup, specific permissions, existing resources)
+Use Case: What problem does this solve? Who is this for?
+Expected Outcome: What will developers have after running this prompt?
+Troubleshooting Tips: Common issues and how to resolve them
+3. AWS Services & Best Practices
+
+Which AWS services does your prompt utilize?
+How does it align with the AWS Well-Architected Framework?
+What security, cost optimization, or operational excellence principles does it incorporate?
+Quality Standards
+Winning prompts share these characteristics:
+
+Clear & Actionable – Anyone following your prompt should know exactly what to do at each step. Include specific parameter values, configuration examples, and decision points.
+
+Production-Ready – Your prompt should guide users to build something they can actually deploy. Security groups configured properly. Monitoring enabled. Cost controls in place. Not just "hello world" demos.
+
+Well-Documented – Think about the developer using this at 2 AM trying to solve a problem. What context do they need? What might go wrong? What should they check?
+
+Best Practice Aligned – Follows AWS recommendations for security, reliability, performance, cost optimization, and operational excellence.
+
+Reference Examples
+Before submitting, review these prompts from our library to see the level of detail and structure we're looking for:
+
+Day 1 AWS Foundation Setup – See how it walks through account configuration with specific IAM policies and security controls
+MVSP-Compliant Infrastructure Builder – Notice the comprehensive security requirements and validation steps
+Karpenter + KEDA Cost-Optimized EKS – Observe the detailed configuration parameters and cost optimization strategies
+View full library →
+
+Multiple Submissions Welcome
+Have several ideas? Submit them all! There's no limit. Each prompt is evaluated independently, and you can win with any of your submissions.
+
+After You Submit
+Our team reviews submissions for:
+
+Completeness and clarity
+Technical accuracy
+Production readiness
+Alignment with AWS best practices
+Agentic Coding Throughout Your Journey
+Agentic coding tools are allowed and encouraged for every step of this challenge, including:
+
+Brainstorming topics and exploring creative ideas
+Prompt development and refinement for AI systems
+Testing and iteration of your solutions
+Generating submission content and documentation
+Building and finalizing your project deliverables
+We encourage use of Kiro IDE as the default tool, but other agentic coding assistants (such as), Claude Code, or similar AI-powered tools) are welcome. These AI-powered assistants can significantly accelerate your development process, help you explore creative solutions, and allow you to focus on innovation rather than repetitive tasks.
+
+Why Use Kiro?
+Kiro helps developers build, iterate, and finalize their submissions more efficiently through:
+
+Agentic Coding: AI agents that understand your project context and can autonomously handle complex development tasks
+Intelligent Steering: Advanced controls to guide AI behavior with precision
+Rapid Iteration: Quickly prototype, test, and refine your ideas with AI assistance
+Production-Ready Code: Generate high-quality, maintainable code that's ready for deployment
+Important Notes
+Kiro use is NOT required for participation in this event
+We strongly encourage using Kiro and other agentic coding tools throughout the challenge
+These tools are welcome at every stage—from initial brainstorming to final submission
+For more information about Kiro visit kiro.dev
+Questions?
+Join our community channels or use the "Ask Question" feature on this page. We're here to help you create prompts that make a real difference for developers worldwide.
+
+Your Ideas Can Help Thousands
+Every prompt you submit becomes part of a global library that helps developers worldwide build on AWS. Whether you're sharing something you've learned, an idea you've had, or a solution you've discovered—your contribution matters.
+
+Join the challenge. Submit unlimited prompts. Win $5K in credits.
+
+DoraHacks
+FOLLOW US
+About
+Dora Research Blog
+DoraHacks Blog
+Dora Factory
+Changelog
+Resources
+MACI/aMACI Voting
+Host a Hackathon
+Binance Live ↗
+YouTube ↗
+Grants
+Quadratic Funding
+ATOM Economic Zone Quadratic Grant
+Aptos Grant DAO
+Injective Grant DAO
+Flow Grant DAO
+Contact us
+
+Report Issue
+
+Message
+Telegram ↗
+Discord ↗
+Email ↗
+© 2026 DoraHacks. All rights reserved.
+
+Code of conduct
+|
+Privacy policy
+|
+Terms of service
+Share

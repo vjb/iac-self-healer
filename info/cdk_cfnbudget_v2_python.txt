@@ -1,0 +1,52 @@
+# AWS CDK v2 Python - strict CfnBudget Syntax Guide
+
+When using AWS CDK v2 in Python to deploy `CfnBudget`, you must rigorously use the explicitly typed `Property` classes (e.g., `CfnBudget.BudgetDataProperty`, `CfnBudget.SpendProperty`, `CfnBudget.NotificationWithSubscribersProperty`) rather than passing raw dictionaries with `camelCase` keys (which fail JSII deserialization). 
+Ensure all kwargs map correctly to AWS CDK Python `snake_case` syntax.
+
+Example Reference Structure:
+```python
+from aws_cdk.aws_budgets import CfnBudget
+
+budget = CfnBudget(
+    self, "SandboxBudget",
+    budget=CfnBudget.BudgetDataProperty(
+        budget_type="COST",
+        time_unit="MONTHLY",
+        budget_limit=CfnBudget.SpendProperty(
+            amount=1.00,
+            unit="USD"
+        )
+    ),
+    notifications_with_subscribers=[
+        CfnBudget.NotificationWithSubscribersProperty(
+            notification=CfnBudget.NotificationProperty(
+                comparison_operator="GREATER_THAN",
+                notification_type="ACTUAL",
+                threshold=50,
+                threshold_type="PERCENTAGE"
+            ),
+            subscribers=[
+                CfnBudget.SubscriberProperty(
+                    address=sns_topic.topic_arn,
+                    subscription_type="SNS"
+                )
+            ]
+        ),
+        CfnBudget.NotificationWithSubscribersProperty(
+            notification=CfnBudget.NotificationProperty(
+                comparison_operator="GREATER_THAN",
+                notification_type="ACTUAL",
+                threshold=100,
+                threshold_type="PERCENTAGE"
+            ),
+            subscribers=[
+                CfnBudget.SubscriberProperty(
+                    address=sns_topic.topic_arn,
+                    subscription_type="SNS"
+                )
+            ]
+        )
+    ]
+)
+```
+Failure to instantiate these explicit DataProperties causes CDK JSII deserialization errors like: `Missing required properties for aws-cdk-lib.aws_budgets.CfnBudget.BudgetDataProperty: 'budgetType', 'timeUnit'` because dictionaries do not map the nested types correctly.
