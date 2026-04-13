@@ -81,13 +81,38 @@ Do not include any other text, markdown, or bullet points.""" + retrieved_contex
         constraints = [c.strip().lstrip('-').lstrip('*').strip() for c in constraints_text.split("\n") if c.strip()]
         return constraints[:3]
     except Exception as e:
-        print(f"Meta-Analyzer API failed: {e}")
         return ["Never use local file paths or from_asset; always use inline lambda code."]
+
+def count_cdk_constructs(code_text: str) -> int:
+    """Uses Python AST to accurately count physical AWS constructs instantiated."""
+    import ast
+    try:
+        tree = ast.parse(code_text)
+        count = 0
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                if node.args and isinstance(node.args[0], ast.Name) and node.args[0].id == "self":
+                    count += 1
+                elif node.args and isinstance(node.args[0], ast.Name) and node.args[0].id == "scope":
+                    count += 1
+        return count
+    except Exception:
+        return 0
 
 
 def main():
     load_dotenv()
     
+    print("[SYSTEM] Verifying Environment Dependencies...", flush=True)
+    import urllib.request
+    try:
+        urllib.request.urlopen("http://localhost:4566/_localstack/health", timeout=3)
+        print("[SYSTEM] LocalStack Emulation Daemon is ONLINE on Port 4566.", flush=True)
+    except Exception:
+        print("\n>>> [FATAL ERROR] LocalStack is NOT running or unreachable on port 4566!", flush=True)
+        print(">>> [FATAL ERROR] The pipeline requires 'docker compose up -d' to validate architecture.", flush=True)
+        sys.exit(1)
+        
     target_intent = sys.argv[1] if len(sys.argv) > 1 else "Container Orchestration"
     
     # Check and clear stop flag
@@ -117,7 +142,8 @@ def main():
         os.remove("learned_constraints.txt")
         
     python_exe = os.path.join("venv", "Scripts", "python.exe")
-    max_iterations = 8
+    max_iterations = 15
+    topology_history = []
     
     rag_collection = None
     if 'chromadb' in sys.modules:
@@ -207,6 +233,9 @@ def main():
             with open(stack_file, "r", encoding="utf-8") as cf:
                 generated_code_txt = cf.read()
 
+        construct_count = count_cdk_constructs(generated_code_txt)
+        topology_history.append(construct_count)
+
         # Fractional Scoring Algorithm
         score = 0
         issues = 0
@@ -219,17 +248,25 @@ def main():
             score += max(20 - (issues * 2), 0)
             
         cdk_success = "CloudFormation successfully generated" in stdout
-        test_success = "Validation complete and PASSED" in stdout
+        deploy_success = "LocalStack Deploy: Architecture physically validated and PASSED." in stdout
         
         if cdk_success:
             score += 35
             
-        if test_success:
+        if deploy_success:
             score += 30
             
         # Hard override if score is somehow perfect here
-        if test_success and issues == 0:
+        if deploy_success and issues == 0:
             score = 100
+            
+        # Agentic Laziness / Topology Shrinkage Detection
+        if len(topology_history) > 1:
+            max_past_topology = max(topology_history[:-1])
+            if (max_past_topology - construct_count) >= 3 and score > 75:
+                print(f">>> [ENVIRONMENT] LAZINESS DETECTED! Topology shrank from {max_past_topology} to {construct_count} constructs to bypass compilation.")
+                print(f">>> [ENVIRONMENT] Applying Shrinkage Penalty (-50 points).")
+                score = max(score - 50, 0)
             
         print(f">>> [ENVIRONMENT] Gauntlet Score Evaluated: {score}/100")
         
@@ -247,9 +284,11 @@ def main():
         iter_stats = {
             "iteration": i,
             "score": score,
+            "construct_count": construct_count,
             "flake8_issues": issues,
             "cdk_synth_success": cdk_success,
-            "pytest_success": test_success,
+            "pytest_success": False, # Deprecated
+            "deploy_success": deploy_success,
             "generated_code_snapshot": generated_code_txt,
             "orchestrator_prompt": final_prompt_txt,
             "new_constraints": [],
@@ -308,6 +347,14 @@ def main():
             with open(run_summary_path, "w", encoding="utf-8") as f:
                 json.dump(run_stats, f, indent=4)
             break
+            
+        print(f"\n>>> [HYGIENE] Executing LocalStack hardware wipe to ensure zero-state hygiene...")
+        subprocess.run('npx cdklocal destroy --force --require-approval never -a "..\\\\venv\\\\Scripts\\\\python.exe app.py"', cwd="cdk-testing-ground", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        
+        if len(score_history) >= 2 and score_history[-1] < 16 and score_history[-2] < 16:
+            print(">>> [HYGIENE] Architecture validation flatlined below minimal threshold. Rebooting Docker Daemon to purge orphaned endpoints...")
+            subprocess.run("docker compose restart", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            time.sleep(3) # Let container boot
             
         if i < max_iterations - 1:
             print(f">>> [ORCHESTRATOR] Applying new constraint logic to context...")

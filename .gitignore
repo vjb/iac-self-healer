@@ -10,3 +10,8 @@ FINAL_PROMPT.md
 optimized_factory.json
 results/
 .env
+volume/
+learned_constraints.txt
+stop_flag.txt
+tmp_stack_*.py
+FINAL_PROMPT_*.md

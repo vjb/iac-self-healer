@@ -92,13 +92,18 @@ def main():
     else:
         print("CDK Synth: Compilation Failed!")
         
-    print(">>> 6. Running Moto test suite in testing ground...")
-    pytest_exe = os.path.join("..", "venv", "Scripts", "pytest")
-    result_pytest = subprocess.run([python_exe, "-m", "pytest", "tests/unit/test_cdk_testing_ground_stack.py", "-v"], cwd="cdk-testing-ground")
-    if result_pytest.returncode == 0:
-        print("Pytest Moto: Validation complete and PASSED.")
+    print(">>> 6. Running LocalStack Architecture Synthesis...")
+    deploy_env = os.environ.copy()
+    deploy_env["AWS_ACCESS_KEY_ID"] = "test"
+    deploy_env["AWS_SECRET_ACCESS_KEY"] = "test"
+    deploy_env["AWS_DEFAULT_REGION"] = "us-east-1"
+    
+    deploy_cmd = 'npx cdklocal deploy --require-approval never -a "..\\\\venv\\\\Scripts\\\\python.exe app.py"'
+    result_deploy = subprocess.run(deploy_cmd, cwd="cdk-testing-ground", shell=True, env=deploy_env)
+    
+    if result_deploy.returncode == 0:
+        print("LocalStack Deploy: Architecture physically validated and PASSED.")
     else:
-        print("Pytest Moto: Tests failed!")
-        
+        print("LocalStack Deploy: CloudFormation stack rollback or failure detected!")
 if __name__ == "__main__":
     main()

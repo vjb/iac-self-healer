@@ -78,8 +78,11 @@ Strict Context / Best Practices:
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {api_key}"
                 }
+                global _dspy_lm_active
+                temp_val = _dspy_lm_active.temperature if _dspy_lm_active else 0.5
                 payload = {
                     "model": "gpt-4o-mini",
+                    "temperature": temp_val,
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": f"Intent: {intent}"}
@@ -111,9 +114,12 @@ class Example:
     def with_inputs(self, *args):
         return self
 
+_dspy_lm_active = None
 def configure(**kwargs):
-    pass
+    global _dspy_lm_active
+    if 'lm' in kwargs:
+        _dspy_lm_active = kwargs['lm']
 
 class LM:
-    def __init__(self, model, api_base="", api_key=""):
-        pass
+    def __init__(self, model, api_base="", api_key="", temperature=0.5, **kwargs):
+        self.temperature = temperature
