@@ -1,72 +1,126 @@
 # IaC Self-Healer
 
-An autonomous orchestration loop that generates, compiles, and reiterates AWS CDK infrastructure code using runtime validation.
+An autonomous orchestration system that generates, compiles, deploys, and self-corrects AWS CDK v2 infrastructure code — converging on physically deployable cloud architecture without human intervention.
 
-## Architecture Concept
+## The Problem
 
-Generating Infrastructure-as-Code (IaC) via zero-shot Large Language Models frequently results in invalid dependency topological structures or outdated JSII constructs. 
+Generating Infrastructure-as-Code (IaC) via zero-shot Large Language Models produces code that _looks_ correct but fails deterministically against real compilers. Common failure modes include deprecated CDK v1 namespaces, hallucinated API surfaces, missing JSII type constraints, and service-level incompatibilities with emulated cloud environments. Traditional approaches (few-shot examples, chain-of-thought prompting) cannot fix these issues because they lack a physical feedback loop — they never actually _compile_ the code.
 
-**IaC Self-Healer** resolves this by executing a continuous validation pipeline built on a **Teacher-Student Zero-Shot Architecture**. It uses **Zero-Trust Physical Proofing** to bypass LLM hallucinations and mathematically converge on deployable cloud hardware.
+## The Solution: Teacher-Student Zero-Trust Architecture
+
+IaC Self-Healer decomposes the generation problem into two cooperating LLM agents, each with a distinct role, connected by a deterministic physical compiler that acts as the sole source of truth.
 
 ```mermaid
 graph TD
-    A[User Intent] -->|Topology Request| B(Teacher LLM Agent)
-    C[(ChromaDB)] -.->|Environment Limitations| B
-    H[(learned_constraints.txt)] -.->|Previous Trace Fixes| B
+    A["User Intent (Natural Language)"] -->|Architecture Request| B["Teacher Agent (DSPy)"]
     
-    B -->|Natural Language Prompt| D(Student LLM Agent)
-    D -->|Targeted Python CDK| E{AWS CDK Physical Compiler}
+    subgraph "Knowledge Layer"
+        C[("ChromaDB (Static Rules)")]
+        H[("learned_constraints.txt (Runtime Rules)")]
+    end
     
-    E -- Success --> F[LocalStack Emulation Deploy]
-    E -- Crash Traceback --> G[Meta-Analyzer]
+    C -.->|Environment Bans| B
+    H -.->|Previous Crash Fixes| B
     
-    G -->|Extracts API Solution| H
+    B -->|"Natural Language Prompt (Markdown)"| D["Student Agent (GPT-4o)"]
+    D -->|"Raw Python CDK v2 Code"| E["Linting Gate"]
+    
+    E -->|"AST Parse + Flake8"| F{"CDK Physical Compiler"}
+    F -->|"npx cdk synth"| G{"LocalStack Deploy"}
+    
+    G -- "✅ Deploy Success" --> I["100/100 — Converged"]
+    G -- "❌ Stack Trace" --> J["Meta-Analyzer (GPT-4o)"]
+    F -- "❌ Compilation Error" --> J
+    
+    J -->|"Deterministic Rule Extraction"| H
+    J -->|"Semantic Indexing"| C
+    
+    H -.->|"Injected into next iteration"| D
 ```
 
-### Execution Workflow
+### Why Two Agents?
 
-The system enforces structural validity through the following discrete steps:
-1. **Teacher Generation**: The Teacher creates an instructional markdown prompt mapping the user's architectural intent. It reads environment limitations dynamically from `ChromaDB` (e.g. "Do not use SSM or RDS inside LocalStack").
-2. **Student Execution**: A segmented Student Coder strictly reads the Teacher's Prompt and synthesizes Python AWS CDK v2 code. 
-3. **Zero-Trust Physical Proofing**: The code bypasses abstract LLM linters and hits the real compiler.
-    * `flake8` executes static syntax checking.
-    * `npx cdk synth` evaluates JSII constraints and generates CloudFormation.
-    * The CDK stack deploys directly into a LocalStack Docker container.
-4. **Deterministic Context Reflection**: If compilation crashes, the literal stack trace is extracted. A Meta-Analyzer translates the physical crash into a hard rule. Crucially, the orchestrator mechanically forces the rule into the `learned_constraints.txt` memory block, permanently blocking the hallucination on the next iteration cycle.
+A single LLM tasked with both _designing_ and _coding_ infrastructure conflates two fundamentally different skills. The Teacher-Student split enforces separation of concerns:
 
-## The DSPy Integration
+- **Teacher (DSPy `ChainOfThought`)**: Reads the user's intent, queries ChromaDB for environment-specific limitations and previously learned constraints, and produces a **natural language instructional prompt** — never code. This ensures the architectural decisions are informed by accumulated knowledge without leaking implementation details.
+- **Student (GPT-4o, Temperature 0.0)**: Receives the Teacher's markdown instructions plus a hardcoded set of **Mandatory Environment Rules** (e.g., "Never use `aws_rds` in LocalStack") and produces raw Python CDK code. The Student has zero memory between iterations — it is purely reactive.
 
-Instead of relying on prompt parameter adjustments via MIPROv2, this project pivots to use DSPy purely for its structural programmatic abstraction. The core logic relies on physical environment limitations mapped into ChromaDB RAG layers rather than recursive Bayesian probability tests.
+### Zero-Trust Physical Proofing
 
-### Custom Prompt Ingestion
+The system deliberately rejects all abstract LLM-based code review. Early iterations included a "Static Critic" agent that would review generated code before compilation. This was removed after it caused infinite hallucination loops — the critic would reject valid code, or approve invalid code, because it was guessing about compiler behavior rather than observing it.
 
-The repository supports mapping internal documentation directly into the generation layer.
-1. Place standard markdown architectures (e.g., `Serverless.md`, `EKS_Baseline.md`) into the offline `chroma_db/`.
-2. Execute the engine natively. The system reads and maps hardware limits natively.
+Instead, the system uses a three-stage physical validation gauntlet:
 
-## System Overview
+1. **AST + Flake8 Linting**: Python's `ast.parse()` verifies the code is syntactically valid and contains a proper `Stack` class inheritance. `flake8` catches undefined names and import errors.
+2. **`npx cdk synth`**: The actual AWS CDK compiler executes the Python code through the JSII runtime, generating a CloudFormation template. This catches type errors, missing construct properties, deprecated APIs, and invalid resource configurations that no LLM linter could reliably detect.
+3. **LocalStack Deployment**: The synthesized CloudFormation template is deployed to a local LocalStack Docker container via `cdklocal deploy`. This catches service-level failures (e.g., SSM not enabled, RDS requiring a Pro license).
 
-*   **Next.js Dashboard (`/ui/`)**: A client-side web interface using Server-Sent Events to render compilation telemetry.
-*   **Orchestration Logic (`scripts/self_healing_optimizer.py`)**: Sub-process logic orchestrating lockfiles, LocalStack polling, and RAG data injection.
-*   **Prompt Engine (`generate.py`)**: The runtime override orchestrator guaranteeing Deterministic Rule injection on markdown artifacts.
+### Deterministic Context Reflection
+
+When compilation fails, the raw stack trace is extracted, filtered (removing JSII `UserWarning` noise and `typeguard` protocol warnings), and sent to a **Meta-Analyzer** agent. This agent's sole job is to translate the physical error into a concrete, actionable constraint rule. For example:
+
+| Stack Trace Error | Generated Constraint |
+|---|---|
+| `AttributeError: 'CdkTestingGroundStack' object has no attribute 'removal_policy'` | `Use RemovalPolicy.DESTROY directly, never Stack.of(self).removal_policy` |
+| `Cannot find asset at ...existing_lambda_directory` | `Use Code.from_inline() instead of from_asset() when directory doesn't exist` |
+| `Service 'ssm' is not enabled` | `Use ec2.MachineImage.generic_linux({'us-east-1': 'ami-12345'}) instead of SSM lookups` |
+
+These constraints are written to `learned_constraints.txt` and injected verbatim into the next iteration's prompt. A **`difflib.SequenceMatcher` deduplication filter** (threshold 0.98) prevents semantically identical constraints from accumulating across iterations.
+
+### Dual-Layer Constraint Injection
+
+A critical architectural insight: constraints must reach **both** agents, not just the Teacher.
+
+- **Teacher-side**: The `learned_constraints.txt` file is read by `data_loader.py` and injected into the DSPy context. The ChromaDB vector store holds static environment rules that persist across runs.
+- **Student-side**: The Student Coder's system prompt in `execute_prompt.py` contains hardcoded **Mandatory Environment Rules** that override any conflicting Teacher instructions. This prevents the Student from blindly following a Teacher instruction like "Set up an RDS database" when the environment cannot support RDS.
+
+## Scoring Algorithm
+
+Each iteration produces a score from 0-100:
+
+| Component | Points | Condition |
+|---|---|---|
+| Python Synthesis | 15 | Code is valid Python |
+| Flake8 Lint | 0–20 | Deduct 2 points per lint error |
+| `cdk synth` Success | 35 | CloudFormation template generated |
+| LocalStack Deploy | 30 | Stack deployed without rollback |
+| **Total** | **100** | **Full convergence** |
+
+Additional penalties:
+- **Topology Regression (-50)**: If construct count drops by ≥3 between iterations, indicating the Student is "solving" errors by deleting resources.
+- **Temperature Escalation**: If scores stagnate for 3+ consecutive iterations, the generation temperature increases by 0.1 to escape local minima.
+
+## Project Structure
+
+| Path | Purpose |
+|---|---|
+| `generate.py` | Teacher Agent orchestrator. Runs DSPy prediction, applies Editor formatting, injects learned constraints into final markdown. |
+| `scripts/execute_prompt.py` | Student Agent + physical validation gauntlet. Generates 3 code variants, lints them, selects champion, runs `cdk synth` and `cdklocal deploy`. |
+| `scripts/self_healing_optimizer.py` | Top-level orchestration loop. Manages iterations, scoring, Meta-Analyzer invocation, ChromaDB seeding, and constraint deduplication. |
+| `src/dspy_signatures.py` | DSPy `Signature` defining the Teacher's input/output contract. |
+| `src/data_loader.py` | Loads AWS context + runtime constraints from `learned_constraints.txt` into the Teacher's prompt. |
+| `src/factory.py` | DSPy `Module` wrapping `ChainOfThought` with the prompt signature. |
+| `cdk-testing-ground/` | Isolated CDK project directory where generated code is injected and compiled. |
+| `ui/` | Next.js dashboard for real-time telemetry via Server-Sent Events. |
+| `results/learning_loop/` | Iteration artifacts: prompts, generated code, stack traces, and `run_summary.json` telemetry. |
 
 ## Installation
 
-### Step 0: Environment Configuration
-Duplicate `.env.example` into a local `.env` file at the root repository. Populate all keys, notably defining your endpoint API structure and your LocalStack API token.
+### Prerequisites
+- Python 3.8+
+- Node.js 20+ (JSII runtime for AWS CDK)
+- Docker Desktop (LocalStack container)
+- OpenAI API key
 
-### Backend Requirements
-*   Python 3.8+
-*   Node.js (For the underlying V8 engine utilized by AWS CDK JSII wrappers)
-*   Docker Desktop running natively
-
+### Setup
 ```bash
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env  # Populate OPENAI_API_KEY
 ```
 
-### Dashboard Initialization
+### Dashboard
 ```bash
 cd ui
 npm install
@@ -75,26 +129,26 @@ npm run dev
 
 ## Running the Engine
 
-1. Execute `npm run dev` and navigate to `localhost:3000`.
-2. Provide standard text intent and instantiate the compiler logic.
-3. System logs dynamically push to `results/learning_loop/run_<timestamp>/` folders.
-4. If manual termination is required, invoke the cancellation flag on the UI to gracefully spin down the threading locks.
+### Via CLI (Direct)
+```bash
+venv\Scripts\python.exe scripts\self_healing_optimizer.py "simple three tier web app with security and networking"
+```
 
-## Extensibility & Throughput Scaling
+### Via Dashboard
+1. Run `npm run dev` in `ui/` and navigate to `localhost:3000`.
+2. Enter an architectural intent in natural language.
+3. Monitor iteration progress in real-time. Logs persist to `results/learning_loop/run_<timestamp>/`.
 
-Because DSPy validation physically instruments dependent architecture binaries rather than purely virtual simulations, execution throughput is strictly bottlenecked by the compiler layer (`cdk synth` and Docker daemons) rather than LLM token streaming.
+## Scaling Considerations
 
-### Phase 1: Local Environment Constraints (Laptop)
-*   **Docker Subsystem Overrides**: The default Docker Desktop resource allocations (used by LocalStack) constrain deployment IO. Increment allocated local memory limits to >=8GB and force allocation of all available CPU cores.
-*   **Groq API Subsystem Replacement**: While current documentation points to `openai/gpt-4o`, migrating the native backend API target from OpenAI endpoints to internal Llama3 Groq LPU endpoints drastically reduces TTFT (Time-To-First-Token) bottlenecks on the generative execution phase. 
+The bottleneck is the physical compiler (`cdk synth` ~15s, `cdklocal deploy` ~20s), not LLM inference. Scaling strategies:
 
-### Phase 2: High-Performance Infrastructure Deployment (Google Cloud)
-*   **Avoid Serverless Topologies**: Cloud Run or Cloud Functions are insufficient due to ephemeral disk scaling limits when utilizing heavy NPM package caching alongside isolated Docker daemons.
-*   **Compute Engine (IaaS)**: The most straightforward scale configuration employs dedicated high-CPU standard instances (e.g., GCP `c3` or `n2d-standard-32`). This allows for maximum parallel ThreadPool configuration. 
-*   **GKE Batch Processing (Containerized Loop)**: For optimal scale, the `cdk-testing-ground` should be extracted from local runtime into standalone Kubernetes batch execution jobs. This isolates file-lock conflicts concurrently, allowing hundreds of architecture proposals to compile within horizontal nodes against dedicated Kubernetes LocalStack StatefulSets.
+- **Local**: Increase Docker Desktop memory to ≥8GB. Consider Groq LPU endpoints to minimize TTFT.
+- **Cloud (GCE)**: Dedicated `c3` or `n2d-standard-32` instances with persistent Docker daemons.
+- **Cloud (GKE)**: Extract `cdk-testing-ground/` into Kubernetes batch jobs with dedicated LocalStack StatefulSets for horizontal compilation parallelism.
 
-## Known Limitations & Future Work
+## Known Limitations
 
-1. **Child Daemon Locking**: The system currently terminates orphaned `node.exe` processes executing `cdk` wrappers using Windows native WMI logic to bypass directory access locking. Long-term production requires executing the testing loops in completely containerized sandbox instances rather than directly on the host machine.
-2. **Ephemeral Hardware Storage**: LocalStack resets the infrastructure entirely between deployments (zero-state hygiene). There is no incremental caching.
-3. **Sequential Processing**: Prompt variant linting and evaluation currently execute synchronously in specific execution loops, creating local CPU-bound bottlenecks on lower-spec machines.
+1. **Windows Process Locking**: Orphaned `node.exe` processes from `cdk synth` are terminated via WMI. Containerized sandboxes would eliminate this.
+2. **Ephemeral LocalStack State**: Infrastructure resets between deployments. No incremental deployment caching.
+3. **Single-Tenant Compilation**: Only one CDK stack compiles at a time per working directory. Parallel compilation requires directory isolation.

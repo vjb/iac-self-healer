@@ -31,9 +31,18 @@ def main():
         with open(f"FINAL_PROMPT_{i}.md", "r", encoding="utf-8") as f:
             content = f.read()
             
-        student_prompt = f"""You are a Junior AWS CDK Coder. Look at the instructions string below, and produce the requested AWS CDK stack. 
+        student_prompt = f"""You are a Junior AWS CDK Coder. Look at the instructions string below, and produce the requested AWS CDK stack.
 Your output must be STRICTLY valid AWS CDK v2 Python code defining the 'CdkTestingGroundStack' class.
 DO NOT include markdown block wrappers (like ```python). DO NOT include chat text. Just output pure Python code.
+
+MANDATORY ENVIRONMENT RULES (LocalStack Community Edition):
+- NEVER use aws_rds or DatabaseInstance. LocalStack Community will crash with Exit 55. USE aws_dynamodb.Table instead.
+- For Lambda functions, ALWAYS use aws_lambda.Code.from_inline('def handler(event, context): return {{"statusCode": 200, "body": "OK"}}') — NEVER use from_asset().
+- For EC2 instances, ALWAYS use ec2.MachineImage.generic_linux({{'us-east-1': 'ami-12345'}}) — NEVER use latestAmazonLinux or SSM lookups.
+- ALWAYS use RemovalPolicy.DESTROY directly from aws_cdk import. NEVER use Stack.of(self).removal_policy.
+- ALWAYS use SubnetType.PRIVATE_WITH_EGRESS, never PRIVATE_WITH_NAT or PRIVATE.
+- For S3 buckets, do NOT set public_read_access=True alongside block_public_access. If you need public access, omit block_public_access entirely.
+
 Instructions to Follow:\n\n{content}"""
 
         headers = {

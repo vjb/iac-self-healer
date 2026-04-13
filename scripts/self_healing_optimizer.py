@@ -199,7 +199,6 @@ def main():
                     "AWS CDK v2 LocalStack Pro Ban: NEVER use `aws_rds` or `DatabaseInstance` (SQL databases). LocalStack Community Edition will instantly crash with an Exit 55 License Error if you attempt to provision RDS. YOU MUST USE `aws_dynamodb.Table` for the database tier."
                 ]
                 rag_collection.add(documents=cdk_docs, ids=[f"core_doc_{i}" for i in range(len(cdk_docs))])
-                rag_collection.add(documents=cdk_docs, ids=[f"core_doc_{i}" for i in range(len(cdk_docs))])
             else:
                 logger.info("ChromaDB connected. Semantic records: %d", rag_collection.count())
         except Exception as e:
@@ -366,8 +365,25 @@ def main():
         new_rules = invoke_meta_analyzer(traceback_segment, rag_collection)
         iter_stats["new_constraints"] = new_rules
         
+        import difflib
+        existing_rules = []
+        if os.path.exists("learned_constraints.txt"):
+            with open("learned_constraints.txt", "r", encoding="utf-8") as f:
+                existing_rules = [line.strip().lstrip("- ") for line in f.readlines() if line.strip()]
+        
+        rules_to_add = []
+        for rule in new_rules:
+            is_duplicate = False
+            for existing in existing_rules:
+                if difflib.SequenceMatcher(None, rule, existing).ratio() > 0.98:
+                    is_duplicate = True
+                    break
+            if not is_duplicate:
+                rules_to_add.append(rule)
+                existing_rules.append(rule)
+                
         with open("learned_constraints.txt", "a", encoding="utf-8") as f:
-            for rule in new_rules:
+            for rule in rules_to_add:
                 logger.info("Generated validation constraint: '%s'", rule)
                 f.write(f"- {rule}\n")
                 
