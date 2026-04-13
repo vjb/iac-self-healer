@@ -64,7 +64,6 @@ pip install -r requirements.txt
 cd ui
 npm install
 npm run dev
-import os
 ```
 
 ## Running the Engine
@@ -73,6 +72,19 @@ import os
 2. Provide standard text intent and instantiate the compiler logic.
 3. System logs dynamically push to `results/learning_loop/run_<timestamp>/` folders.
 4. If manual termination is required, invoke the cancellation flag on the UI to gracefully spin down the threading locks.
+
+## Extensibility & Throughput Scaling
+
+Because DSPy validation physically instruments dependent architecture binaries rather than purely virtual simulations, execution throughput is strictly bottlenecked by the compiler layer (`cdk synth` and Docker daemons) rather than LLM token streaming.
+
+### Phase 1: Local Environment Constraints (Laptop)
+*   **Docker Subsystem Overrides**: The default Docker Desktop resource allocations (used by LocalStack) constrain deployment IO. Increment allocated local memory limits to >=8GB and force allocation of all available CPU cores.
+*   **Groq API Subsystem Replacement**: While current documentation points to `openai/gpt-4o`, migrating the native backend API target from OpenAI endpoints to internal Llama3 Groq LPU endpoints drastically reduces TTFT (Time-To-First-Token) bottlenecks on the generative execution phase. 
+
+### Phase 2: High-Performance Infrastructure Deployment (Google Cloud)
+*   **Avoid Serverless Topologies**: Cloud Run or Cloud Functions are insufficient due to ephemeral disk scaling limits when utilizing heavy NPM package caching alongside isolated Docker daemons.
+*   **Compute Engine (IaaS)**: The most straightforward scale configuration employs dedicated high-CPU standard instances (e.g., GCP `c3` or `n2d-standard-32`). This allows for maximum parallel ThreadPool configuration. 
+*   **GKE Batch Processing (Containerized Loop)**: For optimal scale, the `cdk-testing-ground` should be extracted from local runtime into standalone Kubernetes batch execution jobs. This isolates file-lock conflicts concurrently, allowing hundreds of architecture proposals to compile within horizontal nodes against dedicated Kubernetes LocalStack StatefulSets.
 
 ## Known Limitations & Future Work
 
