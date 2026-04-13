@@ -26,7 +26,7 @@ def main():
     context = get_aws_context()
     
     context = get_aws_context()
-    topology_locked_intent = args.intent + "\nCRITICAL TOPOLOGY LOCK: You must retain the exact underlying topological architecture (e.g. EC2, RDS, VPC) defined within the user intent. Do not completely substitute base layout components or pivot the architecture model just to avoid a constraint. Maintain the fundamental architecture requested."
+    topology_locked_intent = args.intent + "\nCRITICAL TOPOLOGY LOCK: You must retain the exact underlying topological architecture (e.g. EC2, RDS, VPC) defined within the user intent. Do not completely substitute base layout components or pivot the architecture model just to avoid a constraint. Maintain the fundamental architecture requested.\nCRITICAL CDK V2 SYNTAX LOCK: You must strictly adhere to AWS CDK v2 syntax. Specifically, DO NOT use `core.RemovalPolicy` or `cdk.RemovalPolicy`. You MUST natively use `aws_cdk.RemovalPolicy` and import it directly via `from aws_cdk import RemovalPolicy`. DO NOT hallucinate deprecated AWS CDK v1 namespaces."
     prediction = factory(intent=topology_locked_intent, aws_strict_context=context)
     
     output = f"""# AWS Prompt Output
