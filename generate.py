@@ -6,9 +6,10 @@ from src.data_loader import get_aws_context
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--intent", type=str, required=True, help="The core infrastructure requirement.")
+    parser.add_argument("--temperature", type=float, default=0.5, help="Temperature for generative randomness.")
     args = parser.parse_args()
     
-    lm = dspy.LM('anthropic.claude-v2:1', api_base='http://localhost:11434', api_key='mock')
+    lm = dspy.LM('anthropic.claude-v2:1', api_base='http://localhost:11434', api_key='mock', temperature=args.temperature)
     dspy.configure(lm=lm)
     
     factory = PromptFactory()
@@ -19,34 +20,9 @@ def main():
         
     context = get_aws_context()
     
-    # Inference mock
-    class MockPrediction:
-        prerequisites = "1. AWS Account\n2. LocalStack\n3. CDK CLI"
-        use_case = args.intent
-        core_instructions = """from aws_cdk import (
-    Stack,
-    aws_s3 as s3,
-    RemovalPolicy
-)
-from constructs import Construct
-
-
-class CdkTestingGroundStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
-        super().__init__(scope, construct_id, **kwargs)
-
-        s3.Bucket(
-            self, "SecureBucket",
-            versioned=True,
-            encryption=s3.BucketEncryption.S3_MANAGED,
-            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
-            removal_policy=RemovalPolicy.DESTROY,
-            auto_delete_objects=True
-        )
-"""
-        troubleshooting = "Check Docker and Moto connections."
-    
-    prediction = MockPrediction()
+    context = get_aws_context()
+    topology_locked_intent = args.intent + "\nCRITICAL TOPOLOGY LOCK: You must retain the exact underlying topological architecture (e.g. EC2, RDS, VPC) defined within the user intent. Do not completely substitute base layout components or pivot the architecture model just to avoid a constraint. Maintain the fundamental architecture requested."
+    prediction = factory(intent=topology_locked_intent, aws_strict_context=context)
     
     output = f"""# AWS Prompt Output
 ## Prerequisites

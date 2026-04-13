@@ -8,3 +8,5 @@ cdk-testing-ground/cdk.out/
 cdk-testing-ground/node_modules/
 FINAL_PROMPT.md
 optimized_factory.json
+results/
+.env
