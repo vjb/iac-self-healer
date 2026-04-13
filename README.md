@@ -21,6 +21,19 @@ The pipeline forces the AI to fight its way to a valid deployment:
 
 As a side-effect, the system natively aggregates this state transition trajectory (Prompt -> Crash Log -> Extracted Constraint -> Architecture Score) into an automatic RLHF (Reinforcement Learning from Human Feedback) dataset in `run_summary.json`.
 
+## The DSPy "Inverse Prompt" Framework
+
+IaC Self-Healer serves a dual purpose: rather than just synthesizing code, its root goal is utilizing the **Stanford DSPy Optimization framework** (`MIPROv2`) to mathematically compile the ultimate foundational prompts. 
+
+Because Large Language Models interpret discrete English text (tokens) instead of continuous floating-point weights, you cannot natively perform a mathematical backward-pass "gradient descent" like in PyTorch. DSPy bridges this mathematical gap. Using Bayesian discrete optimization acting as a **simulated gradient**, the system intelligently bounces variations of multi-layered architectural templates through the Gauntlet until it structurally converges on the most mathematically optimal prompt configuration!
+
+### Injecting Custom Prompt Libraries
+
+The framework ships with an integration library bound to the `info/aws startup prompts/` directory. Rather than relying on rigid semantic constraints, you can seamlessly augment the Gauntlet by injecting your own internal architecture requirements!
+1. Drop your complex structural Markdown architectures (e.g. `Serverless.md`, `EKS_Baseline.md`) directly into `info/aws startup prompts/`.
+2. Run `venv\Scripts\python.exe -m src.factory` to re-execute the mathematical compiler.
+3. The DSPy engine will mathematically assimilate the specific header definitions, context parameters, and topological constraints of your custom prompts and lock them into the static `optimized_factory.json` weights file for future zero-shot prompt generations!
+
 ## System Architecture
 
 *   **Next.js Dashboard (`/ui/`):** A real-time visual interface bridging Server-Sent Events (SSE), allowing you to monitor the validation loop, trace compilation failures, and map LocalStack resources.
