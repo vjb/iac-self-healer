@@ -48,7 +48,10 @@ def main():
     with open(out_file, "w", encoding='utf-8') as f:
         f.write(output)
         
-    print(f"ALL PHASES COMPLETE. WROTE OUTPUT TO {out_file}.")
+    import logging
+    logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(asctime)s - %(message)s')
+    logger = logging.getLogger(__name__)
+    logger.info("Generation complete. Output allocated to %s", out_file)
 
 if __name__ == "__main__":
     main()

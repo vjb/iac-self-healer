@@ -22,15 +22,17 @@ def train():
     
     trainset = load_aws_reference_prompts()
     
+    import logging
+    logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(asctime)s - %(message)s')
+    logger = logging.getLogger(__name__)
+    
     try:
-        print("[SYSTEM] Initiating MIPROv2 DSPy Metric Compilation...")
+        logger.info("Initiating MIPROv2 DSPy Metric Compilation...")
         optimizer = MIPROv2(metric=continuous_aws_metric, auto="light", num_candidates=5)
         # Assuming dummy compile execution since actual evaluate setup may require valid predictors
         # compiled_dspy = optimizer.compile(PromptFactory().generator, trainset=trainset)
     except Exception as e:
-        import traceback
-        print(f"\n[FATAL ERROR] Failed initializing or compiling optimizer: {e}")
-        traceback.print_exc()
+        logger.error("Failed initializing optimizer: %s", e, exc_info=True)
         raise e
         
     with open("optimized_factory.json", "w") as f:

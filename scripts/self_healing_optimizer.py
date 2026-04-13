@@ -14,15 +14,15 @@ try:
 except ImportError:
     pass
 
-def print(*args, **kwargs):
-    kwargs['flush'] = True
-    builtins.print(*args, **kwargs)
+import logging
+logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=60), stop=stop_after_attempt(5))
 def _post_openai_request(headers, payload):
     resp = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
     if resp.status_code == 429:
-        print(">>> [META-ANALYZER] Rate Limit Exceeded (HTTP 429). Encountering exponential backoff...")
+        logger.warning("Rate Limit Exceeded (HTTP 429). Encountering exponential backoff...")
     resp.raise_for_status()
     return resp
 
@@ -149,12 +149,12 @@ def main():
     if 'chromadb' in sys.modules:
         try:
             db_path = os.path.join(os.getcwd(), "chroma_db")
-            print(f"[SYSTEM] Initializing Persistent ChromaDB RAG Lexicon at: {db_path}...")
+            logger.info("Initializing Persistent ChromaDB Database at: %s", db_path)
             chroma_client = chromadb.PersistentClient(path=db_path, settings=chromadb.Settings(anonymized_telemetry=False))
             rag_collection = chroma_client.get_or_create_collection(name="cdk_v2_docs")
             
             if rag_collection.count() == 0:
-                print("[SYSTEM] Lexicon is empty. Seeding core AWS CDK v2 structural constraints...")
+                logger.info("Database empty. Seeding core AWS CDK v2 layout requirements.")
                 cdk_docs = [
                     "AWS CDK v2 ApplicationLoadBalancer: The ApplicationLoadBalancer class has been moved to aws_elasticloadbalancingv2. Use aws_elasticloadbalancingv2.ApplicationLoadBalancer.",
                     "AWS CDK v2 LatestAmazonLinux: MachineImage.latestAmazonLinux is deprecated, you must use MachineImage.latestAmazonLinux2.",
@@ -165,24 +165,25 @@ def main():
                     "AWS CDK v2 LocalStack Pro Ban: NEVER use `aws_rds` or `DatabaseInstance` (SQL databases). LocalStack Community Edition will instantly crash with an Exit 55 License Error if you attempt to provision RDS. YOU MUST USE `aws_dynamodb.Table` for the database tier."
                 ]
                 rag_collection.add(documents=cdk_docs, ids=[f"core_doc_{i}" for i in range(len(cdk_docs))])
+                rag_collection.add(documents=cdk_docs, ids=[f"core_doc_{i}" for i in range(len(cdk_docs))])
             else:
-                print(f"[SYSTEM] Persistent Lexicon hooked. Curated Semantic Capacity: {rag_collection.count()} Vectors.")
+                logger.info("ChromaDB connected. Semantic records: %d", rag_collection.count())
         except Exception as e:
-            print(f"[SYSTEM] RAG Init failed: {e}")
+            logger.error("ChromaDB Initialization failed: %s", e)
             
     score_history = []
     current_temperature = 0.5
     
-    print(f"===============================================================", flush=True)
-    print(f"INITIATING AUTONOMOUS SELF-HEALING OPTIMIZER (MIPRO SIMULATION)", flush=True)
-    print(f"Target: '{target_intent}'", flush=True)
-    print(f"===============================================================\n", flush=True)
+    logger.info("===============================================================")
+    logger.info("INITIATING OPTIMIZATION COMPILE LOOP")
+    logger.info("Target: '%s'", target_intent)
+    logger.info("===============================================================\n")
 
     for i in range(max_iterations):
         iter_dir = os.path.join(results_dir, f"iteration_{i}")
         os.makedirs(iter_dir, exist_ok=True)
         
-        print(f"--- ITERATION {i} ---")
+        logger.info("--- ITERATION %d ---", i)
         import threading
         
         # Prevent ghost CDK locking bugs from previous crashed iterations
@@ -191,7 +192,7 @@ def main():
             shutil.rmtree(cdk_out_path, ignore_errors=True)
         
         # 1. Execute the Pipeline
-        print(f">>> [GENERATOR] Attempting to synthesize infrastructure (Temp={current_temperature})...")
+        logger.info("Executing infrastructure synthesis (Temperature: %.2f)", current_temperature)
         process = subprocess.Popen(
             [python_exe, "-u", os.path.join("scripts", "execute_prompt.py"), target_intent, str(current_temperature)],
             stdout=subprocess.PIPE,
@@ -205,7 +206,7 @@ def main():
         
         def read_stream(stream, lines_list):
             for line in stream:
-                print(line, end="")
+                logger.debug(line.strip())
                 lines_list.append(line)
                 
         t1 = threading.Thread(target=read_stream, args=(process.stdout, stdout_lines))
@@ -272,11 +273,11 @@ def main():
         if len(topology_history) > 1:
             max_past_topology = max(topology_history[:-1])
             if (max_past_topology - construct_count) >= 3 and score > 75:
-                print(f">>> [ENVIRONMENT] LAZINESS DETECTED! Topology shrank from {max_past_topology} to {construct_count} constructs to bypass compilation.")
-                print(f">>> [ENVIRONMENT] Applying Shrinkage Penalty (-50 points).")
+                logger.warning("Code omission detected. Topology dropped from %d to %d constructs representing compilation bypass.", max_past_topology, construct_count)
+                logger.warning("Applying penalty parameter (-50 points).")
                 score = max(score - 50, 0)
             
-        print(f">>> [ENVIRONMENT] Gauntlet Score Evaluated: {score}/100")
+        logger.info("Deployment Evaluation Score: %d/100", score)
         
         score_history.append(score)
         if len(score_history) > 3:
@@ -284,8 +285,7 @@ def main():
 
         current_temperature = 0.5
         if len(score_history) >= 3 and (max(score_history) - min(score_history)) < 5 and score < 100:
-            print(f">>> [ORCHESTRATOR] STAGNATION DETECTED! SCORE LOCKED IN LOCAL MINIMA (History: {score_history}).")
-            print(f">>> [ORCHESTRATOR] INITIATING KERNEL KICKSTART PROTOCOL (T=1.2) FOR ARCHITECTURE SHAKEUP.")
+            logger.warning("Score stagnated (History: %s). Implementing temperature override (T=1.2)", score_history)
             current_temperature = 1.2
             score_history.clear()
             
@@ -304,8 +304,8 @@ def main():
         }
         
         if score == 100:
-            print(f"\n[SUCCESS] The architecture has successfully converged and compiled!")
-            print(f"[SUCCESS] Final constraint state saved in: {iter_dir}")
+            logger.info("Target architecture successfully converged and compiled.")
+            logger.info("Final constraints persisted to: %s", iter_dir)
             run_stats["status"] = "success"
             run_stats["metadata"]["timestamp_end"] = int(time.time())
             run_stats["iterations"].append(iter_stats)
@@ -313,8 +313,7 @@ def main():
                 json.dump(run_stats, f, indent=4)
             break
             
-        print(f"\n>>> [ENVIRONMENT] CRITICAL SYNTAX OR SYNTH FAILURE DETECTED.")
-        print(f">>> [ENVIRONMENT] Extracting Traceback...")
+        logger.error("Compilation failure detected. Extracting Traceback.")
         
         # 2. Aggressive Noise Filtering for Traceback
         lines = stderr.split("\n")
@@ -335,7 +334,7 @@ def main():
         
         with open("learned_constraints.txt", "a", encoding="utf-8") as f:
             for rule in new_rules:
-                print(f">>> [META-ANALYZER] Generated New Constraint: '{rule}'")
+                logger.info("Generated validation constraint: '%s'", rule)
                 f.write(f"- {rule}\n")
             
         with open(os.path.join(iter_dir, "learned_constraints_update.txt"), "w", encoding="utf-8") as f:
@@ -348,7 +347,7 @@ def main():
             json.dump(run_stats, f, indent=4)
             
         if os.path.exists("stop_flag.txt"):
-            print(f"\n>>> [SYSTEM] Stop flag received! Gracefully shutting down...")
+            logger.info("Stop flag received. Initiating graceful shutdown.")
             os.remove("stop_flag.txt")
             run_stats["status"] = "halted"
             run_stats["metadata"]["timestamp_end"] = int(time.time())
@@ -356,22 +355,22 @@ def main():
                 json.dump(run_stats, f, indent=4)
             break
             
-        print(f"\n>>> [HYGIENE] Executing LocalStack hardware wipe to ensure zero-state hygiene...")
+        logger.info("Teardown of CDK testing environment.")
         subprocess.run('npx cdklocal destroy --force --require-approval never -a "..\\\\venv\\\\Scripts\\\\python.exe app.py"', cwd="cdk-testing-ground", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if os.path.exists(os.path.join("cdk-testing-ground", "cdk.out")):
             shutil.rmtree(os.path.join("cdk-testing-ground", "cdk.out"), ignore_errors=True)
 
         if len(score_history) >= 2 and score_history[-1] < 16 and score_history[-2] < 16:
-            print(">>> [HYGIENE] Architecture validation flatlined below minimal threshold. Rebooting Docker Daemon to purge orphaned endpoints...")
+            logger.warning("Environment performance degraded. Restarting LocalStack Docker Daemon.")
             subprocess.run("docker compose restart", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             time.sleep(3) # Let container boot
             
         if i < max_iterations - 1:
-            print(f">>> [ORCHESTRATOR] Applying new constraint logic to context...")
-            print(f">>> [ORCHESTRATOR] Flushing API rate limit queues (15s sleep)...\n")
+            logger.info("Applying updated context parameters...")
+            logger.info("Pausing for rate limit quotas (15s sleep).")
             time.sleep(15)
         else:
-            print(f"\n[FAILED] Reached max iterations ({max_iterations}) without converging.")
+            logger.error("Reached maximum iterations (%d) without convergence.", max_iterations)
             run_stats["status"] = "failed"
             run_stats["metadata"]["timestamp_end"] = int(time.time())
             with open(run_summary_path, "w", encoding="utf-8") as f:

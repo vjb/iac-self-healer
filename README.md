@@ -1,70 +1,81 @@
 # IaC Self-Healer
 
-An autonomous multi-agent orchestration loop that generates, stress-tests, and self-heals AWS CDK infrastructure code using real-time reflection and syntax validation.
+An autonomous orchestration loop that generates, compiles, and reiterates AWS CDK infrastructure code using runtime validation.
 
-## The Concept
+## Architecture Concept
 
-Generating Infrastructure-as-Code (IaC) with Large Language Models directly is notoriously brittle. Zero-shot prompting for AWS CDK frequently results in code that hallucinates outdated JSII imports, constructs invalid topological dependencies, or fails rigorous type-checking.
+Generating Infrastructure-as-Code (IaC) via zero-shot Large Language Models frequently results in invalid dependency topological structures or outdated JSII constructs. 
 
-**IaC Self-Healer** flips this paradigm by shifting focus away from perfect generation and instead building a robust **Continuous Validation Gauntlet**.
+**IaC Self-Healer** resolves this by executing a continuous validation pipeline. 
 
-### How it Works
+### Execution Workflow
 
-The pipeline forces the AI to fight its way to a valid deployment:
-1. **Generate**: A language model receives an intent (e.g., "three-tier web app") and generates a raw CDK string.
-2. **Execute (The Gauntlet)**: The string is dynamically injected into an isolated scaffolding repository (`/cdk-testing-ground/`).
-3. **Pummel**: The environment attempts to physically compile the infrastructure. It runs `flake8` for syntax, `npx cdk synth` to test JSII CloudFormation constraints, and deploys natively into a **LocalStack (Docker)** container using `cdklocal` to physically validate hardware allocation.
-4. **Reflect**: If the local AWS environment crashes, the exact stack trace is extracted and verified against a **ChromaDB Lexicon RAG Engine**. A Meta-Analyzer agent deduces hyper-specific constraints based purely on the failure (e.g., `Never use aws_ec2.SubnetType.PRIVATE; you must use aws_ec2.SubnetType.PRIVATE_WITH_NAT instead.`).
-5. **Score & Converge**: The orchestration loop scores fractional progress. It includes defensive ML traps:
-    * **Kernel Kickstart Protocol:** If the score stagnates for 3 iterations, it physically overrides the LLM's `temperature` to shatter mathematical valleys.
-    * **Topology Shrinkage Detection:** Using Python's `ast`, it tracks the total hardware component count. If the generator acts "lazy" by deleting infrastructure to bypass errors, it receives an instant -50pt penalty.
+The system enforces structural validity through the following discrete steps:
+1. **Generate**: The system dynamically generates Python CDK code based on the user's architectural intent.
+2. **Execute**: The artifact is injected into an isolated directory (`/cdk-testing-ground/`).
+3. **Compile**: The directory triggers native dependencies to validate the code.
+    * `flake8` executes static syntax checking.
+    * `npx cdk synth` evaluates JSII constraints and generates CloudFormation.
+    * The CDK stack deploys directly into a LocalStack Docker container to validate service provisioning.
+4. **Reflect**: If compilation crashes, the literal stack trace is extracted and verified against a ChromaDB storage layer. A specialized DSPy script deduces strict constraints based entirely on the compiler failure.
+5. **Evaluate**: The orchestrator scores progress. Current parameters include:
+    * **Temperature Override Logic**: If generation scores stagnate over 3 consecutive iterations, the system adjusts the underlying temperature parameter to avoid local minima.
+    * **AST Component Validation**: The system uses the Python `ast` module to tally deployed hardware elements. If the generator attempts to bypass syntax errors by omitting required infrastructural resources, it applies a -50 point adjustment.
 
-As a side-effect, the system natively aggregates this state transition trajectory (Prompt -> Crash Log -> Extracted Constraint -> Architecture Score) into an automatic RLHF (Reinforcement Learning from Human Feedback) dataset in `run_summary.json`.
+The iteration states (Prompt, Crash Log, Constraint, and Score) are logged mathematically via JSON inside `run_summary.json` for potential reinforcement learning datasets.
 
 ## The DSPy "Inverse Prompt" Framework
 
-IaC Self-Healer serves a dual purpose: rather than just synthesizing code, its root goal is utilizing the **Stanford DSPy Optimization framework** (`MIPROv2`) to mathematically compile the ultimate foundational prompts. 
+Instead of merely generating execution code, this repository relies on the Stanford DSPy Optimization framework (`MIPROv2`) to mathematically compile foundational prompts. 
 
-Because Large Language Models interpret discrete English text (tokens) instead of continuous floating-point weights, you cannot natively perform a mathematical backward-pass "gradient descent" like in PyTorch. DSPy bridges this mathematical gap. Using Bayesian discrete optimization acting as a **simulated gradient**, the system intelligently bounces variations of multi-layered architectural templates through the Gauntlet until it structurally converges on the most mathematically optimal prompt configuration!
+Because LLMs do not utilize continuous weight distributions for text generation, performing a traditional differentiable backward sweep is geometrically impossible. The framework circumvents this layout by using Bayesian discrete optimization. This acts as a simulated gradient, methodically testing architectural prompt variations against the compiler until it discovers stable patterns.
 
-### Injecting Custom Prompt Libraries
+### Custom Prompt Ingestion
 
-The framework ships with an integration library bound to the `info/aws startup prompts/` directory. Rather than relying on rigid semantic constraints, you can seamlessly augment the Gauntlet by injecting your own internal architecture requirements!
-1. Drop your complex structural Markdown architectures (e.g. `Serverless.md`, `EKS_Baseline.md`) directly into `info/aws startup prompts/`.
-2. Run `venv\Scripts\python.exe -m src.factory` to re-execute the mathematical compiler.
-3. The DSPy engine will mathematically assimilate the specific header definitions, context parameters, and topological constraints of your custom prompts and lock them into the static `optimized_factory.json` weights file for future zero-shot prompt generations!
+The repository supports mapping internal documentation directly into the generation layer.
+1. Place standard markdown architectures (e.g., `Serverless.md`, `EKS_Baseline.md`) under `info/aws startup prompts/`.
+2. Execute `venv\Scripts\python.exe -m src.factory` to re-compile the optimization layer.
+3. DSPy will assimilate explicit constraint dependencies from the documents and lock them into `optimized_factory.json`.
 
-## System Architecture
+## System Overview
 
-*   **Next.js Dashboard (`/ui/`):** A real-time visual interface bridging Server-Sent Events (SSE), allowing you to monitor the validation loop, trace compilation failures, and map LocalStack resources.
-*   **Orchestration Engine (`scripts/self_healing_optimizer.py`):** The primary sub-process router that handles lockfiles, telemetry tracing, JSON logging, and API limit mechanics.
-*   **Validation Gauntlet & LocalStack (`cdk-testing-ground/`):** The localized AWS Docker environment. Native execution of Python AWS CDK v2 and physical network graph simulations.
+*   **Next.js Dashboard (`/ui/`)**: A client-side web interface using Server-Sent Events to render compilation telemetry.
+*   **Orchestration Logic (`scripts/self_healing_optimizer.py`)**: Sub-process logic orchestrating lockfiles and API rate limits.
+*   **Testing Directory (`cdk-testing-ground/`)**: Windows native AWS execution environment hooked to the Docker daemon.
 
-## Installation & Setup
+## Installation
 
-**Prerequisites:**
+### Step 0: Environment Configuration
+Duplicate `.env.example` into a local `.env` file at the root repository. Populate all keys, notably defining your endpoint API structure and your LocalStack API token.
+
+### Backend Requirements
 *   Python 3.8+
-*   Node.js (for AWS CDK `npx` execution)
-*   An active `OPENAI_API_KEY` for the Meta-Analyzer reflection loop
+*   Node.js (For the underlying V8 engine utilized by AWS CDK JSII wrappers)
+*   Docker Desktop running natively
 
-**Backend Setup:**
 ```bash
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 ```
-*Create an `.env` file at the root repository containing your `OPENAI_API_KEY=...`*
 
-**Frontend Dashboard Setup:**
+### Dashboard Initialization
 ```bash
 cd ui
 npm install
 npm run dev
+import os
 ```
 
 ## Running the Engine
 
-1. Boot the frontend using `npm run dev` and navigate to `localhost:3000`.
-2. Input an architectural intent and initialize the factory.
-3. The server will automatically spin up isolated directories under `results/learning_loop/run_<timestamp>/` for telemetry aggregation.
-4. If you wish to terminate the search space early, tap "Halt Factory" to gracefully spin down the threading locks and save the existing trace constraints.
+1. Execute `npm run dev` and navigate to `localhost:3000`.
+2. Provide standard text intent and instantiate the compiler logic.
+3. System logs dynamically push to `results/learning_loop/run_<timestamp>/` folders.
+4. If manual termination is required, invoke the cancellation flag on the UI to gracefully spin down the threading locks.
+
+## Known Limitations & Future Work
+
+1. **Child Daemon Locking**: The system currently terminates orphaned `node.exe` processes executing `cdk` wrappers using Windows native WMI logic to bypass directory access locking. Long-term production requires executing the testing loops in completely containerized sandbox instances rather than directly on the host machine.
+2. **Ephemeral Hardware Storage**: LocalStack resets the infrastructure entirely between deployments (zero-state hygiene). There is no incremental caching.
+3. **Sequential Processing**: Prompt variant linting and evaluation currently execute synchronously in specific execution loops, creating local CPU-bound bottlenecks on lower-spec machines.

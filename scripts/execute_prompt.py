@@ -6,17 +6,21 @@ import sys
 def main():
     import concurrent.futures
     import shutil
+    import logging
+    
+    logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    logger = logging.getLogger(__name__)
     
     intent = sys.argv[1] if len(sys.argv) > 1 else "stand up a VM in us-central"
     temperature = sys.argv[2] if len(sys.argv) > 2 else "0.5"
     python_exe = os.path.join("venv", "Scripts", "python.exe")
     N_VARIANTS = 3
     
-    print(f">>> 1. Generating Prompt Variants (Best of {N_VARIANTS}, Temp={temperature}) for: {intent}")
+    logger.info("Initializing Prompt Variants (Count: %d, Temp: %s) for intent: %s", N_VARIANTS, temperature, intent)
     variants = []
     
     def generate_single_variant(i):
-        print(f"       -> Generating Variant {i+1}...")
+        logger.debug("Executing Variant %d...", i+1)
         subprocess.run([python_exe, "generate.py", "--intent", intent, "--temperature", temperature, "--output_file", f"FINAL_PROMPT_{i}.md"], check=True)
         with open(f"FINAL_PROMPT_{i}.md", "r", encoding="utf-8") as f:
             content = f.read()
@@ -40,9 +44,9 @@ def main():
                 f.write(cdk_code)
             variants.append((i, tmp_path, cdk_code))
         else:
-            print(f"       -> [ERROR] Variant {i+1} failed Python structure extraction.")
+            logger.error("Variant %d failed Python structure extraction.", i+1)
             
-    print(f">>> 2. Linting variants concurrently with AST Shield and flake8...")
+    logger.info("Linting variants concurrently with AST Validation and flake8.")
     def run_linter(variant_info):
         import ast
         i, path, cdk_code = variant_info
@@ -77,18 +81,18 @@ def main():
     results.sort(key=lambda x: x[1]) # Sort by error count
     champion_i, champ_errors, champ_stdout, champ_code = results[0]
     
-    print(f">>> 3. Champion Selected: Variant {champion_i+1} with {champ_errors} syntax errors.")
+    logger.info("Champion Selected: Variant %d with %d syntax errors.", champion_i+1, champ_errors)
     if champ_errors > 0:
-        print(f"Flake8: Issues detected!")
+        logger.warning("Flake8: Syntax constraints violated")
         # We inject the flake8 stdout back into STDOUT so the main orchestrator reads it
-        print(champ_stdout.replace(f"tmp_stack_{champion_i}.py", "cdk-testing-ground/cdk_testing_ground/cdk_testing_ground_stack.py"))
+        print("Flake8:\n" + champ_stdout.replace(f"tmp_stack_{champion_i}.py", "cdk-testing-ground/cdk_testing_ground/cdk_testing_ground_stack.py"))
     else:
-        print(f"Flake8: No critical issues found (Success).")
+        logger.info("Flake8: No critical syntax issues found (Success)")
         
     shutil.copy2(f"FINAL_PROMPT_{champion_i}.md", "FINAL_PROMPT.md")
     champion_code = next(v[2] for v in variants if v[0] == champion_i)
     
-    print(">>> 4. Injecting champion generated code into testing ground...")
+    logger.info("Injecting champion artifact into execution directory.")
     stack_file = os.path.join("cdk-testing-ground", "cdk_testing_ground", "cdk_testing_ground_stack.py")
     with open(stack_file, "w", encoding="utf-8") as f:
         f.write(champion_code)
@@ -100,15 +104,16 @@ def main():
         subprocess.run('wmic process where "name=\'node.exe\' and commandline like \'%cdk%\'" call terminate', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         shutil.rmtree(cdk_out_path, ignore_errors=True)
         
-    print(">>> 5. Synthesizing CDK App...")
+    logger.info("Synthesizing CDK Application")
     synth_cmd = 'npx cdk synth -a "..\\\\venv\\\\Scripts\\\\python.exe app.py" --quiet'
     result_synth = subprocess.run(synth_cmd, cwd="cdk-testing-ground", shell=True)
     if result_synth.returncode == 0:
-        print("CDK Synth: CloudFormation successfully generated.")
+        logger.info("CDK Synth: CloudFormation successfully generated.")
+        print("CloudFormation successfully generated")
     else:
-        print("CDK Synth: Compilation Failed!")
+        logger.error("CDK Synth: Compilation Failed.")
         
-    print(">>> 6. Running LocalStack Architecture Synthesis...")
+    logger.info("Executing LocalStack container deployment.")
     deploy_env = os.environ.copy()
     deploy_env["AWS_ACCESS_KEY_ID"] = "test"
     deploy_env["AWS_SECRET_ACCESS_KEY"] = "test"
@@ -118,8 +123,9 @@ def main():
     result_deploy = subprocess.run(deploy_cmd, cwd="cdk-testing-ground", shell=True, env=deploy_env)
     
     if result_deploy.returncode == 0:
+        logger.info("LocalStack Deploy: Architecture physically validated and PASSED.")
         print("LocalStack Deploy: Architecture physically validated and PASSED.")
     else:
-        print("LocalStack Deploy: CloudFormation stack rollback or failure detected!")
+        logger.error("LocalStack Deploy: CloudFormation stack rollback or failure detected.")
 if __name__ == "__main__":
     main()
