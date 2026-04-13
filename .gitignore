@@ -16,3 +16,5 @@ learned_constraints.txt
 stop_flag.txt
 tmp_stack_*.py
 FINAL_PROMPT_*.md
+
+run_log.txt

@@ -36,4 +36,12 @@ def get_aws_context():
             with open(filepath, 'r', encoding='utf-8') as f:
                 context += f"\n=== {filename} ===\n"
                 context += f.read()
+
+    # Ingest persistent runtime constraints directly into the prompt context payload.
+    learned_constraints_path = os.path.join(os.getcwd(), "learned_constraints.txt")
+    if os.path.exists(learned_constraints_path):
+        with open(learned_constraints_path, 'r', encoding='utf-8') as f:
+            context += "\n=== RUNTIME ACCUMULATED CONSTRAINTS. YOU MUST STRICTLY FOLLOW THESE AND ENSURE THEY ARE SATISFIED IN THE NEW PROMPT: ===\n"
+            context += f.read()
+
     return context

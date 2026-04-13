@@ -15,7 +15,7 @@ except ImportError:
     pass
 
 import logging
-logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S', stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=60), stop=stop_after_attempt(5))
@@ -28,15 +28,15 @@ def _post_openai_request(headers, payload):
 
 def invoke_meta_analyzer(stderr_trace, rag_collection=None):
     """
-    Acts as the DSPy Reflection Agent. Parses a Python stack trace or CloudFormation 
-    synthesis crash, deduces the root cause, and generates an absolute behavioral constraint.
+    Acts as the JSON RCA Extractor and Senior Reflection Agent.
+    Parses crashes from both local stack execution and the pre-execution static critic,
+    derives a correct snippet for the DB, and precise instructions for the Coder.
     """
     print(">>> [META-ANALYZER] Reflecting on stack trace...")
-    print(f"[META-ANALYZER] Parsing Error: {stderr_trace[:200]}...")
     
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
-        return "Always use aws_lambda.Code.from_inline() for lambdas."
+        return ["Always use aws_lambda.Code.from_inline() for lambdas."]
         
     retrieved_context = ""
     if rag_collection:
@@ -44,24 +44,39 @@ def invoke_meta_analyzer(stderr_trace, rag_collection=None):
             results = rag_collection.query(query_texts=[stderr_trace[-300:]], n_results=1)
             docs = results.get('documents')
             if docs and len(docs) > 0 and len(docs[0]) > 0:
-                retrieved_context = f"\\n<RETRIEVED_DOCUMENTATION_MAP>\\n{docs[0][0]}\\n</RETRIEVED_DOCUMENTATION_MAP>\\nNote: Prioritize giving constraints based on the exact path in this retrieved AWS CDK context.\\n"
-        except Exception as e:
+                retrieved_context = f"\\n<RETRIEVED_DOCUMENTATION_MAP>\\n{docs[0][0]}\\n</RETRIEVED_DOCUMENTATION_MAP>\\n"
+        except Exception:
             pass
             
-    system_prompt = """You are the Meta-Analyzer in a Self-Healing ML loop.
-The Generator Agent just failed to synthesize AWS CDK Python code.
-Analyze the following crash log and output up to THREE highly specific constraints instructing the Generator Agent what it MUST NEVER do again, or what it MUST do to fix it.
+    system_prompt = """You are the "Senior Reflection & RCA Agent" in an autonomous Multi-Agent AWS CDK v2 pipeline.
+The "Coder Agent" just attempted to synthesize or deploy Python AWS CDK code, or passed it to static review, but it crashed.
+
+Your objective is twofold:
+1. RCA EXTRACTION: Analyze the crash log, identify the root cause, and extract a positive, proven coding pattern for our permanent database.
+2. CODER FEEDBACK: Provide strict, exact instructions to the Coder Agent on how to rewrite the code to pass the compiler on the next iteration.
 
 CRITICAL RULES:
-1. NEVER output generic advice like "check the documentation for the right attribute" or "ensure correct versions".
-2. If the log is an AttributeError or ModuleNotFoundError, you MUST provide the exact correct Python module path replacement. If you do not 100% know the correct path, tell the Generator to "Delete the failing resource and fallback to inline AWS Lambda architecture".
-3. Constraints must be absolute mathematical rules.
+1. POSITIVE REINFORCEMENT: For the RCA extraction, do not write negative rules (e.g., "Never do X"). Write positive instructions: "To accomplish Y, you must use X."
+2. ACTIONABLE AGENT FEEDBACK: Your feedback to the Coder Agent must be exact. Name the specific class, the wrong parameter, and what it must be changed to. Do not give generic advice like "check the docs." 
+3. LOCALSTACK AWARENESS: If the error mentions a LocalStack exit code or licensing issue, the solution is always to pivot the architecture to a supported LocalStack Community tier service (e.g., swap RDS for DynamoDB).
 
-Format exactly like this, separated by newlines:
-Never use X; you must use Y.
-Always import Z when using W.
-
-Do not include any other text, markdown, or bullet points.""" + retrieved_context
+OUTPUT FORMAT:
+You must output exclusively in valid JSON format matching the exact structure below. Do not include markdown formatting like ```json.
+{
+  "rca_extraction": {
+    "failing_aws_construct": "The exact CDK class that failed (e.g., 'aws_rds.DatabaseInstance').",
+    "error_category": "A short classification.",
+    "root_cause_summary": "A 1-sentence explanation of why it crashed.",
+    "positive_constraint": "A clear, positive rule explaining the correct way to build this construct in CDK v2.",
+    "working_code_snippet": "2 to 4 lines of PERFECT, valid Python CDK v2 code demonstrating the fix."
+  },
+  "multi_agent_routing": {
+    "feedback_to_coder_agent": [
+      "Exact instruction 1 for the Coder Agent...",
+      "Exact instruction 2 for the Coder Agent..."
+    ]
+  }
+}""" + retrieved_context
 
     try:
         headers = {
@@ -69,19 +84,38 @@ Do not include any other text, markdown, or bullet points.""" + retrieved_contex
             "Authorization": f"Bearer {api_key}"
         }
         payload = {
-            "model": "gpt-4o-mini",
+            "model": "gpt-4o",
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Crash Log:\n{stderr_trace}"}
             ],
-            "max_tokens": 150
+            "response_format": { "type": "json_object" },
+            "temperature": 0.1
         }
         resp = _post_openai_request(headers, payload)
-        constraints_text = resp.json()['choices'][0]['message']['content']
-        constraints = [c.strip().lstrip('-').lstrip('*').strip() for c in constraints_text.split("\n") if c.strip()]
-        return constraints[:3]
+        
+        rca_data = json.loads(resp.json()['choices'][0]['message']['content'])
+        
+        # Route the RCA to the long-term RAG DB format
+        rca_ext = rca_data.get("rca_extraction", {})
+        rich_constraint = (
+            f"FIX FOR {rca_ext.get('failing_aws_construct', 'Unknown')}: "
+            f"{rca_ext.get('positive_constraint', '')} "
+            f"Example:\n```python\n{rca_ext.get('working_code_snippet', '')}\n```"
+        )
+        
+        # Add feedback to coder as constraints as well so the DSPy optimizer sees it
+        feedback_list = rca_data.get("multi_agent_routing", {}).get("feedback_to_coder_agent", [])
+        
+        final_constraints = []
+        if feedback_list:
+            final_constraints.extend(feedback_list)
+        final_constraints.append(rich_constraint)
+        
+        return final_constraints
     except Exception as e:
-        return ["Never use local file paths or from_asset; always use inline lambda code."]
+        logger.error(f"Meta-Analyzer JSON parsing failed: {e}")
+        return ["When provisioning Lambdas, always use inline code to avoid asset path errors."]
 
 def count_cdk_constructs(code_text: str) -> int:
     """Uses Python AST to accurately count physical AWS constructs instantiated."""
@@ -142,7 +176,7 @@ def main():
         os.remove("learned_constraints.txt")
         
     python_exe = os.path.join("venv", "Scripts", "python.exe")
-    max_iterations = 15
+    max_iterations = 20
     topology_history = []
     
     rag_collection = None
@@ -157,7 +191,7 @@ def main():
                 logger.info("Database empty. Seeding core AWS CDK v2 layout requirements.")
                 cdk_docs = [
                     "AWS CDK v2 ApplicationLoadBalancer: The ApplicationLoadBalancer class has been moved to aws_elasticloadbalancingv2. Use aws_elasticloadbalancingv2.ApplicationLoadBalancer.",
-                    "AWS CDK v2 LatestAmazonLinux: MachineImage.latestAmazonLinux is deprecated, you must use MachineImage.latestAmazonLinux2.",
+                    "AWS CDK v2 LatestAmazonLinux: MachineImage.latestAmazonLinux is deprecated, you must use MachineImage.latestAmazonLinux2(). HOWEVER, IN LOCALSTACK, you must NEVER use dynamic SSM lookups like latestAmazonLinux. You MUST ALWAYS hardcode the AMI: ec2.MachineImage.generic_linux({'us-east-1': 'ami-12345'}).",
                     "AWS CDK v2 SubnetType: Use aws_ec2.SubnetType.PRIVATE_WITH_EGRESS or PRIVATE_ISOLATED instead of PRIVATE.",
                     "AWS CDK v2 DynamoDB RemovalPolicy: Do not use aws_dynamodb.RemovalPolicy. Instead, use aws_cdk.RemovalPolicy.DESTROY.",
                     "AWS CDK v2 Lambda Asset Path: To use a local lambda code folder, use aws_lambda.Code.from_asset('lambda'). If the asset throws ENOTEMPTY or NotFound, it means the lambda directory is missing. Fallback to inline: aws_lambda.Code.from_inline('def handler(event, context): pass').",
@@ -336,7 +370,16 @@ def main():
             for rule in new_rules:
                 logger.info("Generated validation constraint: '%s'", rule)
                 f.write(f"- {rule}\n")
-            
+                
+                # Permanently index physical constraints into vector database
+                if rag_collection and "FIX FOR" in rule:
+                    try:
+                        import uuid
+                        record_id = f"runtime_learned_{str(uuid.uuid4())[:8]}"
+                        rag_collection.add(documents=[rule], ids=[record_id])
+                    except Exception as e:
+                        pass
+        
         with open(os.path.join(iter_dir, "learned_constraints_update.txt"), "w", encoding="utf-8") as f:
             f.write("\n".join(new_rules))
             
