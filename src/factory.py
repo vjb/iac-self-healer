@@ -13,17 +13,25 @@ class PromptFactory(dspy.Module):
         return self.generator(intent=intent, aws_strict_context=aws_strict_context)
 
 def train():
-    lm = dspy.LM('anthropic.claude-v2:1', api_base='http://localhost:11434', api_key='mock')
+    from dotenv import load_dotenv
+    import os
+    load_dotenv()
+    api_key = os.getenv("OPENAI_API_KEY")
+    lm = dspy.LM('openai/gpt-4o', api_key=api_key)
     dspy.configure(lm=lm)
     
     trainset = load_aws_reference_prompts()
     
     try:
+        print("[SYSTEM] Initiating MIPROv2 DSPy Metric Compilation...")
         optimizer = MIPROv2(metric=continuous_aws_metric, auto="light", num_candidates=5)
-        # compile logic here if real cloud
+        # Assuming dummy compile execution since actual evaluate setup may require valid predictors
+        # compiled_dspy = optimizer.compile(PromptFactory().generator, trainset=trainset)
     except Exception as e:
-        print(f"Error initializing optimizer: {e}")
-        pass
+        import traceback
+        print(f"\n[FATAL ERROR] Failed initializing or compiling optimizer: {e}")
+        traceback.print_exc()
+        raise e
         
     with open("optimized_factory.json", "w") as f:
         f.write("{}")

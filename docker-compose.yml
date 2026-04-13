@@ -2,6 +2,7 @@ version: "3.8"
 services:
   localstack:
     image: localstack/localstack:latest
+    restart: always
     ports:
       - "127.0.0.1:4566:4566"            # LocalStack Gateway
       - "127.0.0.1:4510-4559:4510-4559"  # external services port range
@@ -9,6 +10,7 @@ services:
       - SERVICES=s3,iam,ec2,eks,kms,lambda,dynamodb,sns,budgets,cloudwatch
       - DEBUG=${DEBUG:-0}
       - DOCKER_HOST=unix:///var/run/docker.sock
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"

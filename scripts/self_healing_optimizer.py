@@ -148,19 +148,25 @@ def main():
     rag_collection = None
     if 'chromadb' in sys.modules:
         try:
-            print("[SYSTEM] Initializing Offline ChromaDB RAG Lexicon...")
-            chroma_client = chromadb.Client()
+            db_path = os.path.join(os.getcwd(), "chroma_db")
+            print(f"[SYSTEM] Initializing Persistent ChromaDB RAG Lexicon at: {db_path}...")
+            chroma_client = chromadb.PersistentClient(path=db_path, settings=chromadb.Settings(anonymized_telemetry=False))
             rag_collection = chroma_client.get_or_create_collection(name="cdk_v2_docs")
             
-            cdk_docs = [
-                "AWS CDK v2 ApplicationLoadBalancer: The ApplicationLoadBalancer class has been moved to aws_elasticloadbalancingv2. Use aws_elasticloadbalancingv2.ApplicationLoadBalancer.",
-                "AWS CDK v2 LatestAmazonLinux: MachineImage.latestAmazonLinux is deprecated, you must use MachineImage.latestAmazonLinux2.",
-                "AWS CDK v2 SubnetType: Use aws_ec2.SubnetType.PRIVATE_WITH_EGRESS or PRIVATE_ISOLATED instead of PRIVATE.",
-                "AWS CDK v2 DynamoDB RemovalPolicy: Do not use aws_dynamodb.RemovalPolicy. Instead, use aws_cdk.RemovalPolicy.DESTROY.",
-                "AWS CDK v2 Lambda Asset Path: To use a local lambda code folder, use aws_lambda.Code.from_asset('lambda'). If the asset throws ENOTEMPTY or NotFound, it means the lambda directory is missing. Fallback to inline: aws_lambda.Code.from_inline('def handler(event, context): pass').",
-                "AWS CDK v2 RDS Keyword Arguments: aws_rds.DatabaseInstance does not accept 'security_group'. You must pass an array to 'security_groups=[my_sg]'."
-            ]
-            rag_collection.add(documents=cdk_docs, ids=[f"doc_{i}" for i in range(len(cdk_docs))])
+            if rag_collection.count() == 0:
+                print("[SYSTEM] Lexicon is empty. Seeding core AWS CDK v2 structural constraints...")
+                cdk_docs = [
+                    "AWS CDK v2 ApplicationLoadBalancer: The ApplicationLoadBalancer class has been moved to aws_elasticloadbalancingv2. Use aws_elasticloadbalancingv2.ApplicationLoadBalancer.",
+                    "AWS CDK v2 LatestAmazonLinux: MachineImage.latestAmazonLinux is deprecated, you must use MachineImage.latestAmazonLinux2.",
+                    "AWS CDK v2 SubnetType: Use aws_ec2.SubnetType.PRIVATE_WITH_EGRESS or PRIVATE_ISOLATED instead of PRIVATE.",
+                    "AWS CDK v2 DynamoDB RemovalPolicy: Do not use aws_dynamodb.RemovalPolicy. Instead, use aws_cdk.RemovalPolicy.DESTROY.",
+                    "AWS CDK v2 Lambda Asset Path: To use a local lambda code folder, use aws_lambda.Code.from_asset('lambda'). If the asset throws ENOTEMPTY or NotFound, it means the lambda directory is missing. Fallback to inline: aws_lambda.Code.from_inline('def handler(event, context): pass').",
+                    "AWS CDK v2 RDS Keyword Arguments: aws_rds.DatabaseInstance does not accept 'security_group'. You must pass an array to 'security_groups=[my_sg]'.",
+                    "AWS CDK v2 LocalStack Pro Ban: NEVER use `aws_rds` or `DatabaseInstance` (SQL databases). LocalStack Community Edition will instantly crash with an Exit 55 License Error if you attempt to provision RDS. YOU MUST USE `aws_dynamodb.Table` for the database tier."
+                ]
+                rag_collection.add(documents=cdk_docs, ids=[f"core_doc_{i}" for i in range(len(cdk_docs))])
+            else:
+                print(f"[SYSTEM] Persistent Lexicon hooked. Curated Semantic Capacity: {rag_collection.count()} Vectors.")
         except Exception as e:
             print(f"[SYSTEM] RAG Init failed: {e}")
             
@@ -221,10 +227,12 @@ def main():
             f.write(stderr)
             
         final_prompt_txt = ""
-        if os.path.exists("FINAL_PROMPT.md"):
-            shutil.copy2("FINAL_PROMPT.md", os.path.join(iter_dir, "FINAL_PROMPT.md"))
-            with open("FINAL_PROMPT.md", "r", encoding="utf-8") as pf:
-                final_prompt_txt = pf.read()
+        import glob
+        for prompt_file in glob.glob("FINAL_PROMPT*.md"):
+            shutil.copy2(prompt_file, os.path.join(iter_dir, prompt_file))
+            if prompt_file == "FINAL_PROMPT.md":
+                with open(prompt_file, "r", encoding="utf-8") as pf:
+                    final_prompt_txt = pf.read()
             
         generated_code_txt = ""
         stack_file = os.path.join("cdk-testing-ground", "cdk_testing_ground", "cdk_testing_ground_stack.py")
@@ -350,7 +358,9 @@ def main():
             
         print(f"\n>>> [HYGIENE] Executing LocalStack hardware wipe to ensure zero-state hygiene...")
         subprocess.run('npx cdklocal destroy --force --require-approval never -a "..\\\\venv\\\\Scripts\\\\python.exe app.py"', cwd="cdk-testing-ground", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        
+        if os.path.exists(os.path.join("cdk-testing-ground", "cdk.out")):
+            shutil.rmtree(os.path.join("cdk-testing-ground", "cdk.out"), ignore_errors=True)
+
         if len(score_history) >= 2 and score_history[-1] < 16 and score_history[-2] < 16:
             print(">>> [HYGIENE] Architecture validation flatlined below minimal threshold. Rebooting Docker Daemon to purge orphaned endpoints...")
             subprocess.run("docker compose restart", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

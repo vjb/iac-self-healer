@@ -11,6 +11,7 @@ optimized_factory.json
 results/
 .env
 volume/
+chroma_db/
 learned_constraints.txt
 stop_flag.txt
 tmp_stack_*.py

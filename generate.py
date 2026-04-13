@@ -7,9 +7,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--intent", type=str, required=True, help="The core infrastructure requirement.")
     parser.add_argument("--temperature", type=float, default=0.5, help="Temperature for generative randomness.")
+    parser.add_argument("--output_file", type=str, default="", help="Specific filepath destination to write FINAL_PROMPT output to.")
     args = parser.parse_args()
     
-    lm = dspy.LM('anthropic.claude-v2:1', api_base='http://localhost:11434', api_key='mock', temperature=args.temperature)
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    api_key = os.getenv("OPENAI_API_KEY")
+    lm = dspy.LM('openai/gpt-4o', api_key=api_key, temperature=args.temperature)
     dspy.configure(lm=lm)
     
     factory = PromptFactory()
@@ -39,10 +44,11 @@ def main():
 ## Troubleshooting
 {prediction.troubleshooting}
 """
-    with open("FINAL_PROMPT.md", "w", encoding='utf-8') as f:
+    out_file = args.output_file if args.output_file else "FINAL_PROMPT.md"
+    with open(out_file, "w", encoding='utf-8') as f:
         f.write(output)
         
-    print("ALL PHASES COMPLETE. AWAITING COMMAND TO INITIATE TRAINING.")
+    print(f"ALL PHASES COMPLETE. WROTE OUTPUT TO {out_file}.")
 
 if __name__ == "__main__":
     main()

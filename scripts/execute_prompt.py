@@ -15,13 +15,22 @@ def main():
     print(f">>> 1. Generating Prompt Variants (Best of {N_VARIANTS}, Temp={temperature}) for: {intent}")
     variants = []
     
-    for i in range(N_VARIANTS):
+    def generate_single_variant(i):
         print(f"       -> Generating Variant {i+1}...")
-        subprocess.run([python_exe, "generate.py", "--intent", intent, "--temperature", temperature], check=True)
-        shutil.copy2("FINAL_PROMPT.md", f"FINAL_PROMPT_{i}.md")
-        
+        subprocess.run([python_exe, "generate.py", "--intent", intent, "--temperature", temperature, "--output_file", f"FINAL_PROMPT_{i}.md"], check=True)
         with open(f"FINAL_PROMPT_{i}.md", "r", encoding="utf-8") as f:
             content = f.read()
+        return i, content
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=N_VARIANTS) as executor:
+        futures = {executor.submit(generate_single_variant, i): i for i in range(N_VARIANTS)}
+        results = {}
+        for future in concurrent.futures.as_completed(futures):
+            idx, txt = future.result()
+            results[idx] = txt
+            
+    for i in range(N_VARIANTS):
+        content = results[i]
             
         match = re.search(r"```python\n(.*?)\n```", content, re.DOTALL)
         if match:
@@ -83,6 +92,13 @@ def main():
     stack_file = os.path.join("cdk-testing-ground", "cdk_testing_ground", "cdk_testing_ground_stack.py")
     with open(stack_file, "w", encoding="utf-8") as f:
         f.write(champion_code)
+        
+    import shutil
+    cdk_out_path = os.path.join("cdk-testing-ground", "cdk.out")
+    if os.path.exists(cdk_out_path):
+        # Surgically wipe any orphaned NodeJS threads holding the .cdk.out.lock
+        subprocess.run('wmic process where "name=\'node.exe\' and commandline like \'%cdk%\'" call terminate', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        shutil.rmtree(cdk_out_path, ignore_errors=True)
         
     print(">>> 5. Synthesizing CDK App...")
     synth_cmd = 'npx cdk synth -a "..\\\\venv\\\\Scripts\\\\python.exe app.py" --quiet'

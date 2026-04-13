@@ -17,10 +17,10 @@ def load_aws_reference_prompts():
             intent = filename.replace('.md', '')
             examples.append(dspy.Example(
                 intent=intent,
-                core_instructions=content,
-                prerequisites="",
-                use_case="",
-                troubleshooting=""
+                core_instructions="import aws_cdk as cdk\nfrom aws_cdk import aws_ec2\n\n# AWS Infrastructure automatically synthesized.\nclass GenerativeStack(cdk.Stack):\n    pass",
+                prerequisites="Requires strictly AWS CDK v2 and python.",
+                use_case=content,
+                troubleshooting="If CloudFormation rollback occurs, verify security group ingress rules."
             ).with_inputs('intent'))
     return examples
 
