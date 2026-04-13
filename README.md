@@ -6,42 +6,49 @@ An autonomous orchestration loop that generates, compiles, and reiterates AWS CD
 
 Generating Infrastructure-as-Code (IaC) via zero-shot Large Language Models frequently results in invalid dependency topological structures or outdated JSII constructs. 
 
-**IaC Self-Healer** resolves this by executing a continuous validation pipeline. 
+**IaC Self-Healer** resolves this by executing a continuous validation pipeline built on a **Teacher-Student Zero-Shot Architecture**. It uses **Zero-Trust Physical Proofing** to bypass LLM hallucinations and mathematically converge on deployable cloud hardware.
+
+```mermaid
+graph TD
+    A[User Intent] -->|Topology Request| B(Teacher LLM Agent)
+    C[(ChromaDB)] -.->|Environment Limitations| B
+    H[(learned_constraints.txt)] -.->|Previous Trace Fixes| B
+    
+    B -->|Natural Language Prompt| D(Student LLM Agent)
+    D -->|Targeted Python CDK| E{AWS CDK Physical Compiler}
+    
+    E -- Success --> F[LocalStack Emulation Deploy]
+    E -- Crash Traceback --> G[Meta-Analyzer]
+    
+    G -->|Extracts API Solution| H
+```
 
 ### Execution Workflow
 
 The system enforces structural validity through the following discrete steps:
-1. **Generate**: The system dynamically generates Python CDK code based on the user's architectural intent.
-2. **Execute**: The artifact is injected into an isolated directory (`/cdk-testing-ground/`).
-3. **Compile**: The directory triggers native dependencies to validate the code.
+1. **Teacher Generation**: The Teacher creates an instructional markdown prompt mapping the user's architectural intent. It reads environment limitations dynamically from `ChromaDB` (e.g. "Do not use SSM or RDS inside LocalStack").
+2. **Student Execution**: A segmented Student Coder strictly reads the Teacher's Prompt and synthesizes Python AWS CDK v2 code. 
+3. **Zero-Trust Physical Proofing**: The code bypasses abstract LLM linters and hits the real compiler.
     * `flake8` executes static syntax checking.
     * `npx cdk synth` evaluates JSII constraints and generates CloudFormation.
-    * The CDK stack deploys directly into a LocalStack Docker container to validate service provisioning.
-4. **Reflect**: If compilation crashes, the literal stack trace is extracted and verified against a ChromaDB storage layer. A specialized DSPy script deduces strict constraints based entirely on the compiler failure.
-5. **Evaluate**: The orchestrator scores progress. Current parameters include:
-    * **Temperature Override Logic**: If generation scores stagnate over 3 consecutive iterations, the system adjusts the underlying temperature parameter to avoid local minima.
-    * **AST Component Validation**: The system uses the Python `ast` module to tally deployed hardware elements. If the generator attempts to bypass syntax errors by omitting required infrastructural resources, it applies a -50 point adjustment.
+    * The CDK stack deploys directly into a LocalStack Docker container.
+4. **Deterministic Context Reflection**: If compilation crashes, the literal stack trace is extracted. A Meta-Analyzer translates the physical crash into a hard rule. Crucially, the orchestrator mechanically forces the rule into the `learned_constraints.txt` memory block, permanently blocking the hallucination on the next iteration cycle.
 
-The iteration states (Prompt, Crash Log, Constraint, and Score) are logged mathematically via JSON inside `run_summary.json` for potential reinforcement learning datasets.
+## The DSPy Integration
 
-## The DSPy "Inverse Prompt" Framework
-
-Instead of merely generating execution code, this repository relies on the Stanford DSPy Optimization framework (`MIPROv2`) to mathematically compile foundational prompts. 
-
-Because LLMs do not utilize continuous weight distributions for text generation, performing a traditional differentiable backward sweep is geometrically impossible. The framework circumvents this layout by using Bayesian discrete optimization. This acts as a simulated gradient, methodically testing architectural prompt variations against the compiler until it discovers stable patterns.
+Instead of relying on prompt parameter adjustments via MIPROv2, this project pivots to use DSPy purely for its structural programmatic abstraction. The core logic relies on physical environment limitations mapped into ChromaDB RAG layers rather than recursive Bayesian probability tests.
 
 ### Custom Prompt Ingestion
 
 The repository supports mapping internal documentation directly into the generation layer.
-1. Place standard markdown architectures (e.g., `Serverless.md`, `EKS_Baseline.md`) under `info/aws startup prompts/`.
-2. Execute `venv\Scripts\python.exe -m src.factory` to re-compile the optimization layer.
-3. DSPy will assimilate explicit constraint dependencies from the documents and lock them into `optimized_factory.json`.
+1. Place standard markdown architectures (e.g., `Serverless.md`, `EKS_Baseline.md`) into the offline `chroma_db/`.
+2. Execute the engine natively. The system reads and maps hardware limits natively.
 
 ## System Overview
 
 *   **Next.js Dashboard (`/ui/`)**: A client-side web interface using Server-Sent Events to render compilation telemetry.
-*   **Orchestration Logic (`scripts/self_healing_optimizer.py`)**: Sub-process logic orchestrating lockfiles and API rate limits.
-*   **Testing Directory (`cdk-testing-ground/`)**: Windows native AWS execution environment hooked to the Docker daemon.
+*   **Orchestration Logic (`scripts/self_healing_optimizer.py`)**: Sub-process logic orchestrating lockfiles, LocalStack polling, and RAG data injection.
+*   **Prompt Engine (`generate.py`)**: The runtime override orchestrator guaranteeing Deterministic Rule injection on markdown artifacts.
 
 ## Installation
 
