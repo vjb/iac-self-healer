@@ -160,6 +160,7 @@ Instructions to Follow:\n\n{content}"""
     deploy_env["AWS_ACCESS_KEY_ID"] = "test"
     deploy_env["AWS_SECRET_ACCESS_KEY"] = "test"
     deploy_env["AWS_DEFAULT_REGION"] = "us-east-1"
+    deploy_env["SERVICES"] = "ec2,s3,dynamodb,lambda,apigateway,cloudformation,iam,ssm,sts,logs"
     
     deploy_cmd = 'npx cdklocal deploy --require-approval never -a "..\\\\venv\\\\Scripts\\\\python.exe app.py"'
     result_deploy = subprocess.run(deploy_cmd, cwd="cdk-testing-ground", shell=True, env=deploy_env)
