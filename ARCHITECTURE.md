@@ -40,8 +40,12 @@ Each student's generated output is processed through a sequential 5-stage pipeli
 ### MIPROv2 Optimizer (scripts/optimize.py)
 The system utilizes DSPy 3.1.3 native MIPROv2 functionality to bootstrap few-shot examples and conduct Bayesian optimization across candidate instructions. The mechanism evaluates the parameter space of system instructions and modifies prompts to produce structures that consistently output a 1.0 validation score.
 
-### ChromaDB Reference Data (src/data_loader.py)
+### ChromaDB Reference Data & Oracle Memory (src/data_loader.py)
 The system injects AWS CDK v2 documentation stored in a local ChromaDB instance to constrain generated instructions. Pre-populated data contains standard v1 to v2 migration structural changes, exact import paths, and AWS architectural specifications.
+**Oracle Feedback Loop:** When the evaluation pipeline detects an exhausted compiler bug, it hashes the traceback and dynamically embeds it into ChromaDB as a `WARNING` document for the active architecture intent. On subsequent searches, the Prompt Generator retrieves this localized exception and implicitly integrates negative bug constraints within its instruction space.
+
+### Self-Healing Evaluator Assertions (src/evaluators.py)
+Because native `dspy.Assert` conflicts with multi-vendor parallel API dispatch configurations, the evaluation pipeline contains a custom syntactic assertion loop explicitly simulating DSPy assertions on the local thread. If a model generates code that crashes during `cdk synth`, the `stderr` trace is dynamically injected back into the LLM context for a maximum of 2 auto-correction retries before docking points from the numerical loss function.
 
 ## Engineering Decisions
 

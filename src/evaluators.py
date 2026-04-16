@@ -129,12 +129,15 @@ def _score_single_code(code: str) -> tuple[float, str]:
     return score, curr_error_trace.strip()
 
 
-def evaluate_prompt_with_details(prompt_text: str) -> tuple[float, list]:
+def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> tuple[float, list]:
     """
     Executes student LLM inference and runs the evaluation logic.
     Returns (avg_score, list_of_model_details).
     """
     import concurrent.futures
+    from src.student import retry_llm_code
+    from src.data_loader import record_compiler_failure
+    
     if not prompt_text:
         return 0.0, []
         
@@ -146,9 +149,39 @@ def evaluate_prompt_with_details(prompt_text: str) -> tuple[float, list]:
         if result["error"] is not None:
             return {"model": result["model"], "score": 0.0, "error": f"API Error: {result['error']}"}
             
-        score, error_trace = _score_single_code(result["code"])
-        logger.info("Model %s scored %.2f", result["model"], score)
-        return {"model": result["model"], "score": score, "error": error_trace}
+        current_code = result["code"]
+        best_score = 0.0
+        final_error_trace = ""
+        
+        # Max 3 attempts (1 initial + 2 retries)
+        for attempt in range(3):
+            score, error_trace = _score_single_code(current_code)
+            best_score = max(best_score, score)
+            final_error_trace = error_trace
+            
+            if score >= 0.70:
+                # Compile fully passed!
+                logger.info("Model %s scored %.2f on attempt %d", result["model"], score, attempt + 1)
+                return {"model": result["model"], "score": score, "error": error_trace}
+                
+            logger.debug("Model %s scored %.2f on attempt %d. Error trace captured.", result["model"], score, attempt + 1)
+            
+            if attempt < 2:
+                logger.debug("Triggering dspy.Assert equivalent: retrying %s with stack trace feedback...", result["model"])
+                try:
+                    current_code = retry_llm_code(result["model"], prompt_text, current_code, final_error_trace)
+                    logger.debug("Retry generation successful, re-evaluating...")
+                except Exception as e:
+                    logger.warning("Retry API call failed for %s: %s", result["model"], e)
+                    break
+                    
+        # If all retries exhausted and it still failed, record trace to Oracle
+        if intent_text and final_error_trace and best_score < 0.70:
+            logger.warning("Model %s exhausted all local retries. Tripping Oracle memory exception...", result["model"])
+            record_compiler_failure(intent_text, final_error_trace)
+            
+        logger.info("Model %s scored %.2f (exhausted)", result["model"], best_score)
+        return {"model": result["model"], "score": best_score, "error": final_error_trace}
         
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         computed_details = list(executor.map(_evaluate_single, student_results))
@@ -175,7 +208,8 @@ def cdk_compile_metric(example, prediction, trace=None):
     result, and returns the average score across all successful models.
     """
     prompt_text = getattr(prediction, 'prompt', '')
-    avg_score, _ = evaluate_prompt_with_details(prompt_text)
+    intent_text = getattr(example, 'architecture_intent', '')
+    avg_score, _ = evaluate_prompt_with_details(prompt_text, intent_text=intent_text)
     
     if trace is not None:
         # STRICT DSPY BOOTSTRAP GATING:

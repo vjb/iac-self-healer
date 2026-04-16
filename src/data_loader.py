@@ -163,3 +163,31 @@ def get_cdk_reference(intent: str) -> str:
                 reference += f"\n\n{f.read()}"
     
     return reference[:3000] if reference else "Use AWS CDK v2 Python syntax. Import from aws_cdk, not aws_cdk.core."
+
+
+def record_compiler_failure(intent: str, error_trace: str):
+    """Embed an exhausted compiler failure back into ChromaDB to act as an oracle for the next trial."""
+    collection = _get_chroma_collection()
+    if not collection:
+        return
+        
+    try:
+        import hashlib
+        # Hash to create a unique ID for this bug
+        bug_id = "bug_" + hashlib.md5((intent + error_trace).encode('utf-8')).hexdigest()[:15]
+        
+        warning_msg = f"CRITICAL COMPILER WARNING related to intent '{intent[:100]}...':\n"
+        warning_msg += f"The following error previously occurred during CDK execution:\n{error_trace}\n"
+        warning_msg += "Constraint: You MUST avoid the syntactic patterns that lead to this exception!"
+        
+        # Don't blow up the DB if the trace is massive
+        if len(warning_msg) > 1500:
+            warning_msg = warning_msg[:1500] + "\n...[truncated]"
+            
+        collection.add(
+            documents=[warning_msg],
+            ids=[bug_id]
+        )
+        logger.info(f"Oracle: Extracted and logged persistent compiler failure {bug_id} into ChromaDB memory.")
+    except Exception as e:
+        logger.warning(f"Oracle: Failed to record compiler failure to ChromaDB: {e}")

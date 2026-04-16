@@ -88,6 +88,40 @@ def _call_openrouter(prompt_text: str, api_key: str, model_id: str) -> str:
     return _clean_code_output(json_resp['choices'][0]['message']['content'])
 
 
+def retry_llm_code(model_id: str, original_prompt: str, previous_code: str, error_trace: str) -> str:
+    """Send back the compiler failure state to prompt self-correction."""
+    api_key = os.environ.get("OPENAI_API_KEY", "") if model_id == "gpt-4o" else os.environ.get("OPENROUTER_API_KEY", "")
+    if not api_key:
+        raise Exception("API key missing for retry")
+        
+    messages = [
+        {"role": "system", "content": STUDENT_SYSTEM_PROMPT},
+        {"role": "user", "content": original_prompt},
+        {"role": "assistant", "content": previous_code},
+        {"role": "user", "content": f"The code you generated failed compilation with the following error trace:\n\n{error_trace}\n\nRewrite the full python script correctly to resolve this."}
+    ]
+    
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
+    
+    url = "https://api.openai.com/v1/chat/completions" if model_id == "gpt-4o" else "https://openrouter.ai/api/v1/chat/completions"
+    
+    payload = {
+        "model": model_id,
+        "messages": messages,
+        "temperature": 0.0
+    }
+    
+    resp = requests.post(url, headers=headers, json=payload, timeout=300)
+    resp.raise_for_status()
+    json_resp = resp.json()
+    if "error" in json_resp:
+        raise Exception(f"API Error during retry: {json_resp['error']}")
+    return _clean_code_output(json_resp['choices'][0]['message']['content'])
+
+
 def call_student_llms(prompt_text: str) -> list:
     """
     Send a prompt to multiple student LLMs and return all successful results concurrently.
