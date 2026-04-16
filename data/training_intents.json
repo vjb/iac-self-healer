@@ -1,38 +1,14 @@
 [
   {
-    "architecture_intent": "Three-tier web application with VPC, Application Load Balancer, Lambda functions as backend, and DynamoDB for data storage"
+    "architecture_intent": "Act as a Principal ML Infrastructure Engineer. Your task is to design a massive EKS-based Kubernetes cluster for LLM Training and Inference using AWS CDK v2 in Python. The workload will handle Distributed LLM Training using Ray and PyTorch, alongside high-throughput inference using vLLM. The architecture must support advanced accelerators including AWS Trainium, Inferentia, and NVIDIA GPUs.\n\nGenerate a complete, valid AWS CDK v2 Python stack named CdkTestingGroundStack that inherits from the core Stack class. You must provision an Amazon EKS Cluster running Kubernetes version 1.30, deployed within a newly created VPC utilizing private subnets. Create EKS Managed Node Groups specifically configured for machine learning; at least one node group must use GPU instances, such as the g5.2xlarge, and explicitly use the appropriate AL2_x86_64_GPU AMI type.\n\nFor high-performance data access, deploy an Amazon FSx for Lustre file system configured for SCRATCH_2 to hold massive training datasets, ensuring the EKS cluster's security group allows ingress from it. Set up Karpenter for dynamic node provisioning by creating the required IAM Role for Service Accounts (IRSA) and deploying the Karpenter Helm Chart directly into the EKS cluster. Finally, implement an Amazon Bedrock fallback mechanism by attaching an IAM Policy to the EKS worker nodes that allows bedrock:InvokeModel, ensuring inference pods can gracefully fall back to Claude 3.5 if local GPUs are exhausted."
   },
   {
-    "architecture_intent": "Serverless REST API with API Gateway, Lambda function, and DynamoDB table with CRUD operations"
+    "architecture_intent": "Act as a Cloud Architect specializing in highly available GenAI systems. Design an Active-Active Multi-Region Serverless RAG backend using AWS CDK v2 in Python. This architecture is intended for a financial RAG chatbot requiring 99.999% uptime, demanding a fully serverless and multi-region capable deployment.\n\nGenerate a complete, valid AWS CDK v2 Python stack named CdkTestingGroundStack that inherits from the core Stack class. You must implement Amazon DynamoDB Global Tables configured to replicate across multiple regions (such as eu-west-1) to store user chat history globally. For vector storage, provision an Amazon OpenSearch Serverless collection. You must specifically use L1 Cfn constructs for OpenSearch Serverless and explicitly create the required access policy, network policy, and security policy to make the collection functional.\n\nTo handle the orchestration, deploy a Python-based AWS Lambda function that acts as the RAG engine. Enforce strict least-privilege IAM controls by granting this Lambda function explicit, granular permissions to read and write to the DynamoDB table, query the OpenSearch Serverless collection, and invoke Amazon Bedrock models. Expose this backend to clients by provisioning an Amazon API Gateway REST API that triggers the Lambda function."
   },
   {
-    "architecture_intent": "Static website hosting with S3 bucket and CloudFront distribution"
+    "architecture_intent": "Act as a Zero-Trust Security Architect. Design a strictly MVSP-compliant GenAI Data Lake using AWS CDK v2 in Python, where security is the absolute highest priority. This architecture will serve as a training data lake for highly sensitive healthcare records requiring HIPAA compliance and strict data isolation.\n\nGenerate a complete, valid AWS CDK v2 Python stack named CdkTestingGroundStack that inherits from the core Stack class. Start by provisioning a custom customer-managed AWS KMS Key with key rotation enabled; this single key must be used to encrypt every supported resource in the stack. Create an Amazon S3 Data Lake bucket that enforces KMS encryption, completely blocks all public access at the bucket level, and utilizes a bucket policy to explicitly deny any unencrypted HTTP requests.\n\nDeploy this infrastructure within a securely isolated VPC that has no internet gateway. To ensure data never traverses the public internet, you must provision Gateway VPC Endpoints for both Amazon S3 and Amazon DynamoDB. For continuous security auditing, enable an Amazon Macie session to automatically scan the S3 data lake for personally identifiable information (PII). Finally, deploy an AWS Glue Crawler configured to catalog the S3 data, utilizing a highly restricted IAM role that only possesses permissions to read that specific S3 bucket and decrypt using your specific KMS key, explicitly avoiding any wildcard resource policies."
   },
   {
-    "architecture_intent": "Event-driven data processing pipeline with SQS queue, SNS topic, and Lambda function processor"
-  },
-  {
-    "architecture_intent": "VPC network infrastructure with public and private subnets, NAT gateway, and security groups for web and application tiers"
-  },
-  {
-    "architecture_intent": "Containerized microservice with ECS Fargate cluster, network load balanced service, and VPC"
-  },
-  {
-    "architecture_intent": "Scheduled Lambda function triggered by EventBridge cron rule for periodic data processing"
-  },
-  {
-    "architecture_intent": "EC2 instance in a VPC with IAM role for Systems Manager access and security group allowing HTTP traffic"
-  },
-  {
-    "architecture_intent": "Serverless backend with Cognito user pool authentication, API Gateway, Lambda, DynamoDB, and S3 bucket"
-  },
-  {
-    "architecture_intent": "Multi-region S3 replication setup with source and destination buckets, versioning enabled, and lifecycle policies"
-  },
-  {
-    "architecture_intent": "Real-time data streaming with Kinesis Data Stream, Lambda consumer, and DynamoDB for state storage"
-  },
-  {
-    "architecture_intent": "CloudWatch monitoring stack with alarms on Lambda errors, SNS notification topic, and dashboard"
+    "architecture_intent": "Act as a specialized GenAI Architect. Design an Event-Driven Asynchronous Agent Swarm using AWS CDK v2 in Python. This architecture must support a workload of 10,000 asynchronous AI agents processing web-scraped data through Amazon Bedrock in parallel, completely eliminating the risk of synchronous API timeouts.\n\nGenerate a complete, valid AWS CDK v2 Python stack named CdkTestingGroundStack that inherits from the core Stack class. Establish the asynchronous backbone by provisioning a primary Amazon SQS Queue alongside a Dead Letter Queue (DLQ), configuring the primary queue to automatically route failed messages to the DLQ after three unsuccessful retries. For the compute layer, deploy an Amazon ECS Cluster utilizing AWS Fargate within a standard VPC.\n\nCreate an ECS Fargate Task Definition that will serve as the blueprint for the AI Agent workers. The ECS Task Role associated with this definition must have precise IAM permissions to consume messages from the SQS queue and to invoke Amazon Bedrock models. Deploy an ECS Fargate Service to run this task definition. Finally, implement an Application Auto Scaling target configured with Step Scaling, ensuring the ECS service automatically scales the number of Fargate tasks up or down based entirely on the current length of the SQS queue."
   }
 ]

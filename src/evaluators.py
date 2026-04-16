@@ -80,32 +80,34 @@ def _run_flake8(code: str) -> int:
         return 0  # Don't penalize if flake8 itself fails
 
 
-def _score_single_code(code: str) -> float:
+def _score_single_code(code: str) -> tuple[float, str]:
     """
     Score a single piece of generated CDK code through the 5-stage pipeline.
-    Returns a float between 0.0 and 1.0.
+    Returns a tuple of (score, error_trace).
     """
     if not code or len(code.strip()) < 10:
-        return 0.0
+        return 0.0, "Code was empty or too short."
     
     # Stage 1: AST parse (fast-fail)
     if not _parse_ast(code):
         logger.debug("Stage 1 FAIL: ast.parse failed")
-        return 0.0
+        return 0.0, "Stage 1 FAIL: Invalid Python syntax (ast.parse failed)."
     score = 0.10
     
     # Stage 2: Stack class check (fast-fail)
     if not _has_stack_class(code):
         logger.debug("Stage 2 FAIL: no Stack class found")
-        return score
+        return score, "Stage 2 FAIL: No class definition inherently inheriting from 'Stack' found."
     score += 0.10
     
     # Stage 3: flake8 (non-blocking but scored)
     flake8_errors = _run_flake8(code)
+    curr_error_trace = ""
     if flake8_errors == 0:
         score += 0.10
     else:
         logger.debug("Stage 3: %d flake8 errors", flake8_errors)
+        curr_error_trace += f"Stage 3 WARNING: {flake8_errors} critical flake8 lint errors detected.\\n"
     
     # Stage 4: cdk synth (the big one — 50% of score)
     synth_result = run_cdk_synth(code)
@@ -121,9 +123,42 @@ def _score_single_code(code: str) -> float:
             score += 0.10
         logger.debug("Stage 5: %d resource types found", resource_count)
     else:
-        logger.debug("Stage 4 FAIL: cdk synth failed\n%s", synth_result["stderr"][:200])
+        logger.debug("Stage 4 FAIL: cdk synth failed\\n%s", synth_result["stderr"][:200])
+        curr_error_trace += f"Stage 4 FAIL: cdk synth failed! Traceback:\\n{synth_result['stderr']}\\n"
     
-    return score
+    return score, curr_error_trace.strip()
+
+
+def evaluate_prompt_with_details(prompt_text: str) -> tuple[float, list]:
+    """
+    Executes student LLM inference and runs the evaluation logic.
+    Returns (avg_score, list_of_model_details).
+    """
+    if not prompt_text:
+        return 0.0, []
+        
+    student_results = call_student_llms(prompt_text)
+    scores = []
+    details = []
+    
+    for result in student_results:
+        if result["error"] is not None:
+            details.append({"model": result["model"], "score": 0.0, "error": f"API Error: {result['error']}"})
+            continue
+            
+        code = result["code"]
+        score, error_trace = _score_single_code(code)
+        logger.info("Model %s scored %.2f", result["model"], score)
+        scores.append(score)
+        details.append({"model": result["model"], "score": score, "error": error_trace})
+        
+    if not scores:
+        logger.warning("No student models returned valid responses")
+        return 0.0, details
+        
+    avg_score = sum(scores) / len(scores)
+    logger.info("Metric result: %.3f (avg of %d models)", avg_score, len(scores))
+    return avg_score, details
 
 
 def cdk_compile_metric(example, prediction, trace=None):
@@ -133,37 +168,15 @@ def cdk_compile_metric(example, prediction, trace=None):
     Takes a DSPy example (with architecture_intent) and a prediction
     (with prompt), feeds the prompt to student LLMs, compiles each
     result, and returns the average score across all successful models.
-    
-    Args:
-        example: DSPy Example with `architecture_intent` field
-        prediction: DSPy prediction with `prompt` field
-        trace: Optional trace argument (required by MIPROv2 signature)
-        
-    Returns:
-        float: Score between 0.0 and 1.0
     """
     prompt_text = getattr(prediction, 'prompt', '')
-    if not prompt_text:
-        return 0.0
+    avg_score, _ = evaluate_prompt_with_details(prompt_text)
     
-    # Call student LLMs
-    student_results = call_student_llms(prompt_text)
-    
-    # Score each successful student response
-    scores = []
-    for result in student_results:
-        if result["error"] is not None:
-            continue  # Skip failed models (graceful degradation)
-        code = result["code"]
-        score = _score_single_code(code)
-        logger.info("Model %s scored %.2f", result["model"], score)
-        scores.append(score)
-    
-    if not scores:
-        logger.warning("No student models returned valid responses")
-        return 0.0
-    
-    # Average across successful models
-    avg_score = sum(scores) / len(scores)
-    logger.info("Metric result: %.3f (avg of %d models)", avg_score, len(scores))
+    if trace is not None:
+        # STRICT DSPY BOOTSTRAP GATING:
+        # If DSPy is evaluating this specific trace to determine if it should be added 
+        # to the prompt as a permanent few-shot example, we MUST return a boolean.
+        # Only perfectly compiled architectures (score >= 0.70) are adopted!
+        return avg_score >= 0.70
+        
     return avg_score

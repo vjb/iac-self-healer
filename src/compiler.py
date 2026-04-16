@@ -19,20 +19,8 @@ CDK_OUT_DIR = os.path.join(CDK_PROJECT_DIR, "cdk.out")
 VENV_PYTHON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "venv", "Scripts", "python.exe")
 
 
-def _kill_orphan_node_processes():
-    """Kill orphaned node.exe processes from previous cdk synth runs (Windows only)."""
-    try:
-        subprocess.run(
-            'wmic process where "name=\'node.exe\' and commandline like \'%cdk%\'" call terminate',
-            shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5
-        )
-    except Exception:
-        pass
-
-
 def _clean_cdk_output():
     """Remove cdk.out directory to prevent stale lock files."""
-    _kill_orphan_node_processes()
     if os.path.exists(CDK_OUT_DIR):
         shutil.rmtree(CDK_OUT_DIR, ignore_errors=True)
 
@@ -58,29 +46,65 @@ def run_cdk_synth(code: str) -> dict:
     with open(STACK_FILE, "w", encoding="utf-8") as f:
         f.write(code)
     
-    # Run cdk synth
-    synth_cmd = f'npx cdk synth -a "..\\\\venv\\\\Scripts\\\\python.exe app.py" --quiet'
+    # Safely construct cross-platform command execution
+    import sys
+    import tempfile
     
+    cdk_bin = "cdk.cmd" if sys.platform == "win32" else "cdk"
+    python_bin = '..\\\\venv\\\\Scripts\\\\python.exe' if sys.platform == 'win32' else '../venv/bin/python'
+    synth_cmd = [cdk_bin, "synth", "-a", f"{python_bin} app.py", "--quiet"]
+    
+    tmp_out = tempfile.NamedTemporaryFile("w+", delete=False, encoding="utf-8")
+    tmp_out_path = tmp_out.name
+    tmp_err = tempfile.NamedTemporaryFile("w+", delete=False, encoding="utf-8")
+    tmp_err_path = tmp_err.name
+    tmp_out.close()
+    tmp_err.close()
+    
+    proc = None
     try:
-        result = subprocess.run(
-            synth_cmd,
-            cwd=CDK_PROJECT_DIR,
-            shell=True,
-            capture_output=True,
-            text=True,
-            timeout=60
-        )
+        with open(tmp_out_path, "w", encoding="utf-8") as out_f, open(tmp_err_path, "w", encoding="utf-8") as err_f:
+            proc = subprocess.Popen(
+                synth_cmd,
+                cwd=CDK_PROJECT_DIR,
+                stdout=out_f,
+                stderr=err_f,
+                shell=(sys.platform == 'win32')
+            )
+            proc.communicate(timeout=120)
+            
+        with open(tmp_err_path, "r", encoding="utf-8") as f:
+            stderr_text = f.read()
     except subprocess.TimeoutExpired:
+        if proc:
+            # Best practice: terminate the exact child process tree without global taskkills
+            try:
+                if sys.platform == "win32":
+                    subprocess.run(f"taskkill /F /T /PID {proc.pid}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                else:
+                    proc.kill()
+            except Exception:
+                pass
+                
         _clean_cdk_output()
         return {
             "success": False,
             "template": None,
-            "stderr": "CDK synth timed out after 60 seconds",
+            "stderr": "CDK synth timed out after 120 seconds",
             "resource_types": []
         }
+    finally:
+        try:
+            os.unlink(tmp_out_path)
+            os.unlink(tmp_err_path)
+        except OSError:
+            pass
+            
+    # Modify returncode check below to use the captured stderr_text
+    result_stderr = stderr_text if 'stderr_text' in locals() else ""
     
     # Filter stderr noise
-    stderr_lines = result.stderr.split("\n") if result.stderr else []
+    stderr_lines = result_stderr.split("\n") if result_stderr else []
     filtered = []
     for line in stderr_lines:
         if "typeguard.check_type" in line:
@@ -92,7 +116,7 @@ def run_cdk_synth(code: str) -> dict:
         filtered.append(line)
     filtered_stderr = "\n".join(filtered[-30:])  # Last 30 meaningful lines
     
-    if result.returncode != 0:
+    if proc and proc.returncode != 0:
         _clean_cdk_output()
         return {
             "success": False,

@@ -13,14 +13,14 @@ class CDKPromptGenerator(dspy.Signature):
     )
     
     prompt = dspy.OutputField(
-        desc="A complete, self-contained instructional prompt in markdown format. "
-             "Must include: Prerequisites section listing required tools (Python 3.8+, "
-             "Node.js 20+, AWS CDK v2); Architecture Overview describing each AWS service "
-             "and how they connect; Step-by-Step Instructions referencing exact CDK v2 "
-             "construct class names and their parameters; Import Statements section showing "
-             "correct `from aws_cdk import ...` paths; Configuration Parameters with specific "
-             "values for instance types, subnet masks, timeouts, etc.; Common Pitfalls section "
-             "covering CDK v1 vs v2 differences; and Troubleshooting section with error messages "
-             "and their fixes. The prompt must work with any AI assistant (ChatGPT, Claude, etc) "
-             "to produce a single valid Python file defining a Stack class."
+        desc="A complete, structural, single-shot instructional prompt in markdown format instructing an AI to build an AWS CDK v2 project. "
+             "CRITICAL STRICT RULE: YOU MUST NEVER generate, write, or include actual raw Python/CDK code blocks (e.g. ````python ... ````) inside this prompt. "
+             "Instead, you must describe what to do using structural requirements and strict constraints. "
+             "The prompt MUST exactly follow this section layout: \n"
+             "1. Title / Objective\n"
+             "2. Requirements (Numbered list of architecture components)\n"
+             "3. Critical Implementation Requirements / Constraints (Strict rules on what API classes or patterns the Agent MUST use or MUST avoid. Use your CDK reference knowledge here)\n"
+             "4. Expected Deliverables (e.g. valid Python Stack class)\n"
+             "5. Common Issues to Avoid (Address CDK v1 to v2 migration pitfalls)\n"
+             "6. Success Criteria"
     )

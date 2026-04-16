@@ -109,9 +109,12 @@ venv\Scripts\python.exe scripts/optimize.py --auto medium
 
 This command executes the MIPROv2 process across the training intents array. The optimized DSPy schema state is written to `optimized_factory.json`. The highest-scoring generalized outputs are written to the `results/` directory.
 
+To deliberately bootstrap and safely compound previous orchestration parameters instead of triggering a zero-shot environment reset, leverage the `--resume` CLI parameter:
+```bash
+venv\Scripts\python.exe scripts/optimize.py --auto medium --resume
+```
+
 ## Known Limitations & Future Work
 
 1. Runtime Testing Constraints: The system evaluates infrastructure statically by verifying that code successfully compiles a valid CloudFormation graph via JSII. It does not provision physical resources to AWS nor evaluate if those architectures function during live operational deployment. This can allow logical network failures (e.g., misconfigured security group routing) to pass evaluation stages.
-2. Concurrent Execution Boundaries: The physical compiler engine mandates a localized `cdk.out` output directory. This prevents dynamic, multi-threaded parallel execution of the `cdk synth` validation within the same working repository. Scaling the evaluator currently requires sequential processing loops.
-3. Windows Operating System Dependencies: Residual background `node.exe` processes invoked by the JSII engine are terminated explicitly utilizing Windows Management Instrumentation (WMI) shell queries (`wmic process`). Native deployment of this optimization suite on standard Linux environments currently requires manual adjustment of the termination commands in the evaluator.
-4. Latency Overhead: The Bayesian search model relies on exhaustive API evaluation cycles spanning multiple parameters and concurrent endpoints. Running the optimization engine on dense enterprise architectures can consume up to 45 minutes of processing overhead prior to convergence.
+2. Concurrent Execution Boundaries: While the LLM payload dispatcher is heavily multi-threaded across concurrent OpenAI and OpenRouter API endpoints, the physical JSII compiler engine mandates a localized `cdk.out` output workspace. This currently prevents structural parallel execution of the CloudFormation validation logic within the same working repository. Scaling the evaluator requires sequential processing or localized virtual directory mappings.

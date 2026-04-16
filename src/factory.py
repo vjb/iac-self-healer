@@ -27,13 +27,14 @@ class PromptFactory(dspy.Module):
         )
 
 
-def train(auto="light", num_candidates=7, num_trials=15):
+def train(auto="light", num_candidates=7, num_trials=15, resume=False):
     """Run MIPROv2 optimization.
     
     Args:
         auto: MIPROv2 intensity ("light", "medium", "heavy")
         num_candidates: Number of instruction candidates to generate
         num_trials: Number of Bayesian search trials
+        resume: Whether to resume from optimized_factory.json weights
     """
     from dotenv import load_dotenv
     import os
@@ -56,18 +57,40 @@ def train(auto="light", num_candidates=7, num_trials=15):
     logger.info("  Trials: %d", num_trials)
     logger.info("  Training examples: %d", len(trainset))
     
-    optimizer = MIPROv2(
-        metric=cdk_compile_metric,
-        auto=auto,
-        num_candidates=num_candidates,
-        verbose=True,
-    )
+    output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "optimized_factory.json")
     
-    compiled = optimizer.compile(
-        PromptFactory(),
-        trainset=trainset,
-        num_trials=num_trials,
-    )
+    # Initialize the base factory and inject previous weights if resuming an optimization loop
+    base_factory = PromptFactory()
+    if resume and os.path.exists(output_path):
+        logger.info("Found existing optimized_factory.json. Loading weights to bootstrap MIPROv2 compilation!")
+        try:
+            base_factory.load(output_path)
+        except Exception as e:
+            logger.warning("Failed to load previous weights: %s. Starting from scratch.", e)
+            
+    if auto:
+        # Auto mode controls num_candidates and num_trials internally
+        optimizer = MIPROv2(
+            metric=cdk_compile_metric,
+            auto=auto,
+            verbose=True,
+        )
+        compiled = optimizer.compile(
+            base_factory,
+            trainset=trainset,
+        )
+    else:
+        # Manual mode: user controls candidates and trials
+        optimizer = MIPROv2(
+            metric=cdk_compile_metric,
+            num_candidates=num_candidates,
+            verbose=True,
+        )
+        compiled = optimizer.compile(
+            base_factory,
+            trainset=trainset,
+            num_trials=num_trials,
+        )
     
     # Save the optimized module using DSPy 3.x native .save()
     output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "optimized_factory.json")

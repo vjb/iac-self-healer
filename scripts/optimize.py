@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='[%(levelname)s] %(asctime)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
     stream=sys.stdout
@@ -25,7 +25,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def optimize(auto="light", num_candidates=7, num_trials=15):
+def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
     """Run full MIPROv2 optimization and export results."""
     from src.factory import PromptFactory, train
     from src.data_loader import load_training_intents, get_cdk_reference
@@ -35,6 +35,12 @@ def optimize(auto="light", num_candidates=7, num_trials=15):
     results_dir = os.path.join("results", "optimization", f"run_{run_timestamp}")
     os.makedirs(results_dir, exist_ok=True)
     
+    # Attach telemetry to specific run folder
+    fh = logging.FileHandler(os.path.join(results_dir, "run_log.txt"), encoding="utf-8")
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(logging.Formatter('[%(levelname)s] %(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+    logging.getLogger().addHandler(fh)
+    
     logger.info("=" * 60)
     logger.info("PROMPT OPTIMIZER — MIPROv2")
     logger.info("=" * 60)
@@ -43,7 +49,7 @@ def optimize(auto="light", num_candidates=7, num_trials=15):
     
     # Phase 1: Optimize
     logger.info("Phase 1: Running MIPROv2 optimization...")
-    compiled = train(auto=auto, num_candidates=num_candidates, num_trials=num_trials)
+    compiled = train(auto=auto, num_candidates=num_candidates, num_trials=num_trials, resume=resume)
     
     # Phase 2: Generate prompts from optimized module
     logger.info("Phase 2: Generating prompts from optimized module...")
@@ -64,8 +70,12 @@ def optimize(auto="light", num_candidates=7, num_trials=15):
             prompt_text = getattr(result, 'prompt', '')
             
             if prompt_text:
+                from src.evaluators import evaluate_prompt_with_details
+                logger.info("  → Evaluating prompt to capture detailed scores and error traces...")
+                score, details = evaluate_prompt_with_details(prompt_text)
+                
                 # Export as submission-ready markdown
-                submission = _format_submission(intent, prompt_text)
+                submission = _format_submission(intent, prompt_text, score, details)
                 
                 safe_name = intent[:40].replace(" ", "_").replace("/", "_").lower()
                 output_path = os.path.join(results_dir, f"prompt_{i}_{safe_name}.md")
@@ -95,9 +105,9 @@ def optimize(auto="light", num_candidates=7, num_trials=15):
     logger.info("=" * 60)
 
 
-def _format_submission(intent: str, prompt_text: str) -> str:
+def _format_submission(intent: str, prompt_text: str, score: float = 0.0, details: list = None) -> str:
     """Format a prompt as a hackathon-ready BUIDL submission document."""
-    return f"""# AWS CDK v2 Prompt: {intent}
+    base_markdown = f"""# AWS CDK v2 Prompt: {intent}
 
 ## Category
 Infrastructure as Code (IaC) — AWS CDK v2 Python
@@ -152,6 +162,18 @@ cdk synth
 cdk deploy
 ```
 """
+    error_section = "\\n## Evaluation Trace & Scores\\n"
+    error_section += f"**Final Average Score:** {score:.3f}\\n\\n"
+    
+    if details:
+        for d in details:
+            error_section += f"### Model: {d['model']} (Score: {d['score']})\\n"
+            if d.get('error'):
+                error_section += f"```text\\n{d['error']}\\n```\\n\\n"
+            else:
+                error_section += f"> Synthesized without critical errors.\\n\\n"
+                
+    return base_markdown + error_section
 
 
 if __name__ == "__main__":
@@ -163,6 +185,8 @@ if __name__ == "__main__":
                         help="Number of instruction candidates")
     parser.add_argument("--trials", type=int, default=15,
                         help="Number of Bayesian search trials")
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume optimization from existing optimized_factory.json weights")
     args = parser.parse_args()
     
-    optimize(auto=args.auto, num_candidates=args.candidates, num_trials=args.trials)
+    optimize(auto=args.auto, num_candidates=args.candidates, num_trials=args.trials, resume=args.resume)
