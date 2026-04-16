@@ -72,8 +72,11 @@ def optimize(auto="light", num_candidates=7, num_trials=15):
                 with open(output_path, "w", encoding="utf-8") as f:
                     f.write(submission)
                 logger.info("  → Saved to %s", output_path)
+            else:
+                logger.warning("  → Empty prompt field. Available fields: %s",
+                             [f for f in dir(result) if not f.startswith('_')])
         except Exception as e:
-            logger.error("  → Failed: %s", e)
+            logger.error("  → Failed: %s", e, exc_info=True)
     
     # Save run metadata
     metadata = {

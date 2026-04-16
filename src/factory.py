@@ -60,6 +60,7 @@ def train(auto="light", num_candidates=7, num_trials=15):
         metric=cdk_compile_metric,
         auto=auto,
         num_candidates=num_candidates,
+        verbose=True,
     )
     
     compiled = optimizer.compile(
@@ -68,7 +69,7 @@ def train(auto="light", num_candidates=7, num_trials=15):
         num_trials=num_trials,
     )
     
-    # Save the optimized module
+    # Save the optimized module using DSPy 3.x native .save()
     output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "optimized_factory.json")
     compiled.save(output_path)
     logger.info("Optimized module saved to %s", output_path)

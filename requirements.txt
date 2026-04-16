@@ -1,11 +1,9 @@
-pytest
-pytest-asyncio
-boto3
-dspy-ai
+dspy
 aws-cdk-lib
 constructs
-tenacity
 chromadb
 requests
 python-dotenv
 flake8
+tenacity
+pytest
