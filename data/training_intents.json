@@ -1,0 +1,38 @@
+[
+  {
+    "architecture_intent": "Three-tier web application with VPC, Application Load Balancer, Lambda functions as backend, and DynamoDB for data storage"
+  },
+  {
+    "architecture_intent": "Serverless REST API with API Gateway, Lambda function, and DynamoDB table with CRUD operations"
+  },
+  {
+    "architecture_intent": "Static website hosting with S3 bucket and CloudFront distribution"
+  },
+  {
+    "architecture_intent": "Event-driven data processing pipeline with SQS queue, SNS topic, and Lambda function processor"
+  },
+  {
+    "architecture_intent": "VPC network infrastructure with public and private subnets, NAT gateway, and security groups for web and application tiers"
+  },
+  {
+    "architecture_intent": "Containerized microservice with ECS Fargate cluster, network load balanced service, and VPC"
+  },
+  {
+    "architecture_intent": "Scheduled Lambda function triggered by EventBridge cron rule for periodic data processing"
+  },
+  {
+    "architecture_intent": "EC2 instance in a VPC with IAM role for Systems Manager access and security group allowing HTTP traffic"
+  },
+  {
+    "architecture_intent": "Serverless backend with Cognito user pool authentication, API Gateway, Lambda, DynamoDB, and S3 bucket"
+  },
+  {
+    "architecture_intent": "Multi-region S3 replication setup with source and destination buckets, versioning enabled, and lifecycle policies"
+  },
+  {
+    "architecture_intent": "Real-time data streaming with Kinesis Data Stream, Lambda consumer, and DynamoDB for state storage"
+  },
+  {
+    "architecture_intent": "CloudWatch monitoring stack with alarms on Lambda errors, SNS notification topic, and dashboard"
+  }
+]

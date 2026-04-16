@@ -1,10 +1,26 @@
 import dspy
 
-class AWSPromptGenerator(dspy.Signature):
-    intent = dspy.InputField(desc="The core infrastructure requirement.")
-    aws_strict_context = dspy.InputField(desc="Strict CDK v2 and Boto3 syntax rules to enforce.")
+
+class CDKPromptGenerator(dspy.Signature):
+    """Generate a detailed instructional prompt that guides any AI assistant
+    to produce valid, production-ready AWS CDK v2 Python code."""
     
-    prerequisites = dspy.OutputField(desc="A brief summary of tools required. Do NOT output any code here.")
-    use_case = dspy.OutputField(desc="High level business use case. Do NOT output any code here.")
-    master_prompt_instructions = dspy.OutputField(desc="A robust, natural language instructional prompt for a human developer. Describe the architecture, parameters, and layout. Absolutely NO full code scripts allowed. You may use small snippets to disambiguate complex attributes.")
-    troubleshooting = dspy.OutputField(desc="Common pitfalls and solutions in natural language. Do NOT output any code here.")
+    architecture_intent = dspy.InputField(
+        desc="High-level description of the desired AWS infrastructure."
+    )
+    cdk_reference = dspy.InputField(
+        desc="Relevant AWS CDK v2 API documentation, import paths, and known pitfalls."
+    )
+    
+    prompt = dspy.OutputField(
+        desc="A complete, self-contained instructional prompt in markdown format. "
+             "Must include: Prerequisites section listing required tools (Python 3.8+, "
+             "Node.js 20+, AWS CDK v2); Architecture Overview describing each AWS service "
+             "and how they connect; Step-by-Step Instructions referencing exact CDK v2 "
+             "construct class names and their parameters; Import Statements section showing "
+             "correct `from aws_cdk import ...` paths; Configuration Parameters with specific "
+             "values for instance types, subnet masks, timeouts, etc.; Common Pitfalls section "
+             "covering CDK v1 vs v2 differences; and Troubleshooting section with error messages "
+             "and their fixes. The prompt must work with any AI assistant (ChatGPT, Claude, etc) "
+             "to produce a single valid Python file defining a Stack class."
+    )
