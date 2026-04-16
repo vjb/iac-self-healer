@@ -8,7 +8,7 @@ Standard Large Language Model generation for Infrastructure-as-Code fails at thr
 
 1. API surface inconsistencies: Models produce CDK v1 syntax (e.g., core.RemovalPolicy), reference non-existent class attributes, or pass arguments with incorrect types (e.g., passing a string to a parameter requiring an array).
 2. Environment-blind generation: Base instructions are often ambiguous regarding which imports or constructs to use. This results in the model relying on outdated training weights rather than specific framework documentation.
-3. Unactionable feedback loops: Previous iterations of this architecture utilized a static LLM-based reviewer that analyzed the generated code prior to compilation. This resulted in an infinite loop where the reviewer would reject valid code or approve invalid code because it was predicting compiler behavior rather than evaluating a physical execution trace.
+3. Unactionable feedback loops: Static LLM-based code reviewers often trap execution into infinite loops where the reviewer ultimately rejects valid structures or approves invalid code because it predicts compiler behavior rather than evaluating a true physical execution trace.
 
 ## Design Principles
 
@@ -49,7 +49,7 @@ The system injects AWS CDK v2 documentation stored in a local ChromaDB instance 
 The project executes on Python 3.13 utilizing `dspy>=3.1.3`. This provides access to native module serialization (`.save()` and `.load()`), exact hyperparameter tuning controls (`num_trials`), and the standard Bayesian optimizer without requiring external workarounds or mock implementations.
 
 ### CloudFormation Synthesis Priority
-Earlier iterations deployed infrastructure directly to an emulated environment. Testing implicit SDK calls and managing container timeouts degraded optimization efficiency. The `cdk synth` command performs exact dependency graph resolution, policy validation, and JSII transpilation. This yields a deterministic, zero-cost error signal at a significantly faster execution rate.
+Direct infrastructure provision via emulated execution environments frequently traps testing logic in implicit SDK calls and container timeouts which dramatically degrades optimization efficiency. To completely bypass this, the pipeline relies strictly on the `cdk synth` command to perform exact dependency graph resolution, policy validation, and JSII transpilation. This yields a mathematically deterministic, zero-cost error signal at a significantly faster execution rate.
 
 ## Known Limitations & Future Work
 
