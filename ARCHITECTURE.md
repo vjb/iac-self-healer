@@ -34,7 +34,7 @@ Each student's generated output is processed through a sequential 5-stage pipeli
 1. `ast.parse()` check: Validates standard Python syntax (+0.10)
 2. Stack class check: Verifies inheritance from the AWS CDK Stack base class (+0.10)
 3. `flake8` execution: Evaluates undefined references and invalid imports (+0.10)
-4. JSII Compilation Validation: The heavy `cdk synth` execution process (+0.50)
+4. Ephemeral JSII Compilation: The heavy `cdk synth` execution process isolated dynamically within native `tempfile` execution workspaces to enable true parallelization (+0.50)
 5. Resource validation: Counts CloudFormation resources to ensure structural completeness (+0.20)
 
 ### MIPROv2 Optimizer (scripts/optimize.py)
@@ -54,5 +54,4 @@ Direct infrastructure provision via emulated execution environments frequently t
 ## Known Limitations & Future Work
 
 1. Post-Deployment Execution Limitations: The system validates that code successfully compiles to a strict CloudFormation template. It does not deploy resources to AWS or monitor runtime operational status.
-2. Single-Tenant Concurrency Bottlenecks: While the core data-generation tier is entirely multi-threaded against OpenAI and OpenRouter APIs, the physical JSII compilation engine utilizes a shared, stateful `cdk.out` directory. This strictly restricts parallelizing compilation checks on the identical repository footprint. Scaling execution effectively requires discrete temporary volumes targeting isolated directory trees.
-3. Hardcoded Parameter Optimization: Currently, the pipeline assigns linear weights to the metric evaluation steps. Future iterations require dynamic gradient weighting where the evaluation pipeline heavily penalizes specific types of syntactic failures over linting anomalies.
+2. Hardcoded Parameter Optimization: Currently, the pipeline assigns linear weights to the metric evaluation steps. Future iterations require dynamic gradient weighting where the evaluation pipeline heavily penalizes specific types of syntactic failures over linting anomalies.

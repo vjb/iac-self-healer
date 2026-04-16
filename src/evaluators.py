@@ -134,6 +134,7 @@ def evaluate_prompt_with_details(prompt_text: str) -> tuple[float, list]:
     Executes student LLM inference and runs the evaluation logic.
     Returns (avg_score, list_of_model_details).
     """
+    import concurrent.futures
     if not prompt_text:
         return 0.0, []
         
@@ -141,16 +142,20 @@ def evaluate_prompt_with_details(prompt_text: str) -> tuple[float, list]:
     scores = []
     details = []
     
-    for result in student_results:
+    def _evaluate_single(result):
         if result["error"] is not None:
-            details.append({"model": result["model"], "score": 0.0, "error": f"API Error: {result['error']}"})
-            continue
+            return {"model": result["model"], "score": 0.0, "error": f"API Error: {result['error']}"}
             
-        code = result["code"]
-        score, error_trace = _score_single_code(code)
+        score, error_trace = _score_single_code(result["code"])
         logger.info("Model %s scored %.2f", result["model"], score)
-        scores.append(score)
-        details.append({"model": result["model"], "score": score, "error": error_trace})
+        return {"model": result["model"], "score": score, "error": error_trace}
+        
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        computed_details = list(executor.map(_evaluate_single, student_results))
+        
+    for detail in computed_details:
+        scores.append(detail["score"])
+        details.append(detail)
         
     if not scores:
         logger.warning("No student models returned valid responses")

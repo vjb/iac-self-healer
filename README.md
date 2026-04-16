@@ -117,4 +117,3 @@ venv\Scripts\python.exe scripts/optimize.py --auto medium --resume
 ## Known Limitations & Future Work
 
 1. Runtime Testing Constraints: The system evaluates infrastructure statically by verifying that code successfully compiles a valid CloudFormation graph via JSII. It does not provision physical resources to AWS nor evaluate if those architectures function during live operational deployment. This can allow logical network failures (e.g., misconfigured security group routing) to pass evaluation stages.
-2. Concurrent Execution Boundaries: While the LLM payload dispatcher is heavily multi-threaded across concurrent OpenAI and OpenRouter API endpoints, the physical JSII compiler engine mandates a localized `cdk.out` output workspace. This currently prevents structural parallel execution of the CloudFormation validation logic within the same working repository. Scaling the evaluator requires sequential processing or localized virtual directory mappings.
