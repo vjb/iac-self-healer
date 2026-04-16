@@ -79,7 +79,7 @@ The DSPy module queries ChromaDB with the architecture intent and retrieves rele
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.10+ (Tested with 3.13)
 - Node.js 20+ (JSII runtime for AWS CDK)
 - OpenAI API key with GPT-4o access
 - Groq API key (free tier supported)
