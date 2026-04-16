@@ -37,10 +37,13 @@ graph TD
    * `ast.parse()`: validates Python syntax structure (+0.10)
    * Stack verification: confirms presence of a class inheriting from `Stack` (+0.10)
    * `flake8`: detects undefined references or import failures (+0.10)
-   * `cdk synth`: generates CloudFormation templates via the JSII runtime environment (+0.50)
+   * `cdk synth`: generates CloudFormation templates via the JSII runtime environment isolated dynamically within native `tempfile` execution workspaces to enable true parallelization (+0.50)
    * Resource verification: detects presence of three or more infrastructure resource types (+0.20)
-5. MIPROv2 consumes the numeric score distribution to optimize the instruction parameters via internal search mechanics.
-6. The exact specification resulting in the highest validation score across all models is output as a markdown document.
+5. **Dual-Layer Auto-Healing Network**:
+   * *Syntactic Iteration (Local)*: If execution fails at the compiler stage, the `stderr` string is piped natively back into the evaluating language model allowing up to 2 contextual recursive syntax auto-corrections.
+   * *Oracle Memory (Global)*: If the local iteration limit is exhausted, the final `stderr` sequence is hashed and injected into the ChromaDB vector layer. The next iteration of the DSPy PromptGenerator implicitly checks this oracle and writes hardcoded prevention constraints to future prompts!
+6. MIPROv2 consumes the numeric score distribution to optimize the instruction parameters via internal search mechanics.
+7. The exact specification resulting in the highest validation score across all models is output as a markdown document.
 
 ### Multi-Model Evaluation
 
