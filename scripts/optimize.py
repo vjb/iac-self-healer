@@ -107,25 +107,23 @@ def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
 
 def _format_submission(intent: str, prompt_text: str, score: float = 0.0, details: list = None) -> str:
     """Format a prompt as a hackathon-ready BUIDL submission document."""
-    base_markdown = f"""# AWS CDK v2 Prompt: {intent}
+    base_markdown = f"""# Declarative AWS SAM Prompt: {intent}
 
 ## Category
-Infrastructure as Code (IaC) — AWS CDK v2 Python
+Infrastructure as Code (IaC) — AWS SAM (YAML)
 
 ## AWS Services Used
 _Extracted from the architecture intent and prompt content._
 
 ## Prerequisites
-- Python 3.8 or higher
-- Node.js 20+ (required for AWS CDK CLI and JSII runtime)
-- AWS CDK v2 CLI: `npm install -g aws-cdk`
-- AWS account with appropriate IAM permissions
-- Python packages: `aws-cdk-lib`, `constructs`
+- AWS SAM CLI installed
+- `cfn-lint` installed checking CloudFormation configurations
+- `cfn-guard` installed for strict security compliance verification
 
 ## Prompt
 
 > Copy and paste the following prompt into any AI assistant (ChatGPT, Claude, etc.)
-> to generate a complete, working AWS CDK v2 Python stack.
+> to generate a complete, structurally sound AWS SAM YAML template.
 
 ---
 
@@ -137,29 +135,23 @@ _Extracted from the architecture intent and prompt content._
 
 ### Common Errors
 
-1. **`ModuleNotFoundError: No module named 'aws_cdk'`**
-   - Install: `pip install aws-cdk-lib constructs`
+1. **`[Lint E1001] Top level template section not valid`**
+   - Ensure `Transform: AWS::Serverless-2016-10-31` is declared at the absolute root of the document.
 
-2. **`Cannot find module 'aws-cdk-lib'`**
-   - Run: `npm install aws-cdk-lib`
+2. **`[Lint E3002] Resource properties are missing`**
+   - Check the specific resource block for missing required attributes (e.g., CodeUri, Handler).
 
-3. **`Error: This app contains no stacks`**
-   - Ensure your `app.py` instantiates the stack and calls `app.synth()`
-
-4. **`jsii.errors.JavaScriptError: ... is not a constructor`**
-   - Check import paths — CDK v2 uses `from aws_cdk import aws_X`, not `from aws_cdk.core import X`
-
-5. **`SubnetType.PRIVATE is not valid`**
-   - Use `SubnetType.PRIVATE_WITH_EGRESS` instead (CDK v2 renamed this)
+3. **`cfn-guard violation`**
+   - Your architecture breached strict HIPAA or NIST compliance bounds. Verify KMS encryption patterns and VPC subnets.
 
 ## Verification
 
 ```bash
-# Synthesize the CloudFormation template (no deployment needed)
-cdk synth
+# Verify static structure without deployment
+cfn-lint template.yaml
 
-# Deploy to your AWS account
-cdk deploy
+# Verify security bounds
+cfn-guard validate --data template.yaml
 ```
 """
     error_section = "\\n## Evaluation Trace & Scores\\n"
