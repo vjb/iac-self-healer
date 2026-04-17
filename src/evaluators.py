@@ -42,23 +42,25 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
         blocks.sort(key=len, reverse=True)
         yaml_content = blocks[0].strip()
         # Sort blocks by length descending because SAM templates are vastly larger than dummy bash chunks
-        blocks.sort(key=len, reverse=True)
-        yaml_content = blocks[0].strip()
     
     # Stage 1: Structural Parsing & Sanitization Middleware
     parsed_obj = None
     try:
-        parsed_obj = yaml.safe_load(yaml_content)
-    except yaml.YAMLError as exc:
-        logger.debug("Stage 1 FAIL: yaml.safe_load failed, testing JSON fallback...")
+        from cfn_flip import to_json
+        import json
+        # to_json converts native AWS YAML (!Ref, !Sub) safely into standard AWS JSON structure natively
+        json_str = to_json(yaml_content)
+        parsed_obj = json.loads(json_str)
+    except Exception as e:
+        # JSON fallback if it drops directly out of structural loops (or if LLM natively outputs JSON)
         try:
+            import json
             parsed_obj = json.loads(yaml_content)
-        except json.JSONDecodeError:
-            line = "unknown"
-            if hasattr(exc, 'problem_mark') and exc.problem_mark is not None:
-                line = exc.problem_mark.line + 1
-            error_trace = f"[YAML Parsing Error] Line {line}: {exc}"
-            return 0.0, "YAML_PARSE_ERROR", error_trace
+        except Exception as fallback_e:
+            cfn_error = f"{type(e).__name__}: {e}"
+            json_error = f"{type(fallback_e).__name__}: {fallback_e}"
+            logger.debug("Stage 1 FAIL: cfn_flip parsing failed, testing JSON fallback...")
+            return 0.0, "YAML_PARSE_ERROR", f"CFN_ParseError: {cfn_error} | JSON_ParseError: {json_error}"
             
     if isinstance(parsed_obj, dict):
         if "AWSTemplateFormatVersion" not in parsed_obj:
