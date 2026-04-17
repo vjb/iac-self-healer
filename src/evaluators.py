@@ -39,17 +39,32 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
     if match:
         yaml_content = match.group(1).strip()
     
-    # Stage 1: Structural Parsing
+    # Stage 1: Structural Parsing & Sanitization Middleware
+    parsed_obj = None
     try:
-        yaml.safe_load(yaml_content)
-        score += 0.20
+        parsed_obj = yaml.safe_load(yaml_content)
     except yaml.YAMLError as exc:
-        logger.debug("Stage 1 FAIL: yaml.safe_load failed")
-        line = "unknown"
-        if hasattr(exc, 'problem_mark') and exc.problem_mark is not None:
-            line = exc.problem_mark.line + 1
-        error_trace = f"[YAML Parsing Error] Line {line}: {exc}"
-        return 0.0, "YAML_PARSE_ERROR", error_trace
+        logger.debug("Stage 1 FAIL: yaml.safe_load failed, testing JSON fallback...")
+        try:
+            parsed_obj = json.loads(yaml_content)
+        except json.JSONDecodeError:
+            line = "unknown"
+            if hasattr(exc, 'problem_mark') and exc.problem_mark is not None:
+                line = exc.problem_mark.line + 1
+            error_trace = f"[YAML Parsing Error] Line {line}: {exc}"
+            return 0.0, "YAML_PARSE_ERROR", error_trace
+            
+    if isinstance(parsed_obj, dict):
+        if "AWSTemplateFormatVersion" not in parsed_obj:
+            parsed_obj["AWSTemplateFormatVersion"] = "2010-09-09"
+        if "Transform" not in parsed_obj:
+            parsed_obj["Transform"] = "AWS::Serverless-2016-10-31"
+        try:
+            yaml_content = yaml.dump(parsed_obj, sort_keys=False)
+        except Exception as e:
+            return 0.0, "YAML_DUMP_ERROR", f"Failed to serialize sanitized template: {e}"
+            
+    score += 0.20
         
     with tempfile.TemporaryDirectory() as temp_dir:
         template_file = os.path.join(temp_dir, "template.yaml")

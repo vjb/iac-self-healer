@@ -41,7 +41,7 @@ class PromptFactory(dspy.Module):
         )
 
 
-def train(auto="light", num_candidates=7, num_trials=15, resume=False):
+def train(auto="light", num_candidates=7, num_trials=15, resume=False, results_dir=None):
     """Run MIPROv2 optimization.
     
     Args:
@@ -49,6 +49,7 @@ def train(auto="light", num_candidates=7, num_trials=15, resume=False):
         num_candidates: Number of instruction candidates to generate
         num_trials: Number of Bayesian search trials
         resume: Whether to resume from optimized_factory.json weights
+        results_dir: The timestamped directory to land the json checkpoints
     """
     from dotenv import load_dotenv
     import os
@@ -71,16 +72,25 @@ def train(auto="light", num_candidates=7, num_trials=15, resume=False):
     logger.info("  Trials: %d", num_trials)
     logger.info("  Training examples: %d", len(trainset))
     
-    output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "optimized_factory.json")
+    output_path = os.path.join(results_dir, "optimized_factory.json") if results_dir else os.path.join(os.path.dirname(os.path.dirname(__file__)), "optimized_factory.json")
     
     # Initialize the base factory and inject previous weights if resuming an optimization loop
     base_factory = PromptFactory()
-    if resume and os.path.exists(output_path):
-        logger.info("Found existing optimized_factory.json. Loading weights to bootstrap MIPROv2 compilation!")
-        try:
-            base_factory.load(output_path)
-        except Exception as e:
-            logger.warning("Failed to load previous weights: %s. Starting from scratch.", e)
+    if resume:
+        champion_id = os.getenv("CHAMPION_RUN_ID")
+        if champion_id:
+            resume_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "results", "optimization", f"run_{champion_id}", "optimized_factory.json")
+        else:
+            resume_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "optimized_factory.json")
+            
+        if os.path.exists(resume_path):
+            logger.info("Found checkpoint at %s. Loading weights to bootstrap MIPROv2 compilation!", resume_path)
+            try:
+                base_factory.load(resume_path)
+            except Exception as e:
+                logger.warning("Failed to load previous weights from %s: %s. Starting from scratch.", resume_path, e)
+        else:
+            logger.warning("Attempted to resume but no checkpoint found at %s", resume_path)
             
     if auto:
         # Auto mode controls num_candidates and num_trials internally
@@ -107,7 +117,8 @@ def train(auto="light", num_candidates=7, num_trials=15, resume=False):
         )
     
     # Save the optimized module using DSPy 3.x native .save()
-    output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "optimized_factory.json")
+    if not results_dir:
+        output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "optimized_factory.json")
     compiled.save(output_path)
     logger.info("Optimized module saved to %s", output_path)
     

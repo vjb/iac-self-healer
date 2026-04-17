@@ -49,7 +49,7 @@ def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
     
     # Phase 1: Optimize
     logger.info("Phase 1: Running MIPROv2 optimization...")
-    compiled = train(auto=auto, num_candidates=num_candidates, num_trials=num_trials, resume=resume)
+    compiled = train(auto=auto, num_candidates=num_candidates, num_trials=num_trials, resume=resume, results_dir=results_dir)
     
     # Phase 2: Generate prompts from optimized module
     logger.info("Phase 2: Generating prompts from optimized module...")
