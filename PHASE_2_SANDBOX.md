@@ -7,18 +7,23 @@ To achieve maximum institutional rigor for a hackathon boundary, the pipeline mu
 
 ## Structural Execution Flow
 
-### 1. Ephemeral Sandbox Initialization
-The generative model must be permanently partitioned away from root physical resources. The evaluation loop must execute strictly under a dynamically isolated execution boundary:
-- **Ephemeral Sandbox Constraint:** Target an isolated AWS Environment (e.g., via LocalStack running on massive RAM footprints, or explicit AWS Organizations sandbox policies). 
-- **Strict Execution IAM Boundaries:** The Python orchestration thread assumes a tightly constrained IAM Execution Role possessing rights exclusively targeted for serverless provisioning bounds (Lambda, APIGW, S3, DynamoDB), strictly mapping back to a `PermissionsBoundary` to verify agents cannot break sandbox containment.
+### 1. Ephemeral Sandbox Initialization (LocalStack Ultimate)
+The generative model must be permanently partitioned away from root live physical AWS cloud resources. The evaluation loop executes strictly under a completely localized, dynamically isolated execution boundary:
+- **Zero-Latency Target:** Target a LocalStack container instance rather than live AWS infrastructure. This physically guarantees zero cloud provider API billings and immediate deployment latency metrics.
+- **Critical IAM Emulation Limit:** Under standard configurations, LocalStack Community defaults to an implicit `Allow:*` execution. For the Phase 2 Oracle to validate true AWS WAFR physical safety bounds, the environment explicitly mandates the **LocalStack Pro/Ultimate License**. 
+- **Docker Enforcement Flags:** The LocalStack instance MUST be instantiated utilizing the `LOCALSTACK_AUTH_TOKEN` environment variable accompanied precisely by the parameter `ENFORCE_IAM=1`. This completely seals the execution loop, guaranteeing simulated `AccessDeniedException` rollbacks if the LLM fails to synthesize correct IAM Role architectures.
 
 ### 2. The Physical Execution Oracle (`sam deploy`)
 The current static `evaluate_prompt_with_details` function routes the generated output string directly into physical cloud verification natively.
 
 1. **Compilation & Synthesis:** The generative parameter writes a `template.yaml` to the volatile RAM disk node. The system mechanically executes `sam build --use-container`.
-2. **Synchronous Deployment Trace:** The orchestration loop triggers continuous deployment boundaries utilizing randomized UUID hashing:
+2. **Synchronous LocalStack Deployment Trace:** The orchestration loop triggers continuous deployment boundaries targeting the absolute local endpoints utilizing randomized UUID hashing:
    ```bash
-   sam deploy --stack-name eval-trace-[UUID] --resolve-s3 --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --no-confirm-changeset
+   sam deploy --stack-name eval-trace-[UUID] \
+       --endpoint-url=http://localhost:4566 \
+       --resolve-s3 \
+       --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+       --no-confirm-changeset
    ```
 3. **Trace Extraction:** The Bayesian optimizer listens actively to the CloudFormation execution loop rather than local static syntax tests.
    - If `status == CREATE_COMPLETE`: The agent correctly mapped structural intent physically to the remote cloud. Reward limit multiplier bounds at `2.00`.
