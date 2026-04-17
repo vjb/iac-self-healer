@@ -15,6 +15,7 @@ import tempfile
 import logging
 import yaml
 import json
+import math
 
 from src.student import call_student_llms
 
@@ -93,14 +94,18 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
                 try:
                     errors = json.loads(result.stdout)
                     if errors:
+                        num_errors = len(errors)
+                        lint_score = 0.40 * math.exp(-0.5 * num_errors)
+                        score += lint_score
                         first_err = errors[0]
                         rule_id = first_err.get("Rule", {}).get("Id", "E0000")
                         msg = first_err.get("Message", "Unknown error")
                         line = first_err.get("Location", {}).get("Start", {}).get("LineNumber", "Unknown")
-                        return score, rule_id, f"[cfn-lint failure] Rule {rule_id} at line {line}: {msg}"
+                        return score, rule_id, f"[cfn-lint failure] Rule {rule_id} at line {line}: {msg} (Total Errors: {num_errors})"
                 except json.JSONDecodeError:
                     return score, "CFN_LINT_CRASH", f"cfn-lint output parsing failed: {result.stdout}"
-            score += 0.40
+            else:
+                score += 0.40
         except FileNotFoundError:
             logger.error("cfn-lint binary not found! Please run pip install cfn-lint")
             return score, "SYS_ERR", "cfn-lint execution failed."
@@ -126,14 +131,17 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
                     out_json = json.loads(result.stdout)
                     if "not_compliant" in out_json:
                         if out_json["not_compliant"]:
+                            num_violations = len(out_json["not_compliant"])
+                            guard_score = 0.40 * math.exp(-0.5 * num_violations)
+                            score += guard_score
                             rule_obj = out_json["not_compliant"][0]
                             rule_name = rule_obj.get("Rule", {}).get("Name", "UNKNOWN_GUARD_RULE")
-                            msg = f"[cfn-guard violation] Rule {rule_name} breached HIPAA/security checks."
+                            msg = f"[cfn-guard violation] Rule {rule_name} breached AWS WAFR constraints. (Total Violations: {num_violations})"
                             return score, rule_name, msg
                 except json.JSONDecodeError:
                     return score, "CFN_GUARD_CRASH", f"cfn-guard error: {result.stderr or result.stdout}"
-                    
-            score += 0.40
+            else:
+                score += 0.40
         except FileNotFoundError:
             logger.error("cfn-guard binary not found! Please install it.")
             return score, "SYS_ERR", "cfn-guard execution failed."
