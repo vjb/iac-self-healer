@@ -35,9 +35,14 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
     
     import re
     # Strip markdown block formatting robustly
-    match = re.search(r"```[a-zA-Z]*\s*(.*?)\s*```", yaml_content, re.DOTALL)
-    if match:
-        yaml_content = match.group(1).strip()
+    blocks = re.findall(r"```[a-zA-Z]*\n(.*?)\n```", yaml_content, re.DOTALL)
+    if not blocks:
+        blocks = re.findall(r"```(.*?)\n```", yaml_content, re.DOTALL)
+    
+    if blocks:
+        # Sort blocks by length descending because SAM templates are vastly larger than dummy bash chunks
+        blocks.sort(key=len, reverse=True)
+        yaml_content = blocks[0].strip()
     
     # Stage 1: Structural Parsing & Sanitization Middleware
     parsed_obj = None
