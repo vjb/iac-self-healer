@@ -54,6 +54,7 @@ cp .env.example .env
 Review the `.env` structure:
 * `OPENAI_API_KEY`: API authentication key.
 * `OPENROUTER_API_KEY`: API authentication key utilized for OpenRouter requests.
+* `LOCALSTACK_AUTH_TOKEN`: Pro/Ultimate environment variable required to trigger strict `ENFORCE_IAM=1` sandbox matrices globally.
 
 ## Installation
 
