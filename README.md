@@ -6,22 +6,22 @@ This repository provides a static evaluation pipeline for optimizing generated I
 
 ```mermaid
 graph TD
-    Z["AWS aws-samples Repository (YAML)"] -->|Extract Validation Defaults| A
-    A["MIPROv2 Bayesian Optimizer (GPT-4o)"] -->|Queries Constraints| B[(ChromaDB Vector Oracle)]
-    B -->|Ingests Document Parameters| C{"Student Evaluator (Claude 3.7)"}
+    Z["AWS aws-samples Repository"] -->|Extract Validation Defaults| A
+    A["MIPROv2 Bayesian Optimizer - GPT-4o"] -->|Queries Constraints| B[(ChromaDB Vector Oracle)]
+    B -->|Ingests Document Parameters| C{"Student Evaluator - Claude 3.7"}
     
     C -->|Generates SAM YAML into Volatile RAM| D["yaml.safe_load Parser"]
     D -->|Validates| E["cfn-lint Syntax Verification"]
     E -->|Validates| F["cfn-guard Compliance Verification"]
     
-    F -->|Satisfies Structural Rules| G{"Semantic Equivalence Judge (GPT-4o-mini)"}
-    G -->|YES (Perfect Match)| H["Score: 1.20 (Validation Success)"]
+    F -->|Satisfies Structural Rules| G{"Semantic Equivalence Judge"}
+    G -->|YES - Perfect Match| H["Score 1.20 - Validation Success"]
     
     %% Information Feedback Loops
     D -->|Exception| J["Math Penalty & Retry Execution"]
     E -->|Returns Top 3 Violations Array| J
     F -->|Returns Raw AST JSON Trace| J
-    G -->|NO (Returns Technical Delta)| J
+    G -->|NO - Returns Technical Delta| J
     
     J -->|Retry Attempt Loop| C
     J -->|Exhausted| K["Record Compiler Failure Log"]
