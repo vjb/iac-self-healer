@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
     """Run full MIPROv2 optimization and export results."""
     from src.factory import PromptFactory, train
-    from src.data_loader import load_training_intents, get_cdk_reference
+    from src.data_loader import load_training_intents, get_sam_reference
     import dspy
     
     run_timestamp = int(time.time())
@@ -65,8 +65,8 @@ def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
         logger.info("Generating prompt %d/%d: %s", i + 1, len(intents), intent[:50])
         
         try:
-            cdk_ref = get_cdk_reference(intent)
-            result = compiled(architecture_intent=intent, cdk_reference=cdk_ref)
+            sam_ref = get_sam_reference(intent)
+            result = compiled(architecture_intent=intent, sam_reference=sam_ref)
             prompt_text = getattr(result, 'prompt', '')
             
             if prompt_text:
