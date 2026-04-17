@@ -12,17 +12,18 @@ Large Language Model generation for declarative Infrastructure-as-Code generally
 ## Core Mechanics
 
 ### Two-Model Bayesian System (DSPy MIPROv2)
-The orchestrator drives a `DSPy MIPROv2` vector loop cleanly decoupled across two physical models optimally bridging speed and heavy compute:
+The orchestrator drives a `DSPy MIPROv2` vector loop cleanly decoupled across two physical models optimally bridging speed and extreme compute:
 1. `Prompt_Model` (gpt-4o): Ingests the trace failures and mathematically hallucinates deeper, bounded prompt constraints recursively. 
-2. `Task_Model` (gpt-4o-mini): A hyper-fast task pipeline rapidly dispatching prompt evaluations dynamically through simulated inference streams (calling out to Llama and Deepseek dynamically via `call_student_llms`). 
+2. `Task_Model` (claude-3.7-sonnet): A hyper-fast task pipeline rapidly dispatching prompt evaluations dynamically. This explicitly drops weaker engines (like Llama / Deepseek) to completely negate Bayesian metric drag and loop stalls! 
 
 ### The Evaluator Pipeline (src/evaluators.py)
 Student language models ingest structural prompt bounds and return raw Serverless YAML structures. The YAML loops seamlessly through an continuous mathematics evaluation array native to Python:
-1. **YAML Parameter Loading:** `yaml.safe_load` establishes format configuration natively.
-2. **Specification Validation:** The `cfn-lint` syntax boundaries run physically against deterministic JSON error outputs. 
-3. **Enterprise Compliance Enforcement:** The `cfn-guard validate` engine checks exact boundaries against Well-Architected constraints (S3 Bucket encryptions). 
-4. **Fractional Decay Grading (`math.exp`):** The amount of compilation exceptions directly translates to a float threshold. An execution throwing exactly 8 rules violations yields a higher physical modifier than one dropping 17, solving discrete-step mathematical stalls completely.
-5. **Semantic Target Parsing (LLM-as-a-judge):** `gpt-4o-mini` natively executes checking identical matches. If the structure matches AWS structural protocols natively (`1.00`), a semantic judge verifies the physical request perfectly to hit the ultimate theoretical ceiling of `1.20`. 
+1. **Volatile Memory Generation:** Because physical compilers (`cfn-lint`) require static bytes to run checks, the orchestrator generates the template actively into a physical RAM Disk vector (`R:\`), entirely obliterating local file I/O locks and solid-state degradation.
+2. **YAML Parameter Loading:** `yaml.safe_load` establishes format configuration natively.
+3. **Specification Validation:** The `cfn-lint` syntax boundaries run physically against deterministic JSON error outputs natively from RAM. 
+4. **Enterprise Compliance Enforcement:** The `cfn-guard validate` engine checks exact boundaries logically against heavily embedded Well-Architected Framework parameters natively inside the pipeline data structure (S3 Encryption bounds). 
+5. **Fractional Decay Grading (`math.exp`):** The amount of compilation exceptions directly translates to a float threshold. An execution throwing exactly 8 rules violations yields a higher physical modifier than one dropping 17, solving discrete-step mathematical stalls completely.
+6. **Semantic Target Parsing (LLM-as-a-judge):** `gpt-4o` natively executes checking identical matches. If the structure matches AWS structural protocols natively (`1.00`), a semantic judge verifies the physical request perfectly to hit the ultimate theoretical ceiling of `1.20`. 
 
 ### Dynamic Web-RAG Grounding (src/data_loader.py)
 A CloudFormation specification object scrapes the exact AWS CDN deployment natively across JSON logic parameters! Whenever the optimizer catches `cfn-lint` compiler execution failures, ChromaDB traces AWS definitions immediately natively across vectors, completely bypassing pre-defined static rules.

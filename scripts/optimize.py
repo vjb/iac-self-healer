@@ -48,11 +48,13 @@ def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
     logger.info("Results dir: %s", results_dir)
     
     # Phase 1: Optimize
+    p1_start = time.time()
     logger.info("Phase 1: Running MIPROv2 optimization...")
     compiled = train(auto=auto, num_candidates=num_candidates, num_trials=num_trials, resume=resume, results_dir=results_dir)
+    p1_elapsed = time.time() - p1_start
     
     # Phase 2: Generate prompts from optimized module
-    logger.info("Phase 2: Generating prompts from optimized module...")
+    logger.info("Phase 2: Generating prompts... (Phase 1 took %.2fs)", p1_elapsed)
     
     api_key = os.getenv("OPENAI_API_KEY")
     lm = dspy.LM('openai/gpt-4o', api_key=api_key, temperature=0.5)
@@ -60,9 +62,17 @@ def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
     
     intents = load_training_intents()
     
+    run_overviews = []
+    
+    phase2_start = time.time()
     for i, example in enumerate(intents):
         intent = example.architecture_intent
-        logger.info("Generating prompt %d/%d: %s", i + 1, len(intents), intent[:50])
+        if i > 0:
+            avg_time = (time.time() - phase2_start) / i
+            eta = avg_time * (len(intents) - i)
+            logger.info("Generating prompt %d/%d (ETA: %.1fs): %s", i + 1, len(intents), eta, intent[:50])
+        else:
+            logger.info("Generating prompt %d/%d: %s", i + 1, len(intents), intent[:50])
         
         try:
             sam_ref = get_sam_reference(intent)
@@ -73,6 +83,22 @@ def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
                 from src.evaluators import evaluate_prompt_with_details
                 logger.info("  → Evaluating prompt to capture detailed scores and error traces...")
                 score, details = evaluate_prompt_with_details(prompt_text)
+                
+                # Aggregate for run summary
+                top_error = "None"
+                model_scores = {}
+                if details:
+                    for d in details:
+                        model_scores[d['model']] = d['score']
+                        if d.get('error') and top_error == "None":
+                            top_error = d['error'].split('\n')[0][:60]
+                
+                run_overviews.append({
+                    "intent": intent,
+                    "score": score,
+                    "model_scores": model_scores,
+                    "top_error": top_error
+                })
                 
                 # Export as submission-ready markdown
                 submission = _format_submission(intent, prompt_text, score, details)
@@ -87,6 +113,21 @@ def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
                              [f for f in dir(result) if not f.startswith('_')])
         except Exception as e:
             logger.error("  → Failed: %s", e, exc_info=True)
+    
+    # Generate run_overview.md
+    overview_md = "# MIPROv2 Global Execution Summary\n\n"
+    overview_md += "| Intent / Prompt Target | Aggregate Score | Top Remaining Error | Model Breakdown |\n"
+    overview_md += "|---|---|---|---|\n"
+    for r in run_overviews:
+        breakdown = "<br>".join([f"{k}: {v:.2f}" for k, v in r["model_scores"].items()])
+        safe_intent_name = (r['intent'][:45] + '...') if len(r['intent']) > 45 else r['intent']
+        safe_error = r['top_error'].replace('|', '')
+        overview_md += f"| **{safe_intent_name}** | `{r['score']:.3f}` | {safe_error} | {breakdown} |\n"
+        
+    overview_path = os.path.join(results_dir, "run_overview.md")
+    with open(overview_path, "w", encoding="utf-8") as f:
+        f.write(overview_md)
+    logger.info("  → Saved Global Overview to %s", overview_path)
     
     # Save run metadata
     metadata = {
@@ -108,15 +149,31 @@ def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
     except Exception as e:
         logger.error("  → Failed to save .optimizer_state.json for next iteration: %s", e)
     
+    total_time = time.time() - run_timestamp
     logger.info("=" * 60)
-    logger.info("Optimization complete. Results in: %s", results_dir)
+    logger.info("Optimization complete in %.2f seconds! Results in: %s", total_time, results_dir)
     logger.info("=" * 60)
 
 
 def _format_submission(intent: str, prompt_text: str, score: float = 0.0, details: list = None) -> str:
     """Format a prompt as a hackathon-ready BUIDL submission document."""
-    base_markdown = f"""# Declarative AWS SAM Prompt: {intent}
+    
+    dashboard = f"# Declarative AWS SAM Prompt: {intent}\n\n"
+    dashboard += "## Telemetry Dashboard\n"
+    dashboard += f"**Final Aggregate Score:** `{score:.3f}`\n\n"
+    dashboard += "| Model | Score | Remaining Trace Errors |\n"
+    dashboard += "|---|---|---|\n"
+    
+    if details:
+        for d in details:
+            err = "None (Clean Compilation)"
+            if d.get('error'):
+                 err_lines = d['error'].strip().split('\n')
+                 err = err_lines[0][:100].replace('|', '').replace('\n', '') if err_lines else "Trace error"
+            dashboard += f"| {d['model']} | {d['score']:.2f} | `{err}` |\n"
+    dashboard += "\n"
 
+    base_markdown = f"""{dashboard}
 ## Category
 Infrastructure as Code (IaC) — AWS SAM (YAML)
 

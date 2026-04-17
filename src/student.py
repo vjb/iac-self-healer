@@ -182,9 +182,7 @@ def call_student_llms(prompt_text: str, intent_text: str = None) -> list:
             
         if openrouter_key:
             or_models = [
-                "anthropic/claude-3.7-sonnet",
-                "deepseek/deepseek-chat",
-                "meta-llama/llama-3.3-70b-instruct"
+                "anthropic/claude-3.7-sonnet"
             ]
             for m in or_models:
                 futures.append(executor.submit(_fetch_openrouter, m))

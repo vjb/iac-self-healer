@@ -75,7 +75,8 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
             
     score += 0.20
         
-    with tempfile.TemporaryDirectory() as temp_dir:
+    ram_dir = "R:\\" if os.path.exists("R:\\") else None
+    with tempfile.TemporaryDirectory(dir=ram_dir) as temp_dir:
         template_file = os.path.join(temp_dir, "template.yaml")
         with open(template_file, 'w', encoding='utf-8') as f:
             f.write(yaml_content)
