@@ -6,24 +6,26 @@ This repository provides a static evaluation pipeline for optimizing generated I
 
 ```mermaid
 graph TD
-    Z["AWS aws-samples Repository (YAML)"] -->|Extracted and Validated| Y["Validated Architecture Templates"]
-    Y --> A
-    A["MIPROv2 Prompt Module (GPT-4o)"] -->|Ingests Vector Data| B("Schema Database")
-    B --> C{"Task Module Evaluation (Claude 3.7)"}
+    Z["AWS aws-samples Repository (YAML)"] -->|Extract Validation Defaults| A
+    A["MIPROv2 Bayesian Optimizer (GPT-4o)"] -->|Queries Constraints| B[(ChromaDB Vector Oracle)]
+    B -->|Ingests Document Parameters| C{"Student Evaluator (Claude 3.7)"}
     
-    C -->|Generates SAM YAML| D["yaml.safe_load Parser"]
+    C -->|Generates SAM YAML (RAM Disk R:\)| D["yaml.safe_load Parser"]
     D -->|Validates| E["cfn-lint Syntax Verification"]
     E -->|Validates| F["cfn-guard Compliance Verification"]
     
-    D -->|Exception Raised| J("Score Calculation (Exponential Decay)")
-    E -->|Violation Detected| J
-    F -->|Violation Detected| J
+    F -->|Satisfies Structural Rules| G{"Semantic Equivalence Judge (GPT-4o-mini)"}
+    G -->|YES (Perfect Match)| H["Score: 1.20 (Validation Success)"]
     
-    F -->|Passes Rules| G["Semantic Equivalence Evaluation"]
-    G -->|"Structural Match"| H("Score: 1.20")
+    %% Information Feedback Loops
+    D -->|Exception| J["Math Penalty & Retry Execution"]
+    E -->|Returns Top 3 Violations Array| J
+    F -->|Returns Raw AST JSON Trace| J
+    G -->|NO (Returns Technical Delta)| J
     
-    J -->|Parses Trace Logs| K["AWS CloudFormation Reference Graph"]
-    K -->|Updates Context Parameters| C
+    J -->|< 3 Attempts (Dynamic Retry Context)| C
+    J -->|Exhausted| K["Record Compiler Failure Log"]
+    K -->|Inject Persistent Hallucination Vectors| B
 ```
 
 ## Core Evaluation Components
