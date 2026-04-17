@@ -62,6 +62,18 @@ If previous evaluation data exists, initialize a stateful configuration recovery
 venv\Scripts\python.exe scripts/optimize.py --auto medium --resume
 ```
 
+## Enterprise Security Compliance (`cfn-guard`)
+
+This evaluation engine natively implements the [AWS Guard Rules Registry](https://github.com/aws-cloudformation/aws-guard-rules-registry) to enforce Tier-1 institutional compliance during the Bayesian generation loops.
+
+By default, the engine provisions a core HIPAA boundary constraint checking S3 `BucketEncryption`. However, you can instantly replace this bound with any of the official AWS enterprise Conformance Packs by pulling their respective `.guard` files and pointing the `-r` flag natively inside `src/evaluators.py` to target them locally. 
+
+The optimizer will natively evaluate tracebacks and punish/heal LLMs against:
+* **PCI-DSS:** Mandates API Gateway TLS 1.2 minimums, strict RDS multi-AZ encryptions, and explicitly blocks public S3 ACLs.
+* **NIST 800-53:** Government-grade strictness. Automatically bans wildcard `*` resource maps inside IAM Execution Roles.
+* **CIS Foundations Benchmark:** General enterprise security baselines (e.g. CloudTrail regional orchestration requirements).
+* **AWS Well-Architected Framework:** Automatically enforces Auto-Scaling, CloudFront edges, and X-Ray telemetry grid architectures on target topologies.
+
 ## Known Limitations & Future Work
 
 1. Security Protocol Evasion: The evaluation script exclusively checks JSON syntax outputted by the generic lint binaries. A language model implicitly trained against the pipeline architecture could artificially generate output capable of tricking lint string pattern matching while fundamentally leaving the infrastructure fatally compromised.
