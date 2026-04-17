@@ -2,7 +2,7 @@
 Multi-Model Student LLM Dispatcher
 
 Sends prompts to multiple student LLMs (GPT-4o, Groq) and returns
-generated CDK v2 code. Groq errors are handled gracefully.
+generated AWS SAM YAML code. Groq errors are handled gracefully.
 """
 import os
 import logging
@@ -38,7 +38,7 @@ def _clean_code_output(raw: str) -> str:
 
 
 def _call_openai(prompt_text: str, api_key: str, system_prompt: str = STUDENT_SYSTEM_PROMPT, model_id: str = "gpt-4o") -> str:
-    """Call OpenAI models to generate CDK code from a prompt."""
+    """Call OpenAI models to generate AWS SAM YAML from a prompt."""
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
@@ -61,7 +61,7 @@ def _call_openai(prompt_text: str, api_key: str, system_prompt: str = STUDENT_SY
 
 
 def _call_openrouter(prompt_text: str, api_key: str, model_id: str, system_prompt: str = STUDENT_SYSTEM_PROMPT) -> str:
-    """Call OpenRouter to generate CDK code from a prompt using a specific model."""
+    """Call OpenRouter to generate AWS SAM YAML from a prompt using a specific model."""
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
@@ -97,7 +97,7 @@ def retry_llm_code(model_id: str, original_prompt: str, previous_code: str, erro
         {"role": "system", "content": STUDENT_SYSTEM_PROMPT},
         {"role": "user", "content": original_prompt},
         {"role": "assistant", "content": previous_code},
-        {"role": "user", "content": f"The code you generated failed compilation with the following error trace:\n\n{error_trace}\n\nRewrite the full python script correctly to resolve this."}
+        {"role": "user", "content": f"The code you generated failed compilation with the following error trace:\n\n{error_trace}\n\nRewrite the full declarative AWS SAM YAML template correctly to resolve this."}
     ]
     
     headers = {
@@ -128,7 +128,7 @@ def call_student_llms(prompt_text: str, intent_text: str = None) -> list:
     Returns:
         list of dicts, each with:
             - model (str): Model name
-            - code (str): Generated CDK v2 Python code
+            - code (str): Generated AWS SAM YAML code
             - error (str or None): Error message if the call failed
     """
     import concurrent.futures

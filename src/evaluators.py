@@ -222,11 +222,14 @@ def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> t
         computed_details = list(executor.map(_evaluate_single, student_results))
         
     for detail in computed_details:
-        scores.append(detail["score"])
+        if detail.get("error", "").startswith("API Error:"):
+            logger.warning("Excluded %s from average calculation due to API connection failure.", detail["model"])
+        else:
+            scores.append(detail["score"])
         details.append(detail)
         
     avg_score = sum(scores) / len(scores) if scores else 0.0
-    logger.info("Metric result: %.3f (avg of %d models)", avg_score, len(scores))
+    logger.info("Metric result: %.3f (avg of %d resolving models)", avg_score, len(scores))
     return avg_score, details
 
 def sam_compile_metric(example, prediction, trace=None):
