@@ -1,100 +1,36 @@
-# Compiler-in-the-Loop IaC Generation
+# AWS SAM Evaluation Engine
 
-A generation system for AWS CDK v2 architectures. The system processes output quality as a discrete cost function and utilizes DSPy MIPROv2 to execute a Bayesian search for architectural specifications that maximize the probability of an inference model producing valid infrastructure code.
+This project defines a static evaluation pipeline for optimizing generated Infrastructure-as-Code schemas. The system utilizes DSPy MIPROv2 to Bayesian-search target parameter configurations capable of coercing language models to generate precise AWS Serverless Application Model architectures.
 
-## Problem
+## Architecture Pipeline
 
-Language model-generated Infrastructure-as-Code consistently fails against explicit compilers. Inference models often output CDK v1 syntax, reference non-existent class attributes, and pass arguments with incorrect structural types. The technical failure occurs because the instructions guiding the inference process lack strict specificity regarding the CDK v2 API surface.
-
-This repository implements an inverted optimization pipeline. Instead of modifying generated code post-inference, the system optimizes the input specification itself and utilizes physical compilation (cdk synth) as the sole validation mechanism.
-
-## Architecture
-
-```mermaid
-graph TD
-    A["Training Set<br/>(Architecture intents)"] --> B["MIPROv2 Optimizer"]
-    B --> C["DSPy PromptGenerator<br/>(ChainOfThought)"]
-    C --> |"candidate specification P"| D["Multi-Model Evaluation<br/>(GPT-4o, Claude 3.7, DeepSeek)"]
-    D --> |"CDK v2 Python code"| E["Cost Function Pipeline"]
-
-    E --> F{"1. ast.parse()"}
-    F --> |pass| G{"2. Stack class check"}
-    G --> |pass| H{"3. flake8 validation"}
-    H --> |pass| I{"4. cdk synth execution"}
-    I --> |pass| J{"5. Resource count check"}
-
-    J --> |"score 0.0 to 1.0"| B
-
-    K[("ChromaDB<br/>CDK v2 Rules")] -.-> C
-```
-
-### Protocol Execution
-
-1. MIPROv2 Bayesian search generates candidate parameter instructions and few-shot demonstrations.
-2. The candidate specification is routed to multiple evaluation models (e.g., GPT-4o, Claude 3.7, DeepSeek Chat) to simulate standard execution constraints.
-3. The evaluation models produce AWS CDK v2 Python routines derived from the input specification.
-4. The resulting codebase is evaluated through a strict 5-stage cost function pipeline:
-   * `ast.parse()`: validates Python syntax structure (+0.10)
-   * Stack verification: confirms presence of a class inheriting from `Stack` (+0.10)
-   * `flake8`: detects undefined references or import failures (+0.10)
-   * `cdk synth`: generates CloudFormation templates via the JSII runtime environment isolated dynamically within native `tempfile` execution workspaces to enable true parallelization (+0.50)
-   * Resource verification: detects presence of three or more infrastructure resource types (+0.20)
-5. **Dual-Layer Auto-Healing Network**:
-   * *Syntactic Iteration (Local)*: If execution fails at the compiler stage, the `stderr` string is piped natively back into the evaluating language model allowing up to 2 contextual recursive syntax auto-corrections.
-   * *Oracle Memory (Global)*: If the local iteration limit is exhausted, the final `stderr` sequence is hashed and injected into the ChromaDB vector layer. The next iteration of the DSPy PromptGenerator implicitly checks this oracle and writes hardcoded prevention constraints to future prompts!
-6. MIPROv2 consumes the numeric score distribution to optimize the instruction parameters via internal search mechanics.
-7. The exact specification resulting in the highest validation score across all models is output as a markdown document.
-
-### Multi-Model Evaluation
-
-To prevent localized overfitting to a specific foundation model's parameter weights, the cost function executes against a concurrent, multi-model dispatcher. Primary evaluation runs on GPT-4o. Secondary evaluation runs via OpenRouter integrations routing to Claude 3.7 Sonnet, DeepSeek Chat, and Llama 3.3. HTTP rate limit anomalies degrade the metric sequentially without terminating the core optimization algorithm.
-
-### ChromaDB Knowledge Base
-
-The system injects AWS CDK v2 documentation stored in a local ChromaDB instance to constrain generated instructions:
-* Syntactic variations and structural shifts between CDK v1 and v2.
-* Explicit import paths for specialized constructs.
-* Static code examples from the verified AWS instances.
-* Known API parameter mismatch definitions.
-
-The DSPy module queries ChromaDB utilizing the architecture intent dataset to retrieve the required documentation structures needed to ground the instruction parameters.
-
-## Project Structure
-
-| Path | Description |
-|---|---|
-| `src/dspy_signatures.py` | DSPy Signature defining the prompt generator input/output constraints. |
-| `src/evaluators.py` | Physical compilation validation metrics. |
-| `src/factory.py` | DSPy Module wrapping ChainOfThought and MIPROv2 optimization logic. |
-| `src/data_loader.py` | Retrieval logic for CDK reference mechanisms. |
-| `src/student.py` | Multi-model evaluation dispatcher for OpenAI and OpenRouter endpoints. |
-| `src/compiler.py` | Subprocess wrapper for the physical JSII synthesis execution. |
-| `data/training_intents.json` | Architecture intents utilized as training arrays. |
-| `cdk-testing-ground/` | Isolated CDK execution workspace for JSII interaction. |
-| `scripts/optimize.py` | Core execution endpoint for Bayesian optimization iterations. |
-| `results/` | Output directory for optimization metadata and final specification files. |
+1. The MIPROv2 optimizer selects a candidate instruction set.
+2. The candidate instruction is parsed by a test language model (e.g. GPT-4o) to output a raw AWS SAM template.
+3. The raw template is processed by a three-stage mechanical evaluation function.
+    * `yaml.safe_load`: Confirms structure representation (+0.20).
+    * `cfn-lint`: Parses against explicit AWS schemas to detect incorrect properties (+0.40).
+    * `cfn-guard`: Validates against internal policy sets such as HIPAA configuration constraints (+0.40).
+4. If an exception triggers during parsing, the exact error code queries the ChromaDB local storage base. Associated documentation snippets are mapped explicitly to the failure point and recursively passed to the generation model for a maximum of two automated retries.
+5. Auto-correction executions incur an algorithmic subtraction mechanism (-0.10) penalizing prompt optimization efficiency parameters based directly on trial cost.
+6. Instructions mapping to perfect 1.0 structural executions are exported natively as documentation schemas inside the `results/` block.
 
 ## Step 0: Environment Configuration
 
-Before executing the setup scripts or optimization commands, you must configure the local environment keys.
-Copy the `.env.example` file to create a local `.env` configuration file:
+Before running any script logic, configure required system telemetry bounds. Duplicate the local configuration baseline into your primary execution route.
+
+Ensure all variable data is assigned. 
 
 ```bash
 cp .env.example .env
 ```
 
-You must populate all required variables (e.g., OPENAI_API_KEY, OPENROUTER_API_KEY) within the `.env` file exactly as specified in the example comments before proceeding.
+Review the `.env.example` structure directly:
+* `OPENAI_API_KEY`: API authentication key required to power the primary verification model instance (e.g. sk-...).
+* `OPENROUTER_API_KEY`: Optional fallback key utilized for dispatching test evaluation runs to distinct architectural platforms (e.g. sk-or-v1-...).
 
-## Setup
+## Required Installation
 
-### Prerequisites
-
-* Python 3.10 or newer
-* Node.js 20 or newer (mandatory for AWS CDK CLI and JSII runtime functionality)
-* Valid OpenAI API key
-* Valid OpenRouter API key
-
-### Installation
+Python 3.10 and explicitly bound target tools are required.
 
 ```bash
 python -m venv venv
@@ -102,21 +38,32 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Running the Architecture
+To function correctly, the native host system must include accessible system aliases pointing to the strict evaluation binaries.
+* Execute `pip install cfn-lint` inside the virtual environment for linting coverage.
+* Manually download or compile the `cfn-guard` execute object and attach it securely within `./venv/Scripts/cfn-guard.exe`.
 
-### Executing the Optimizer
+## Execution Run Protocol
+
+Populate the initial ruleset mappings via standard vector injection.
+
+```bash
+venv\Scripts\python.exe scripts/ingest_sam_docs.py
+```
+
+Begin standard parameter alignment:
 
 ```bash
 venv\Scripts\python.exe scripts/optimize.py --auto medium
 ```
 
-This command executes the MIPROv2 process across the training intents array. The optimized DSPy schema state is written to `optimized_factory.json`. The highest-scoring generalized outputs are written to the `results/` directory.
+If previous evaluation data exists, initialize a stateful configuration recovery protocol by specifying the local resume parameter:
 
-To deliberately bootstrap and safely compound previous orchestration parameters instead of triggering a zero-shot environment reset, leverage the `--resume` CLI parameter:
 ```bash
 venv\Scripts\python.exe scripts/optimize.py --auto medium --resume
 ```
 
 ## Known Limitations & Future Work
 
-1. Runtime Testing Constraints: The system evaluates infrastructure statically by verifying that code successfully compiles a valid CloudFormation graph via JSII. It does not provision physical resources to AWS nor evaluate if those architectures function during live operational deployment. This can allow logical network failures (e.g., misconfigured security group routing) to pass evaluation stages.
+1. Security Protocol Evasion: The evaluation script exclusively checks JSON syntax outputted by the generic lint binaries. A language model implicitly trained against the pipeline architecture could artificially generate output capable of tricking lint string pattern matching while fundamentally leaving the infrastructure fatally compromised.
+2. Missing Physical Integration: The system validates code via `cfn-lint`. It explicitly does not invoke `sam deploy` against a target physical environment. Verification is inherently structural, not functional.
+3. Dynamic Rule Injection: Currently, the pipeline maps explicit strings to predefined arrays inside the ingestion script. Production systems must execute automated web extraction processes directly indexing raw CloudFormation release patches to guarantee current reference validity.

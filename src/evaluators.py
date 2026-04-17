@@ -173,7 +173,7 @@ def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> t
     logger.info("Metric result: %.3f (avg of %d models)", avg_score, len(scores))
     return avg_score, details
 
-def cdk_compile_metric(example, prediction, trace=None):
+def sam_compile_metric(example, prediction, trace=None):
     prompt_text = getattr(prediction, 'prompt', '')
     intent_text = getattr(example, 'architecture_intent', '')
     avg_score, _ = evaluate_prompt_with_details(prompt_text, intent_text=intent_text)

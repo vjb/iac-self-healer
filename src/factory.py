@@ -1,8 +1,8 @@
 import dspy
 from dspy.teleprompt import MIPROv2
-from src.dspy_signatures import CDKPromptGenerator
-from src.evaluators import cdk_compile_metric
-from src.data_loader import load_training_intents, get_cdk_reference
+from src.dspy_signatures import SAMPromptGenerator
+from src.evaluators import sam_compile_metric
+from src.data_loader import load_training_intents, get_sam_reference
 
 import logging
 logger = logging.getLogger(__name__)
@@ -27,21 +27,17 @@ def get_vectorized_feedback(rule_id: str) -> str:
 
 
 class PromptFactory(dspy.Module):
-    """DSPy module that generates CDK v2 instructional prompts.
-    
-    MIPROv2 optimizes the instructions and few-shot demonstrations
-    inside the ChainOfThought wrapper to maximize compilation scores.
-    """
+    """DSPy module that generates AWS SAM instructional prompts."""
     def __init__(self):
         super().__init__()
-        self.generator = dspy.ChainOfThought(CDKPromptGenerator)
+        self.generator = dspy.ChainOfThought(SAMPromptGenerator)
 
-    def forward(self, architecture_intent, cdk_reference=""):
-        if not cdk_reference:
-            cdk_reference = get_cdk_reference(architecture_intent)
+    def forward(self, architecture_intent, sam_reference=""):
+        if not sam_reference:
+            sam_reference = get_sam_reference(architecture_intent)
         return self.generator(
             architecture_intent=architecture_intent,
-            cdk_reference=cdk_reference
+            sam_reference=sam_reference
         )
 
 
@@ -89,7 +85,7 @@ def train(auto="light", num_candidates=7, num_trials=15, resume=False):
     if auto:
         # Auto mode controls num_candidates and num_trials internally
         optimizer = MIPROv2(
-            metric=cdk_compile_metric,
+            metric=sam_compile_metric,
             auto=auto,
             verbose=True,
         )
@@ -100,7 +96,7 @@ def train(auto="light", num_candidates=7, num_trials=15, resume=False):
     else:
         # Manual mode: user controls candidates and trials
         optimizer = MIPROv2(
-            metric=cdk_compile_metric,
+            metric=sam_compile_metric,
             num_candidates=num_candidates,
             verbose=True,
         )

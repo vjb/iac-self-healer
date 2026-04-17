@@ -26,7 +26,7 @@ def main():
     context = get_aws_context()
     
     context = get_aws_context()
-    topology_locked_intent = args.intent + "\\nCRITICAL TOPOLOGY LOCK: You must retain the underlying topological architecture defined within the user intent, UNLESS an explicit constraint in your context demands a fallback (e.g., swapping SQL for NoSQL due to LocalStack rules). Maintain the fundamental architecture intent.\\nCRITICAL CDK V2 SYNTAX LOCK: You must strictly adhere to AWS CDK v2 syntax. Specifically, DO NOT use `core.RemovalPolicy` or `cdk.RemovalPolicy`. You MUST natively use `aws_cdk.RemovalPolicy` and import it directly via `from aws_cdk import RemovalPolicy`. DO NOT hallucinate deprecated AWS CDK v1 namespaces."
+    topology_locked_intent = args.intent + "\\nCRITICAL TOPOLOGY LOCK: You must retain the underlying topological architecture defined within the user intent. Maintain the fundamental architecture intent.\\nCRITICAL SAM SYNTAX LOCK: You must strictly adhere to AWS SAM YAML syntax. Use Transform: AWS::Serverless-2016-10-31."
     prediction = factory(intent=topology_locked_intent, aws_strict_context=context)
     
     print("DEBUG PREDICTION FIELDS:", dir(prediction))
@@ -37,12 +37,12 @@ def main():
     RAW_MASTER_PROMPT: {getattr(prediction, 'master_prompt_instructions', getattr(prediction, 'core_instructions', ''))}
     """
 
-    EDITOR_MEGA_PROMPT = """You are the "Strict Documentation & Formatting Editor" in an autonomous AWS CDK pipeline.
+    EDITOR_MEGA_PROMPT = """You are the "Strict Documentation & Formatting Editor" in an autonomous AWS SAM YAML optimization pipeline.
 Your only job is to review the output of the "Generator Agent" and aggressively fix any formatting violations before the final Prompt is published. 
 
 CRITICAL RULES OF ENGAGEMENT:
 1. TEXT FIELDS MUST BE 100% ENGLISH: The Prerequisites, Use Case, and Troubleshooting fields MUST NOT contain any Python syntax.
-2. NO MASSIVE CODE DUMPS: The `cleaned_master_prompt` field must be a robust, natural language instructional prompt. DO NOT output the full AWS CDK Python class. Use bullet points to describe constraints and architecture layout. You may include tiny snippets (1-2 lines) to disambiguate complex attributes, but absolutely forbid massive code blocks.
+2. NO MASSIVE CODE DUMPS: The `cleaned_master_prompt` field must be a robust, natural language instructional prompt. DO NOT output the full AWS SAM YAML template. Use bullet points to describe constraints and architecture layout. You may include tiny snippets (1-2 lines) to disambiguate complex attributes, but absolutely forbid massive code blocks.
 3. FIX, DO NOT REJECT: Do not tell the user what is wrong; just fix it.
 
 OUTPUT FORMAT:
