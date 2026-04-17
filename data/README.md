@@ -1,26 +1,24 @@
-# 📂 Autonomous IaC Data Store
+# IaC Data Directory
 
-This directory acts as the structural baseline for your agentic DSPy framework. It physically provides the foundational **Training Intents** and **Zero-Trust Compliance Bounds** required to teach the agents how to generate valid, highly secure AWS SAM declarative infrastructure.
+This directory contains the baseline JSON training intents and the AWS Well-Architected Framework Reliability rules utilized by the dynamic evaluation pipeline.
 
 ## Directory Contents
 
 ### 1. `training_intents.json`
-This is the core training dataset ingested into DSPy. It maps 4 "Mega Intents" representing advanced cloud architectures (e.g., *Multi-Region RAG Backend*, *Zero-Trust Data Lake*) that the `cfn-lint` and `cfn-guard` evaluators use to optimize the RAG Prompt Weights.
+This dataset maps the baseline architecture targets passed into DSPy. It includes configuration intents for cloud architectures such as Multi-Region RAG Backends and Data Lakes. These targets are parsed by the `cfn-lint` and `cfn-guard` evaluators to set prompt weights.
 
 ### 2. `aws-wafr-conformance-pack.guard`
-This is your **Physical WAFR Oracle**. Normally, LLMs passively hallucinate infrastructure designs without any concept of enterprise security. This `.guard` file contains absolute, natively compiled deterministic boundary rules driven by the [AWS Well-Architected Framework Reliability (WAFR) Pillar](https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/reliability.html).
+This `.guard` file contains declarative boundary rules defined by the [AWS Well-Architected Framework Reliability (WAFR) Pillar](https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/reliability.html).
 
-By injecting this directly into the vector RAG via `src/data_loader.py`, you force the student LLMs to mathematically "see" the exact boundary checks (like `PublicAccessBlockConfiguration` for S3) *before* they generate, entirely eliminating blind structural security traps.
+The rules are injected into the pipeline context during inference via `src/data_loader.py` to enforce compliance constraints (e.g., `PublicAccessBlockConfiguration` for S3) prior to template generation.
 
 ---
 
-## 🛡️ Expanding the `cfn-guard` Engine
+## Expanding cfn-guard Integration
 
-The `aws-wafr-conformance-pack.guard` file here is just the beginning. 
+To extend compliance coverage to systems such as HIPAA, PCI-DSS, or NIST 800-53, standard AWS security patterns can be loaded into this directory.
 
-If you want to seamlessly expand your autonomous agent's capabilities to natively handle compliance systems like **HIPAA**, **PCI-DSS**, or **NIST 800-53**, you can download official pre-written security `.guard` patterns directly from the Amazon Web Services registry!
-
-**Helpful Links & Documentation:**
+**Reference Documentation:**
 * **Official AWS cfn-guard Documentation:** [CloudFormation Guard User Guide](https://github.com/aws-cloudformation/cloudformation-guard)
-* **AWS Guard Rule Registry:** [AWS Guard Rules Repository](https://github.com/aws-cloudformation/aws-guard-rules-registry) -> Contains hundreds of official enterprise-grade rules you can directly paste into this `data` folder to automatically harden your LLMs.
+* **AWS Guard Rule Registry:** [AWS Guard Rules Repository](https://github.com/aws-cloudformation/aws-guard-rules-registry)
 * **Writing Custom Rules:** [Guard DSL Syntax](https://docs.aws.amazon.com/cfn-guard/latest/ug/writing-rules.html)

@@ -1,54 +1,53 @@
-# Autonomous Infrastructure Prompter — AWS SAM Bayesian Engine
+# Automated Serverless Infrastructure Engine
 
-This project defines a bleeding-edge static evaluation pipeline for optimizing generated Infrastructure-as-Code schemas. The system utilizes DSPy **MIPROv2** to Bayesian-search target parameter configurations capable of coercing language models to generate precise, perfectly declarative, WAFR-compliant AWS Serverless Application Model architectures.
+This repository provides a static evaluation pipeline for optimizing generated Infrastructure as Code (IaC) templates. The system integrates the DSPy MIPROv2 framework to compute optimized prompt parameters, enabling the generation of AWS Serverless Application Model (SAM) architectures that comply with AWS Well-Architected Framework guidelines.
 
 ## Architecture Workflow
 
 ```mermaid
 graph TD
-    Z["AWS aws-samples Repo (Raw SAM YAML)"] -->|Scraped & Structurally Healed| Y["1.200 Semantic Champions"]
+    Z["AWS aws-samples Repository (YAML)"] -->|Extracted and Validated| Y["Validated Architecture Templates"]
     Y --> A
-    A["MIPROv2 Prompt Module (GPT-4o)"] -->|Injects RAG Vectors| B("Dynamic Schema DB")
-    B --> C{"Task Module Evaluation (GPT-4o-mini)"}
+    A["MIPROv2 Prompt Module (GPT-4o)"] -->|Ingests Vector Data| B("Schema Database")
+    B --> C{"Task Module Evaluation (Claude 3.7)"}
     
-    C -->|Generates SAM YAML| D["yaml.safe_load Parsing"]
-    D -->|Pass| E["cfn-lint Syntactic Trace"]
-    E -->|Pass| F["cfn-guard Compliance Trace"]
+    C -->|Generates SAM YAML| D["yaml.safe_load Parser"]
+    D -->|Validates| E["cfn-lint Syntax Verification"]
+    E -->|Validates| F["cfn-guard Compliance Verification"]
     
-    D -->|Violation Detected| J("Exponential Math Penalty Calculation")
+    D -->|Exception Raised| J("Score Calculation (Exponential Decay)")
     E -->|Violation Detected| J
     F -->|Violation Detected| J
     
-    F -->|Pass Physical Bounds| G["Semantic LLM-as-a-Judge"]
-    G -->|"Perfect Alignment (YES)"| H("Score: 1.20 (Validation Success!)")
+    F -->|Passes Rules| G["Semantic Equivalence Evaluation"]
+    G -->|"Structural Match"| H("Score: 1.20")
     
-    J -->|Query Error Snippet| K["Dynamic AWS CloudFormation Graph"]
-    K -->|Return Context Vectors| C
+    J -->|Parses Trace Logs| K["AWS CloudFormation Reference Graph"]
+    K -->|Updates Context Parameters| C
 ```
 
+## Core Evaluation Components
 
-## The 6 Pillars of Evaluation
+1. **Pre-emptive Data Ingestion:** The system parses `d1uauaxba7bl26.cloudfront.net` during initialization to download documented AWS CloudFormation schema parameters into a local ChromaDB instance.
+2. **Dual-Model Execution:** Processing is divided across two models. Instruction synthesis utilizes `gpt-4o`, while continuous trace execution runs on `anthropic/claude-3.7-sonnet`.
+3. **Continuous Scoring Functions (`math.exp`):** The optimization gradients scale linearly against partial code outputs. A template passing 15 of 20 validation checks calculates a mathematically higher score multiplier than a template with complete structual failure, bypassing discrete boolean logic blocks.
+4. **Semantic Verification:** To achieve maximum execution parameters, the script utilizes `gpt-4o` to physically compare output semantic alignments against input specifications, validating structures beyond basic `cfn-lint` syntax.
+5. **Bootstrapped Dataset Execution:** The codebase implements an extraction script that queries the `aws-samples/serverless-patterns` repository. It filters and provides compliant SAM architectures mapped to explicitly defined architecture targets. MIPROv2 passes these examples into the DSPy instances as execution parameters.
+6. **Volatile OS Integration (RAM Disk):** The codebase performs temporary verification workloads into a volatile system RAM drive (e.g., `R:\`) to bypass physical SSD input/output latency associated with the execution of the `cfn-lint` and `cfn-guard` binaries.
 
-1. **Pre-emptive Web RAG Ingestion:** The engine dynamically scours `d1uauaxba7bl26.cloudfront.net` upon initialization, seamlessly downloading and injecting perfectly updated AWS CloudFormation schema metrics directly into your ChromaDB parameters. 
-2. **Two-Model Strict Precision Separation:** Heavy instruction drafting is strictly pushed to high-IQ `gpt-4o` arrays, whereas continuous iteration trace validations are dynamically funneled against `anthropic/claude-3.7-sonnet`—permanently disconnecting weaker API loops to maximize loop velocities!
-3. **Continuous Scoring Functions (`math.exp`):** The Bayesian gradients will scale linearly against partial code output. An LLM solving 15 AWS linting trace bounds out of 20 will organically generate a substantially higher continuous score modifier than an LLM entirely freezing the schema structure.
-4. **LLM-as-a-Judge (Semantic Overloading):** To cross the final `1.20` execution barrier, physical structural bounds (`cfn-guard` and `cfn-lint`) are no longer sufficient natively. `gpt-4o` is natively injected to assess the output physically against your generated input intent. 
-5. **Bootstrapped Dynamic Trainsets (Semantic Extraction):** The engine natively scraped the entire official `aws-samples/serverless-patterns` GitHub repository, extracting strictly compliant SAM architectures mapped exactly to the 4 targets (RAG, Swarms, Data Lakes, Step Functions). `MIPROv2` natively scopes these perfect templates straight into the DSPy instances as organic few-shot `Example()` parameters, permanently breaking out of Step 1 math abstractions natively.
-6. **Volatile OS Integration (RAM Disk Orchestration):** The orchestrator natively circumvents brutal SSD I/O degradation and physical OS file locks cleanly by explicitly writing all transient verification workloads (the thousands of `.yaml` trace runs required by `cfn-lint`) natively into volatile dynamic RAM drives (`R:\`), reducing compilation latency to 0ms dynamically.
+## Step 0: Environment Configuration
 
-## Environment Configuration
-
-Before running any script logic, configure required system telemetry bounds.
+Before running any script logic, configure the required system constraints. Copy the provided `.env.example` file to create your `.env` configuration file and populate all listed variables.
 
 ```bash
 cp .env.example .env
 ```
 
-Review the `.env` structure directly:
-* `OPENAI_API_KEY`: API authentication key required to power the primary verification model instance and the native Semantic Evaluator (e.g. sk-...).
-* `OPENROUTER_API_KEY`: Fallback key utilized for dispatching test evaluation runs to Llama and Deepseek LLM clusters dynamically.
+Review the `.env` structure:
+* `OPENAI_API_KEY`: API authentication key.
+* `OPENROUTER_API_KEY`: API authentication key utilized for OpenRouter requests.
 
-## Required Installation
+## Installation
 
 ```bash
 python -m venv venv
@@ -56,25 +55,25 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-To function correctly, the native host system must include accessible system aliases pointing to the strict evaluation binaries.
-* Execute `pip install cfn-lint` inside the virtual environment for linting coverage.
-* Manually download or compile the `cfn-guard` execute object and attach it securely within `./venv/Scripts/cfn-guard.exe`.
+To function correctly, the host system must map system aliases pointing to the evaluation binaries:
+* Execute `pip install cfn-lint` inside the virtual environment for linting logic.
+* Download the `cfn-guard` executable directly and attach it within `./venv/Scripts/cfn-guard.exe`.
 
-## Execution Protocol
+## Execution Commands
 
-Initiate the Web RAG database engine (Requires Internet Connection) globally:
+Initialize the vector database locally (Requires Internet Connection):
 
 ```bash
 venv\Scripts\python.exe scripts/ingest_sam_docs.py
 ```
 
-Begin standard parameter alignment with automated optimization thresholds (e.g., `light`, `medium`, `heavy`):
+Begin standard parameter alignment with standard optimization thresholds:
 
 ```bash
 venv\Scripts\python.exe scripts/optimize.py --auto medium
 ```
 
-If previous evaluation data exists, initialize a stateful configuration recovery protocol by specifying the local resume parameter:
+If previous evaluation data exists securely on disk, initialize the recovery state by specifying the resume flag:
 
 ```bash
 venv\Scripts\python.exe scripts/optimize.py --auto medium --resume
@@ -82,5 +81,6 @@ venv\Scripts\python.exe scripts/optimize.py --auto medium --resume
 
 ## Known Limitations & Future Work
 
-1. **Missing Physical Integration:** The system validates code via `cfn-lint` natively mapped against AWS Serverless syntax. It explicitly does not invoke `sam deploy` against a target physical environment. Verification is inherently structural and semantic, not statically deployed.
-2. **Security Protocol Bias:** `cfn-guard` policies exclusively check JSON syntax structurally mapping against open-source policies. A language model implicitly trained against the pipeline architecture could artificially generate semantic compliance capable of tricking lint string pattern matching while leaving actual parameters explicitly vulnerable.
+1. **Missing Deployment Integration:** The system validates code via `cfn-lint` strictly against AWS Serverless syntax and physical constraints. It does not invoke `sam deploy` against an active target AWS physical environment. Current verification is structurally semantic and statically evaluated. Production usage requires an explicit isolated deployment test pipeline.
+2. **Security Protocol Generalization:** The `cfn-guard` policies exclusively check JSON syntax structures by mapping them to local logic files. A language model implicitly trained against the pipeline architecture could artificially format schema implementations to bypass string pattern matching algorithms, leaving the underlying architecture explicitly vulnerable to production security exploits.
+3. **Windows Operating System Dependency:** The virtual environment binary routing (`cfn-guard.exe`) relies on standard Windows NT file path formats. A standard Linux machine requires structural path rewriting inside `evaluators.py`.
