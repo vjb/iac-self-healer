@@ -109,7 +109,7 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
         cfn_guard_bin = os.path.join(VENV_SCRIPTS, "cfn-guard.exe") if os.name == 'nt' else os.path.join(VENV_SCRIPTS, "cfn-guard")
         if not os.path.exists(cfn_guard_bin):
             cfn_guard_bin = "cfn-guard"
-        rules_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "aws-hipaa-conformance-pack.guard")
+        rules_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "aws-wafr-conformance-pack.guard")
         if not os.path.exists(rules_path):
             os.makedirs(os.path.dirname(rules_path), exist_ok=True)
             with open(rules_path, "w") as f:

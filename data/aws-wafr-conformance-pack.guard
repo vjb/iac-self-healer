@@ -1,0 +1,24 @@
+# AWS Well-Architected Framework: Reliability & Security Pillars
+
+# Rule 1: S3 Buckets must inherently block public architectures
+rule S3_BLOCK_PUBLIC_ACCESS {
+    AWS::S3::Bucket PublicAccessBlockConfiguration.BlockPublicAcls == true
+    AWS::S3::Bucket PublicAccessBlockConfiguration.BlockPublicPolicy == true
+    AWS::S3::Bucket PublicAccessBlockConfiguration.IgnorePublicAcls == true
+    AWS::S3::Bucket PublicAccessBlockConfiguration.RestrictPublicBuckets == true
+}
+
+# Rule 2: DynamoDB Tables must have Backup Recovery defined
+rule DYNAMODB_PITR_ENABLED {
+    AWS::DynamoDB::Table PointInTimeRecoverySpecification.PointInTimeRecoveryEnabled == true
+}
+
+# Rule 3: RDS Instances must be resilient through Multi-Availability Zones
+rule RDS_MULTI_AZ_ENABLED {
+    AWS::RDS::DBInstance MultiAZ == true
+}
+
+# Rule 4: Lambda Functions must have failure bounds (Dead Letter Queues)
+rule LAMBDA_DLQ_CONFIGURED {
+    AWS::Lambda::Function DeadLetterConfig exists
+}
