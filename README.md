@@ -32,7 +32,11 @@ graph TD
 
 1. **Pre-emptive Data Ingestion:** The system parses `d1uauaxba7bl26.cloudfront.net` during initialization to download documented AWS CloudFormation schema parameters into a local ChromaDB instance.
 2. **Dual-Model Execution:** Processing is divided across two models. Instruction synthesis utilizes `gpt-4o`, while continuous trace execution runs on `anthropic/claude-3.7-sonnet`.
-3. **Continuous Scoring Functions (`math.exp`):** The optimization gradients scale linearly against partial code outputs. A template passing 15 of 20 validation checks calculates a mathematically higher score multiplier than a template with complete structual failure, bypassing discrete boolean logic blocks.
+3. **Continuous Scoring Functions (`math.exp`):** The optimization gradients scale linearly against partial code outputs. A template passing 15 of 20 validation checks calculates a mathematically higher score multiplier than a template with complete structural failure, bypassing discrete boolean logic gates. The pipeline computes the evaluation vector using exponential parameter decay:
+
+   $$ \text{Total Score} = \max\left(0, \left[ 0.20 + 0.40e^{-0.5 L} + 0.40e^{-0.5 G} + 0.20 S \right] - 0.10 A \right) $$
+
+   *Where $L$ executes the aggregate sum of `cfn-lint` syntax errors, $G$ aggregates `cfn-guard` compliance violations, $S \in \{0, 1\}$ maps structural intent via LLM semantic judgment, and $A \in \{0, 1, 2\}$ tracks recursive generation attempt penalties.*
 4. **Semantic Verification:** To achieve maximum execution parameters, the script utilizes `gpt-4o` to physically compare output semantic alignments against input specifications, validating structures beyond basic `cfn-lint` syntax.
 5. **Bootstrapped Dataset Execution:** The codebase implements an extraction script that queries the `aws-samples/serverless-patterns` repository. It filters and provides compliant SAM architectures mapped to explicitly defined architecture targets. MIPROv2 passes these examples into the DSPy instances as execution parameters.
 6. **Volatile OS Integration (RAM Disk):** The codebase performs temporary verification workloads into a volatile system RAM drive (e.g., `R:\`) to bypass physical SSD input/output latency associated with the execution of the `cfn-lint` and `cfn-guard` binaries.
