@@ -33,11 +33,11 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
         
     score = 0.0
     
-    # Strip markdown block formatting
-    if "```yaml" in yaml_content:
-        yaml_content = yaml_content.split("```yaml")[1].split("```")[0]
-    elif "```" in yaml_content:
-        yaml_content = yaml_content.split("```")[1].split("```")[0]
+    import re
+    # Strip markdown block formatting robustly
+    match = re.search(r"```[a-zA-Z]*\s*(.*?)\s*```", yaml_content, re.DOTALL)
+    if match:
+        yaml_content = match.group(1).strip()
     
     # Stage 1: Structural Parsing
     try:
@@ -57,7 +57,9 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
             f.write(yaml_content)
             
         # Stage 2: Specification Validation (cfn-lint)
-        cfn_lint_bin = os.path.join(VENV_SCRIPTS, "cfn-lint.exe") if os.name == 'nt' else "cfn-lint"
+        cfn_lint_bin = os.path.join(VENV_SCRIPTS, "cfn-lint.exe") if os.name == 'nt' else os.path.join(VENV_SCRIPTS, "cfn-lint")
+        if not os.path.exists(cfn_lint_bin):
+            cfn_lint_bin = "cfn-lint"
         try:
             result = subprocess.run(
                 [cfn_lint_bin, "--format", "json", template_file],
@@ -81,7 +83,9 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
             return score, "SYS_ERR", "cfn-lint execution failed."
             
         # Stage 3: Policy & Security Compliance (cfn-guard)
-        cfn_guard_bin = os.path.join(VENV_SCRIPTS, "cfn-guard.exe") if os.name == 'nt' else "cfn-guard"
+        cfn_guard_bin = os.path.join(VENV_SCRIPTS, "cfn-guard.exe") if os.name == 'nt' else os.path.join(VENV_SCRIPTS, "cfn-guard")
+        if not os.path.exists(cfn_guard_bin):
+            cfn_guard_bin = "cfn-guard"
         rules_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "aws-hipaa-conformance-pack.guard")
         if not os.path.exists(rules_path):
             os.makedirs(os.path.dirname(rules_path), exist_ok=True)
