@@ -100,9 +100,16 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
                         score += lint_score
                         first_err = errors[0]
                         rule_id = first_err.get("Rule", {}).get("Id", "E0000")
-                        msg = first_err.get("Message", "Unknown error")
-                        line = first_err.get("Location", {}).get("Start", {}).get("LineNumber", "Unknown")
-                        return score, rule_id, f"[cfn-lint failure] Rule {rule_id} at line {line}: {msg} (Total Errors: {num_errors})"
+                        
+                        err_summaries = []
+                        for err in errors[:3]:
+                            r_id = err.get("Rule", {}).get("Id", "E0000")
+                            m = err.get("Message", "Unknown error")
+                            l = err.get("Location", {}).get("Start", {}).get("LineNumber", "Unknown")
+                            err_summaries.append(f"[{r_id} at line {l}]: {m}")
+                            
+                        msg = f"[cfn-lint failure] {num_errors} total errors. Top explicit violations:\n" + "\n".join(err_summaries)
+                        return score, rule_id, msg
                 except json.JSONDecodeError:
                     return score, "CFN_LINT_CRASH", f"cfn-lint output parsing failed: {result.stdout}"
             else:
@@ -137,7 +144,10 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
                             score += guard_score
                             rule_obj = out_json["not_compliant"][0]
                             rule_name = rule_obj.get("Rule", {}).get("Name", "UNKNOWN_GUARD_RULE")
-                            msg = f"[cfn-guard violation] Rule {rule_name} breached AWS WAFR constraints. (Total Violations: {num_violations})"
+                            
+                            # Provide explicit AST path structure natively to the student compiler
+                            trace_snippet = json.dumps(rule_obj, separators=(',', ':'))[:300]
+                            msg = f"[cfn-guard violation] Rule {rule_name} breached AWS WAFR constraints (Total Violations: {num_violations}). Trace node output: {trace_snippet}"
                             return score, rule_name, msg
                 except json.JSONDecodeError:
                     return score, "CFN_GUARD_CRASH", f"cfn-guard error: {result.stderr or result.stdout}"
@@ -171,6 +181,7 @@ def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> t
     import concurrent.futures
     from src.student import retry_llm_code
     from src.factory import get_vectorized_feedback
+    from src.data_loader import record_compiler_failure
     
     if not prompt_text:
         return 0.0, []
@@ -219,6 +230,15 @@ def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> t
                     break
                     
         logger.info("Model %s scored %.2f (exhausted)", result["model"], best_score)
+        
+        # Prevent information waste! Physically embed the exhausted syntax limits into ChromaDB's local oracle 
+        if final_error_trace and (best_score < 1.0 or "SEMANTIC_FAILURE" in final_error_trace):
+            try:
+                record_compiler_failure(intent_text or "General", final_error_trace)
+                logger.debug("Successfully recorded persistent compiler hallucination trace mapping into ChromaDB Oracle.")
+            except Exception as e:
+                logger.warning("Feedback Oracle mapping failed natively: %s", e)
+                
         return {"model": result["model"], "score": best_score, "error": final_error_trace}
         
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
