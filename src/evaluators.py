@@ -1,142 +1,117 @@
 """
-Physical Compilation Metric for MIPROv2
+Physical Compilation Metric for MIPROv2 (AWS SAM Declarative Validation)
 
 Scores a generated prompt by how well student LLMs can produce
-valid CDK v2 code from it. Uses a 5-stage fast-fail pipeline:
+valid AWS SAM YAML code from it. Uses a 3-stage validation pipeline:
 
-  Stage 1: ast.parse()      → +0.10 (valid Python syntax)
-  Stage 2: Stack class       → +0.10 (contains Stack inheritance)
-  Stage 3: flake8             → +0.10 (no critical lint errors)
-  Stage 4: cdk synth          → +0.50 (CloudFormation generated)
-  Stage 5: Resource richness  → +0.20 (3+ distinct resource types)
+  Stage 1: yaml.safe_load      → +0.20 (valid YAML structure)
+  Stage 2: cfn-lint            → +0.40 (zero-error definition)
+  Stage 3: cfn-guard           → +0.40 (security compliance)
+  Penalty: Local auto-heals    → -0.10 (per attempt)
 """
-import ast
 import os
 import subprocess
 import tempfile
 import logging
+import yaml
+import json
 
-from src.compiler import run_cdk_synth, count_cfn_resources
 from src.student import call_student_llms
 
 logger = logging.getLogger(__name__)
 
-VENV_PYTHON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "venv", "Scripts", "python.exe")
+VENV_SCRIPTS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "venv", "Scripts")
 
 
-def _parse_ast(code: str) -> bool:
-    """Check if code is valid Python syntax."""
-    try:
-        ast.parse(code)
-        return True
-    except SyntaxError:
-        return False
-
-
-def _has_stack_class(code: str) -> bool:
-    """Check if code defines a class that inherits from Stack."""
-    try:
-        tree = ast.parse(code)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                for base in node.bases:
-                    base_name = ""
-                    if isinstance(base, ast.Name):
-                        base_name = base.id
-                    elif isinstance(base, ast.Attribute):
-                        base_name = base.attr
-                    if base_name == "Stack":
-                        return True
-        return False
-    except Exception:
-        return False
-
-
-def _run_flake8(code: str) -> int:
-    """Run flake8 on code and return the number of critical errors."""
-    try:
-        with tempfile.NamedTemporaryFile(
-            mode='w', suffix='.py', delete=False, encoding='utf-8'
-        ) as f:
-            f.write(code)
-            tmp_path = f.name
+def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
+    """
+    Score a single piece of generated AWS SAM YAML code.
+    Returns (score, rule_id, error_trace).
+    """
+    if not yaml_content or len(yaml_content.strip()) < 10:
+        return 0.0, "EMPTY", "YAML was empty or too short."
         
-        result = subprocess.run(
-            [VENV_PYTHON, "-m", "flake8", "--select=E9,F63,F7,F82", tmp_path],
-            capture_output=True, text=True, timeout=15
-        )
+    score = 0.0
+    
+    # Stage 1: Structural Parsing
+    try:
+        yaml.safe_load(yaml_content)
+        score += 0.20
+    except yaml.YAMLError as exc:
+        logger.debug("Stage 1 FAIL: yaml.safe_load failed")
+        line = "unknown"
+        if hasattr(exc, 'problem_mark') and exc.problem_mark is not None:
+            line = exc.problem_mark.line + 1
+        error_trace = f"[YAML Parsing Error] Line {line}: {exc}"
+        return 0.0, "YAML_PARSE_ERROR", error_trace
         
-        os.unlink(tmp_path)
-        
-        if result.stdout.strip():
-            return len([l for l in result.stdout.strip().split('\n') if l.strip()])
-        return 0
-    except Exception as e:
-        logger.warning("flake8 check failed: %s", e)
+    with tempfile.TemporaryDirectory() as temp_dir:
+        template_file = os.path.join(temp_dir, "template.yaml")
+        with open(template_file, 'w', encoding='utf-8') as f:
+            f.write(yaml_content)
+            
+        # Stage 2: Specification Validation (cfn-lint)
+        cfn_lint_bin = os.path.join(VENV_SCRIPTS, "cfn-lint.exe") if os.name == 'nt' else "cfn-lint"
         try:
-            os.unlink(tmp_path)
-        except Exception:
-            pass
-        return 0  # Don't penalize if flake8 itself fails
-
-
-def _score_single_code(code: str) -> tuple[float, str]:
-    """
-    Score a single piece of generated CDK code through the 5-stage pipeline.
-    Returns a tuple of (score, error_trace).
-    """
-    if not code or len(code.strip()) < 10:
-        return 0.0, "Code was empty or too short."
-    
-    # Stage 1: AST parse (fast-fail)
-    if not _parse_ast(code):
-        logger.debug("Stage 1 FAIL: ast.parse failed")
-        return 0.0, "Stage 1 FAIL: Invalid Python syntax (ast.parse failed)."
-    score = 0.10
-    
-    # Stage 2: Stack class check (fast-fail)
-    if not _has_stack_class(code):
-        logger.debug("Stage 2 FAIL: no Stack class found")
-        return score, "Stage 2 FAIL: No class definition inherently inheriting from 'Stack' found."
-    score += 0.10
-    
-    # Stage 3: flake8 (non-blocking but scored)
-    flake8_errors = _run_flake8(code)
-    curr_error_trace = ""
-    if flake8_errors == 0:
-        score += 0.10
-    else:
-        logger.debug("Stage 3: %d flake8 errors", flake8_errors)
-        curr_error_trace += f"Stage 3 WARNING: {flake8_errors} critical flake8 lint errors detected.\\n"
-    
-    # Stage 4: cdk synth (the big one — 50% of score)
-    synth_result = run_cdk_synth(code)
-    if synth_result["success"]:
-        score += 0.50
-        logger.debug("Stage 4 PASS: cdk synth succeeded")
-        
-        # Stage 5: Resource richness
-        resource_count = count_cfn_resources(synth_result["template"])
-        if resource_count >= 3:
-            score += 0.20
-        elif resource_count >= 1:
-            score += 0.10
-        logger.debug("Stage 5: %d resource types found", resource_count)
-    else:
-        logger.debug("Stage 4 FAIL: cdk synth failed\\n%s", synth_result["stderr"][:200])
-        curr_error_trace += f"Stage 4 FAIL: cdk synth failed! Traceback:\\n{synth_result['stderr']}\\n"
-    
-    return score, curr_error_trace.strip()
+            result = subprocess.run(
+                [cfn_lint_bin, "--format", "json", template_file],
+                capture_output=True, text=True
+            )
+            if result.returncode != 0:
+                logger.debug("Stage 2 FAIL: cfn-lint failed")
+                try:
+                    errors = json.loads(result.stdout)
+                    if errors:
+                        first_err = errors[0]
+                        rule_id = first_err.get("Rule", {}).get("Id", "E0000")
+                        msg = first_err.get("Message", "Unknown error")
+                        line = first_err.get("Location", {}).get("Start", {}).get("LineNumber", "Unknown")
+                        return score, rule_id, f"[cfn-lint failure] Rule {rule_id} at line {line}: {msg}"
+                except json.JSONDecodeError:
+                    return score, "CFN_LINT_CRASH", f"cfn-lint output parsing failed: {result.stdout}"
+            score += 0.40
+        except FileNotFoundError:
+            logger.error("cfn-lint binary not found! Please run pip install cfn-lint")
+            return score, "SYS_ERR", "cfn-lint execution failed."
+            
+        # Stage 3: Policy & Security Compliance (cfn-guard)
+        cfn_guard_bin = os.path.join(VENV_SCRIPTS, "cfn-guard.exe") if os.name == 'nt' else "cfn-guard"
+        rules_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "aws-hipaa-conformance-pack.guard")
+        if not os.path.exists(rules_path):
+            os.makedirs(os.path.dirname(rules_path), exist_ok=True)
+            with open(rules_path, "w") as f:
+                f.write("rule S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED { AWS::S3::Bucket BucketEncryption[*] exists }")
+                
+        try:
+            result = subprocess.run(
+                [cfn_guard_bin, "validate", "--data", template_file, "--rules", rules_path, "--output-format", "json"],
+                capture_output=True, text=True
+            )
+            if result.returncode != 0:
+                logger.debug("Stage 3 FAIL: cfn-guard violated")
+                try:
+                    out_json = json.loads(result.stdout)
+                    if "not_compliant" in out_json:
+                        if out_json["not_compliant"]:
+                            rule_obj = out_json["not_compliant"][0]
+                            rule_name = rule_obj.get("Rule", {}).get("Name", "UNKNOWN_GUARD_RULE")
+                            msg = f"[cfn-guard violation] Rule {rule_name} breached HIPAA/security checks."
+                            return score, rule_name, msg
+                except json.JSONDecodeError:
+                    return score, "CFN_GUARD_CRASH", f"cfn-guard error: {result.stderr or result.stdout}"
+                    
+            score += 0.40
+        except FileNotFoundError:
+            logger.error("cfn-guard binary not found! Please install it.")
+            return score, "SYS_ERR", "cfn-guard execution failed."
+            
+    return score, "PASS", "YAML template is robust and passed all checks."
 
 
 def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> tuple[float, list]:
-    """
-    Executes student LLM inference and runs the evaluation logic.
-    Returns (avg_score, list_of_model_details).
-    """
     import concurrent.futures
     from src.student import retry_llm_code
-    from src.data_loader import record_compiler_failure
+    from src.factory import get_vectorized_feedback
     
     if not prompt_text:
         return 0.0, []
@@ -153,33 +128,37 @@ def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> t
         best_score = 0.0
         final_error_trace = ""
         
-        # Max 3 attempts (1 initial + 2 retries)
         for attempt in range(3):
-            score, error_trace = _score_single_code(current_code)
-            best_score = max(best_score, score)
+            score, rule_id, error_trace = _score_single_yaml(current_code)
+            
+            penalty = attempt * 0.10
+            effective_score = max(0.0, score - penalty)
+            best_score = max(best_score, effective_score)
             final_error_trace = error_trace
             
-            if score >= 0.70:
-                # Compile fully passed!
-                logger.info("Model %s scored %.2f on attempt %d", result["model"], score, attempt + 1)
-                return {"model": result["model"], "score": score, "error": error_trace}
+            if score >= 1.0:
+                logger.info("Model %s scored %.2f (Base: %.2f, Penalty: %.2f) on attempt %d", result["model"], effective_score, score, penalty, attempt + 1)
+                return {"model": result["model"], "score": effective_score, "error": error_trace}
                 
-            logger.debug("Model %s scored %.2f on attempt %d. Error trace captured.", result["model"], score, attempt + 1)
+            logger.debug("Model %s failed with %.2f on attempt %d. Error trace captured.", result["model"], score, attempt + 1)
             
             if attempt < 2:
-                logger.debug("Triggering dspy.Assert equivalent: retrying %s with stack trace feedback...", result["model"])
+                logger.debug("Triggering ChromaDB Vectorized Feedback for %s...", result["model"])
                 try:
-                    current_code = retry_llm_code(result["model"], prompt_text, current_code, final_error_trace)
+                    # Query ChromaDB specifically against the rule_id
+                    feedback_doc = get_vectorized_feedback(rule_id)
+                    retry_context = (
+                        f"Your declarative AWS SAM YAML failed validation.\\n"
+                        f"Error:\\n{final_error_trace}\\n\\n"
+                        f"ChromaDB Oracle Snippet:\\n{feedback_doc}\\n\\n"
+                        f"Rewrite the full YAML to satisfy this specific constraint."
+                    )
+                    current_code = retry_llm_code(result["model"], prompt_text, current_code, retry_context)
                     logger.debug("Retry generation successful, re-evaluating...")
                 except Exception as e:
                     logger.warning("Retry API call failed for %s: %s", result["model"], e)
                     break
                     
-        # If all retries exhausted and it still failed, record trace to Oracle
-        if intent_text and final_error_trace and best_score < 0.70:
-            logger.warning("Model %s exhausted all local retries. Tripping Oracle memory exception...", result["model"])
-            record_compiler_failure(intent_text, final_error_trace)
-            
         logger.info("Model %s scored %.2f (exhausted)", result["model"], best_score)
         return {"model": result["model"], "score": best_score, "error": final_error_trace}
         
@@ -190,32 +169,16 @@ def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> t
         scores.append(detail["score"])
         details.append(detail)
         
-    if not scores:
-        logger.warning("No student models returned valid responses")
-        return 0.0, details
-        
-    avg_score = sum(scores) / len(scores)
+    avg_score = sum(scores) / len(scores) if scores else 0.0
     logger.info("Metric result: %.3f (avg of %d models)", avg_score, len(scores))
     return avg_score, details
 
-
 def cdk_compile_metric(example, prediction, trace=None):
-    """
-    MIPROv2 metric function.
-    
-    Takes a DSPy example (with architecture_intent) and a prediction
-    (with prompt), feeds the prompt to student LLMs, compiles each
-    result, and returns the average score across all successful models.
-    """
     prompt_text = getattr(prediction, 'prompt', '')
     intent_text = getattr(example, 'architecture_intent', '')
     avg_score, _ = evaluate_prompt_with_details(prompt_text, intent_text=intent_text)
     
     if trace is not None:
-        # STRICT DSPY BOOTSTRAP GATING:
-        # If DSPy is evaluating this specific trace to determine if it should be added 
-        # to the prompt as a permanent few-shot example, we MUST return a boolean.
-        # Only perfectly compiled architectures (score >= 0.70) are adopted!
-        return avg_score >= 0.70
+        return avg_score >= 1.0
         
     return avg_score

@@ -7,6 +7,24 @@ from src.data_loader import load_training_intents, get_cdk_reference
 import logging
 logger = logging.getLogger(__name__)
 
+def get_vectorized_feedback(rule_id: str) -> str:
+    """Queries ChromaDB to retrieve deterministic constraints based on CFN error codes."""
+    import chromadb
+    try:
+        client = chromadb.PersistentClient(path="./chroma_db")
+        collection = client.get_collection(name="sam_declarative_reference")
+        
+        results = collection.query(
+            query_texts=[rule_id],
+            n_results=1
+        )
+        if results and results["documents"] and results["documents"][0]:
+            return results["documents"][0][0]
+    except Exception as e:
+        logger.warning("Failed to retrieve vector feedback for %s: %s", rule_id, e)
+        
+    return f"Resolve the declarative constraint structural failure associated with {rule_id}."
+
 
 class PromptFactory(dspy.Module):
     """DSPy module that generates CDK v2 instructional prompts.

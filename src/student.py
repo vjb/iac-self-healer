@@ -11,17 +11,14 @@ import re
 
 logger = logging.getLogger(__name__)
 
-STUDENT_SYSTEM_PROMPT = """You are an AWS CDK v2 Python developer. Given the instructional prompt below, produce a complete, valid AWS CDK v2 Python stack.
+STUDENT_SYSTEM_PROMPT = """You are an AWS Serverless Application Model (SAM) developer. Given the instructional prompt below, produce a complete, valid declarative AWS SAM YAML template.
 
 MANDATORY RULES:
-- Output ONLY valid Python AWS CDK v2 code. No markdown wrappers, no explanations.
-- The class must be named CdkTestingGroundStack and inherit from Stack.
-- Use only `aws_cdk` imports (CDK v2). NEVER use `aws_cdk.core` (that is CDK v1).
-- Import Construct from the `constructs` package: `from constructs import Construct`
-- Import RemovalPolicy from aws_cdk directly: `from aws_cdk import RemovalPolicy`
-- Use SubnetType.PRIVATE_WITH_EGRESS, not PRIVATE_WITH_NAT or PRIVATE.
-- Use DynamoDB Attribute objects: `dynamodb.Attribute(name='id', type=dynamodb.AttributeType.STRING)`
-- For ELBv2 targets, import from aws_elasticloadbalancingv2_targets, not aws_elasticloadbalancingv2.
+- Output ONLY valid AWS SAM YAML code. No markdown wrappers, no explanations.
+- The template MUST declare `Transform: AWS::Serverless-2016-10-31` at the top level.
+- Resources must utilize robust `AWS::Serverless::*` architectures (e.g. `AWS::Serverless::Function`, `AWS::Serverless::Api`).
+- Ensure all resources clearly declare strict types, IAM constraints, and required environment mappings.
+- For compliance, verify KMS encryptions on buckets and explicit network subnets on Lambda functions.
 """
 
 
@@ -29,8 +26,10 @@ def _clean_code_output(raw: str) -> str:
     """Strip markdown wrappers and chat text from LLM output."""
     code = raw.strip()
     # Remove markdown code blocks
-    if code.startswith("```python"):
-        code = code[len("```python"):].strip()
+    if code.startswith("```yaml"):
+        code = code[len("```yaml"):].strip()
+    if code.startswith("```yml"):
+        code = code[len("```yml"):].strip()
     if code.startswith("```"):
         code = code[3:].strip()
     if code.endswith("```"):
