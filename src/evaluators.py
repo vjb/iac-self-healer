@@ -33,6 +33,12 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
         
     score = 0.0
     
+    # Strip markdown block formatting
+    if "```yaml" in yaml_content:
+        yaml_content = yaml_content.split("```yaml")[1].split("```")[0]
+    elif "```" in yaml_content:
+        yaml_content = yaml_content.split("```")[1].split("```")[0]
+    
     # Stage 1: Structural Parsing
     try:
         yaml.safe_load(yaml_content)
