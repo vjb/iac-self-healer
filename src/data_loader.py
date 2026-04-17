@@ -117,11 +117,18 @@ def record_compiler_failure(intent: str, error_trace: str):
     if not collection: return
     try:
         import hashlib
-        bug_id = "bug_" + hashlib.md5((intent + error_trace).encode('utf-8')).hexdigest()[:15]
+        import re
+        
+        # Sanitize random volatile RAM paths out of the trace so duplicate errors hash symmetrically
+        sanitized_trace = re.sub(r'\\\\?\??\\?R:\\[a-zA-Z0-9_]+\\template\.yaml', '[VOLATILE_PATH]', error_trace)
+        
+        bug_id = "bug_" + hashlib.md5((intent + sanitized_trace).encode('utf-8')).hexdigest()[:15]
         warning_msg = f"CRITICAL COMPILER WARNING related to intent '{intent[:100]}...':\n"
-        warning_msg += f"The following error previously occurred during SAM YAML execution:\n{error_trace}\n"
+        warning_msg += f"The following error previously occurred during SAM YAML execution:\n{sanitized_trace}\n"
         warning_msg += "Constraint: You MUST avoid the syntactic patterns that lead to this exception!"
         if len(warning_msg) > 1500: warning_msg = warning_msg[:1500] + "\n...[truncated]"
-        collection.add(documents=[warning_msg], ids=[bug_id])
+        
+        # Use upsert to gracefully overwrite exact duplicate structural hashes natively
+        collection.upsert(documents=[warning_msg], ids=[bug_id])
     except Exception as e:
         logger.warning(f"Oracle: Failed to record compiler failure to ChromaDB: {e}")
