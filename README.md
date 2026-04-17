@@ -10,7 +10,7 @@ graph TD
     A["MIPROv2 Bayesian Optimizer (GPT-4o)"] -->|Queries Constraints| B[(ChromaDB Vector Oracle)]
     B -->|Ingests Document Parameters| C{"Student Evaluator (Claude 3.7)"}
     
-    C -->|Generates SAM YAML (RAM Disk R:\)| D["yaml.safe_load Parser"]
+    C -->|Generates SAM YAML into Volatile RAM| D["yaml.safe_load Parser"]
     D -->|Validates| E["cfn-lint Syntax Verification"]
     E -->|Validates| F["cfn-guard Compliance Verification"]
     
@@ -23,7 +23,7 @@ graph TD
     F -->|Returns Raw AST JSON Trace| J
     G -->|NO (Returns Technical Delta)| J
     
-    J -->|< 3 Attempts (Dynamic Retry Context)| C
+    J -->|Retry Attempt Loop| C
     J -->|Exhausted| K["Record Compiler Failure Log"]
     K -->|Inject Persistent Hallucination Vectors| B
 ```
