@@ -36,7 +36,7 @@ graph TD
 
    $$ \text{Total Score} = \max\left(0, \left[ 0.20 + 0.40e^{-0.5 L} + 0.40e^{-0.5 G} + 0.20 S \right] - 0.10 A \right) $$
 
-   *Where $L$ executes the aggregate sum of `cfn-lint` syntax errors, $G$ aggregates `cfn-guard` compliance violations, $S \in \{0, 1\}$ maps structural intent via LLM semantic judgment, and $A \in \{0, 1, 2\}$ tracks recursive generation attempt penalties.*
+   *Where $L$ represents the total count of `cfn-lint` syntax errors, $G$ represents the total count of `cfn-guard` compliance violations, $S \in [0, 1]$ maps structural intent via the LLM semantic judge, and $A \in [0, 1, 2]$ tracks recursive generation attempt penalties.*
 4. **Semantic Verification:** To achieve maximum execution parameters, the script utilizes `gpt-4o` to physically compare output semantic alignments against input specifications, validating structures beyond basic `cfn-lint` syntax.
 5. **Bootstrapped Dataset Execution:** The codebase implements an extraction script that queries the `aws-samples/serverless-patterns` repository. It filters and provides compliant SAM architectures mapped to explicitly defined architecture targets. MIPROv2 passes these examples into the DSPy instances as execution parameters.
 6. **Volatile OS Integration (RAM Disk):** The codebase performs temporary verification workloads into a volatile system RAM drive (e.g., `R:\`) to bypass physical SSD input/output latency associated with the execution of the `cfn-lint` and `cfn-guard` binaries.
