@@ -99,6 +99,14 @@ def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
     }
     with open(os.path.join(results_dir, "run_metadata.json"), "w") as f:
         json.dump(metadata, f, indent=2)
+        
+    # Auto-save physical checkpoint tracking state for seamless resume loops natively
+    state_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".optimizer_state.json")
+    try:
+        with open(state_file, 'w') as f:
+            json.dump({"champion_run_id": str(run_timestamp)}, f, indent=2)
+    except Exception as e:
+        logger.error("  → Failed to save .optimizer_state.json for next iteration: %s", e)
     
     logger.info("=" * 60)
     logger.info("Optimization complete. Results in: %s", results_dir)

@@ -77,7 +77,17 @@ def train(auto="light", num_candidates=7, num_trials=15, resume=False, results_d
     # Initialize the base factory and inject previous weights if resuming an optimization loop
     base_factory = PromptFactory()
     if resume:
-        champion_id = os.getenv("CHAMPION_RUN_ID")
+        champion_id = None
+        state_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".optimizer_state.json")
+        if os.path.exists(state_file):
+            import json
+            try:
+                with open(state_file, 'r') as f:
+                    state = json.load(f)
+                    champion_id = state.get("champion_run_id")
+            except Exception as e:
+                logger.warning("Failed to read .optimizer_state.json: %s", e)
+                
         if champion_id:
             resume_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "results", "optimization", f"run_{champion_id}", "optimized_factory.json")
         else:

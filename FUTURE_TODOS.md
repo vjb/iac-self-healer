@@ -5,7 +5,7 @@ This document outlines structural limitations, technical debt, and required arch
 ## 1. Immutable DSPy Weights State Management [✅ COMPLETED]
 **Current State:** 
 The optimization pipeline isolates its `optimized_factory.json` checkpoints directly within timestamped `results/optimization/run_[ID]` directories, preventing catastrophic logic overwrites. 
-The system natively extracts the `CHAMPION_RUN_ID` constant from the `.env` mapping to dynamically inject previous parameters during `--resume` loops, achieving mathematically stable parameter checkpoints.
+The system natively extracts the `CHAMPION_RUN_ID` tracking constant from a dedicated `.optimizer_state.json` ledger to dynamically inject previous parameters during `--resume` loops, achieving mathematically stable parameter checkpoints without touching secure `.env` secrets.
 
 ## 2. Dynamic Policy Extraction Integration (Sanitization Middleware) [✅ COMPLETED]
 **Current State:** 
