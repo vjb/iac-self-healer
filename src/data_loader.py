@@ -120,7 +120,8 @@ def record_compiler_failure(intent: str, error_trace: str):
         import re
         
         # Sanitize random volatile RAM paths out of the trace so duplicate errors hash symmetrically
-        sanitized_trace = re.sub(r'\\\\?\??\\?R:\\[a-zA-Z0-9_]+\\template\.yaml', '[VOLATILE_PATH]', error_trace)
+        # Utilizes greedy slash matching to handle both raw strings and JSON-escaped formats natively
+        sanitized_trace = re.sub(r'(?:[\\/]+\?[\\/]+)?R:[\\/]+[a-zA-Z0-9_]+[\\/]+template\.yaml', '[VOLATILE_PATH]', error_trace)
         
         bug_id = "bug_" + hashlib.md5((intent + sanitized_trace).encode('utf-8')).hexdigest()[:15]
         warning_msg = f"CRITICAL COMPILER WARNING related to intent '{intent[:100]}...':\n"
