@@ -152,13 +152,15 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
         if score >= 1.0 and intent_text:
             try:
                 from src.student import _call_openai
-                judge_prompt = f"Does the following declarative AWS SAM architecture cleanly satisfy the exact user intent defined below?\n\nUser Intent: {intent_text}\n\nAWS SAM YAML:\n{yaml_content}\n\nStrictly reply with 'YES' if it satisfies it or 'NO' if it completely missed the semantic architecture requirement."
+                judge_prompt = f"Does the following declarative AWS SAM architecture cleanly satisfy the exact user intent defined below?\n\nUser Intent: {intent_text}\n\nAWS SAM YAML:\n{yaml_content}\n\nIf it perfectly satisfies the intent, output strictly 'YES'. If it misses components or hallucinates properties, output 'NO' followed by a 1-sentence technical reason why (e.g., 'NO: Missing explicit DynamoDB Global Secondary Index mapping')."
                 res = _call_openai(judge_prompt, api_key=os.environ.get("OPENAI_API_KEY", ""), model_id="gpt-4o-mini")
-                if "YES" in res.upper():
+                
+                if res.strip().upper().startswith("YES"):
                     score += 0.20
                     return score, "PASS", "YAML template is robust, secure, and semantically verified."
                 else:
-                    return score, "SEMANTIC_FAILURE", "YAML template compiled physically but failed LLM semantic validation intent bounds."
+                    reason = res.replace("NO", "", 1).replace(":", "", 1).strip()
+                    return score, "SEMANTIC_FAILURE", f"Semantic Configuration Missing. The evaluation judge traced: '{reason}'"
             except Exception as e:
                 logger.warning("Semantic validation judge error: %s", e)
             
