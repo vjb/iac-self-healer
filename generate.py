@@ -4,6 +4,10 @@ from src.factory import PromptFactory
 from src.data_loader import get_aws_context
 
 def main():
+    import logging
+    logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(asctime)s - %(message)s')
+    logger = logging.getLogger(__name__)
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--intent", type=str, required=True, help="The core infrastructure requirement.")
     parser.add_argument("--temperature", type=float, default=0.5, help="Temperature for generative randomness.")
@@ -20,8 +24,9 @@ def main():
     factory = PromptFactory()
     try:
         factory.load("optimized_factory.json")
-    except Exception:
-        pass
+        logger.info("Successfully loaded previously optimized weights from optimized_factory.json")
+    except Exception as e:
+        logger.warning("Failed to load optimized weights from 'optimized_factory.json': %s", e)
         
     context = get_aws_context()
     
@@ -77,6 +82,7 @@ You must output exclusively in valid JSON format matching the exact structure be
         resp.raise_for_status()
         cleaned_data = json.loads(resp.json()['choices'][0]['message']['content'])
     except Exception as e:
+        logger.warning("Agent fallback triggered! OpenAI editor request failed or parsed poorly: %s", e)
         cleaned_data = {
             "cleaned_prerequisites": getattr(prediction, 'prerequisites', ''),
             "cleaned_use_case": getattr(prediction, 'use_case', ''),
@@ -92,8 +98,8 @@ You must output exclusively in valid JSON format matching the exact structure be
         if os.path.exists(pwd_constraints):
             with open(pwd_constraints, "r", encoding="utf-8") as rf:
                 strict_constraints_block = "\\n## Runtime Strict Constraints\\n" + rf.read()
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("Bypassed strict runtime constraints mapping: %s", e)
 
     output = f"""# AWS Prompt Output
 ## Prerequisites
@@ -113,9 +119,6 @@ You must output exclusively in valid JSON format matching the exact structure be
     with open(out_file, "w", encoding='utf-8') as f:
         f.write(output)
         
-    import logging
-    logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(asctime)s - %(message)s')
-    logger = logging.getLogger(__name__)
     logger.info("Generation complete. Output allocated to %s", out_file)
 
 if __name__ == "__main__":
