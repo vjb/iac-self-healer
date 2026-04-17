@@ -8,7 +8,7 @@ This repository provides a static evaluation pipeline for optimizing generated I
 graph TD
     Z["AWS aws-samples Repository"] -->|Extract Validation Defaults| A
     A["MIPROv2 Bayesian Optimizer - GPT-4o"] -->|Queries Constraints| B[(ChromaDB Vector Oracle)]
-    B -->|Ingests Document Parameters| C{"Student Evaluator - Claude 3.7"}
+    B -->|Ingests Document Parameters| C{"Student Evaluators - GPT-4o & Claude 3.7"}
     
     C -->|Generates SAM YAML into Volatile RAM| D["yaml.safe_load Parser"]
     D -->|Validates| E["cfn-lint Syntax Verification"]
