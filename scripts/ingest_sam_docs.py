@@ -19,18 +19,28 @@ def ingest_sam_docs():
         metadata={"hnsw:space": "cosine"}
     )
     
-    # 1. AWS SAM Resource Documentation 
+    # 1. Dynamic AWS SAM Resource Documentation 
     sam_docs = [
-        "AWS::Serverless::Function defines an AWS Lambda function. Required Properties: CodeUri, Handler, Runtime. Important: Always include MemorySize and Timeout. Best practice: Timeout should be <= 30 seconds unless explicitly needed.",
-        "AWS::Serverless::Api defines an Amazon API Gateway REST API. Required Properties: StageName. It can be linked implicitly to an AWS::Serverless::Function by defining an Api Event.",
-        "AWS::Serverless::SimpleTable defines a DynamoDB table with a single attribute primary key. Properties: PrimaryKey (Name, Type). Type must be String, Number, or Binary.",
-        "AWS::Serverless::HttpApi defines an Amazon API Gateway HTTP API. Required Properties: None strictly required, but usually needs a default or explicit route. Faster and cheaper than REST Api.",
         "AWS SAM requires the Transform: AWS::Serverless-2016-10-31 declaration exactly at the root top level of the YAML template. Without it, AWS::Serverless objects will throw E1001 errors.",
-        "AWS::Serverless::Application embeds another SAM template. Required Properties: Location. Used for microservice architectures.",
-        "AWS::Serverless::SateMachine defines AWS Step Functions. Required: DefinitionUri or Definition, Role. Use this for orchestrating complex microservices.",
         "AWS::Serverless::Function MemorySize must be an integer between 128 and 10240, in 1-MB increments.",
         "AWS::Serverless::Function Environment variables are mapped via the 'Environment: Variables:' property block. Values must be strings."
     ]
+    try:
+        import requests
+        logger.info("Fetching real-time AWS CloudFormation Resource Specification schema...")
+        r = requests.get('https://d1uauaxba7bl26.cloudfront.net/latest/gzip/CloudFormationResourceSpecification.json', timeout=30)
+        data = r.json()
+        scraped = 0
+        for type_name, type_def in data.get('ResourceTypes', {}).items():
+            if type_name.startswith("AWS::Serverless") or type_name.startswith("AWS::S3") or type_name.startswith("AWS::DynamoDB") or type_name.startswith("AWS::RDS") or type_name.startswith("AWS::Lambda") or type_name.startswith("AWS::ApiGateway"):
+                desc = type_def.get('Documentation', "No explicit AWS doc link provided.")
+                props = type_def.get('Properties', {})
+                req_props = [k for k, v in props.items() if v.get('Required', False)]
+                sam_docs.append(f"{type_name} declarative structural boundary. Official specification mapping: {desc}. Required Architecture Properties: {', '.join(req_props) if req_props else 'None strictly required.'}")
+                scraped += 1
+        logger.info(f"Successfully bridged {scraped} active dynamic AWS Schema bounds into working array.")
+    except Exception as e:
+        logger.error(f"Failed to fetch dynamic schema, falling back to basic bounds: {e}")
     
     # 2. cfn-lint Error Codes (Structural Bounds)
     cfn_lint_docs = [

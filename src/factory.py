@@ -59,8 +59,9 @@ def train(auto="light", num_candidates=7, num_trials=15, resume=False, results_d
     if not api_key:
         raise ValueError("OPENAI_API_KEY not set in .env")
     
-    lm = dspy.LM('openai/gpt-4o', api_key=api_key, temperature=0.7)
-    dspy.configure(lm=lm)
+    prompt_model = dspy.LM('openai/gpt-4o', api_key=api_key, temperature=0.7)
+    task_model = dspy.LM('openai/gpt-4o-mini', api_key=api_key, temperature=0.0)
+    dspy.configure(lm=task_model)
     
     trainset = load_training_intents()
     if not trainset:
@@ -106,6 +107,8 @@ def train(auto="light", num_candidates=7, num_trials=15, resume=False, results_d
         # Auto mode controls num_candidates and num_trials internally
         optimizer = MIPROv2(
             metric=sam_compile_metric,
+            prompt_model=prompt_model,
+            task_model=task_model,
             auto=auto,
             verbose=True,
         )
@@ -117,6 +120,8 @@ def train(auto="light", num_candidates=7, num_trials=15, resume=False, results_d
         # Manual mode: user controls candidates and trials
         optimizer = MIPROv2(
             metric=sam_compile_metric,
+            prompt_model=prompt_model,
+            task_model=task_model,
             num_candidates=num_candidates,
             verbose=True,
         )

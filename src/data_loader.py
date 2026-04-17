@@ -37,6 +37,35 @@ def load_training_intents():
                 sam_reference=sam_ref
             ).with_inputs('architecture_intent', 'sam_reference')
         )
+        
+    # Inject Dynamic Semantic Champions (Score >= 1.20)
+    import glob
+    import re
+    md_files = glob.glob(os.path.join(PROJECT_ROOT, "results", "optimization", "run_*", "*.md"))
+    for md_file in md_files:
+        try:
+            with open(md_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            score_match = re.search(r"\*\*Final Average Score:\*\* ([\d\.]+)", content)
+            if score_match:
+                score = float(score_match.group(1))
+                if score >= 1.20:
+                    intent_match = re.search(r"# Declarative AWS SAM Prompt: (.*)", content)
+                    prompt_match = re.search(r"---\n+(.*?)\n+---", content, re.DOTALL)
+                    if intent_match and prompt_match:
+                        intent = intent_match.group(1).strip()
+                        prompt_text = prompt_match.group(1).strip()
+                        examples.append(
+                            dspy.Example(
+                                architecture_intent=intent,
+                                sam_reference=get_sam_reference(intent),
+                                prompt=prompt_text
+                            ).with_inputs('architecture_intent', 'sam_reference')
+                        )
+                        logger.info("Injected semantic champion into trainset from %s", os.path.basename(md_file))
+        except Exception as e:
+            logger.debug("Failed parsing historical champion %s: %s", md_file, e)
+            
     return examples
 
 def _get_chroma_collection():

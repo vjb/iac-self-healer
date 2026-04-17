@@ -37,16 +37,16 @@ def _clean_code_output(raw: str) -> str:
     return code
 
 
-def _call_openai(prompt_text: str, api_key: str) -> str:
-    """Call GPT-4o to generate CDK code from a prompt."""
+def _call_openai(prompt_text: str, api_key: str, system_prompt: str = STUDENT_SYSTEM_PROMPT, model_id: str = "gpt-4o") -> str:
+    """Call OpenAI models to generate CDK code from a prompt."""
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
     }
     payload = {
-        "model": "gpt-4o",
+        "model": model_id,
         "messages": [
-            {"role": "system", "content": STUDENT_SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt_text}
         ],
         "temperature": 0.0
@@ -60,7 +60,7 @@ def _call_openai(prompt_text: str, api_key: str) -> str:
     return _clean_code_output(resp.json()['choices'][0]['message']['content'])
 
 
-def _call_openrouter(prompt_text: str, api_key: str, model_id: str) -> str:
+def _call_openrouter(prompt_text: str, api_key: str, model_id: str, system_prompt: str = STUDENT_SYSTEM_PROMPT) -> str:
     """Call OpenRouter to generate CDK code from a prompt using a specific model."""
     headers = {
         "Content-Type": "application/json",
@@ -69,7 +69,7 @@ def _call_openrouter(prompt_text: str, api_key: str, model_id: str) -> str:
     payload = {
         "model": model_id,
         "messages": [
-            {"role": "system", "content": STUDENT_SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt_text}
         ],
         "temperature": 0.0
@@ -121,7 +121,7 @@ def retry_llm_code(model_id: str, original_prompt: str, previous_code: str, erro
     return _clean_code_output(json_resp['choices'][0]['message']['content'])
 
 
-def call_student_llms(prompt_text: str) -> list:
+def call_student_llms(prompt_text: str, intent_text: str = None) -> list:
     """
     Send a prompt to multiple student LLMs and return all successful results concurrently.
     
@@ -135,12 +135,22 @@ def call_student_llms(prompt_text: str) -> list:
     openai_key = os.environ.get("OPENAI_API_KEY", "")
     openrouter_key = os.environ.get("OPENROUTER_API_KEY", "")
     
+    system_prompt = STUDENT_SYSTEM_PROMPT
+    if intent_text:
+        try:
+            from src.data_loader import get_sam_reference
+            rag_context = get_sam_reference(intent_text)
+            system_prompt += f"\n\n--- PRE-EMPTIVE ARCHITECTURE RESTRICTIONS & RAG KNOWLEDGE BASE ---\n{rag_context}\n"
+            logger.debug("Successfully injected %d bytes of pre-emptive ChromaDB context into system prompt globally.", len(rag_context))
+        except Exception as e:
+            logger.warning("Failed to inject pre-emptive RAG: %s", e)
+    
     results = []
     
     def _fetch_openai():
         if not openai_key: return None
         try:
-            code = _call_openai(prompt_text, openai_key)
+            code = _call_openai(prompt_text, openai_key, system_prompt=system_prompt)
             logger.info("GPT-4o student: generated %d chars of code", len(code))
             return {"model": "gpt-4o", "code": code, "error": None}
         except Exception as e:
@@ -150,7 +160,7 @@ def call_student_llms(prompt_text: str) -> list:
     def _fetch_openrouter(model_id):
         if not openrouter_key: return None
         try:
-            code = _call_openrouter(prompt_text, openrouter_key, model_id)
+            code = _call_openrouter(prompt_text, openrouter_key, model_id, system_prompt=system_prompt)
             logger.info("OpenRouter student [%s]: generated %d chars of code", model_id, len(code))
             return {"model": model_id, "code": code, "error": None}
         except requests.exceptions.HTTPError as e:

@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 VENV_SCRIPTS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "venv", "Scripts")
 
 
-def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
+def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[float, str, str]:
     """
     Score a single piece of generated AWS SAM YAML code.
     Returns (score, rule_id, error_trace).
@@ -142,11 +142,26 @@ def _score_single_yaml(yaml_content: str) -> tuple[float, str, str]:
                     return score, "CFN_GUARD_CRASH", f"cfn-guard error: {result.stderr or result.stdout}"
             else:
                 score += 0.40
+                
         except FileNotFoundError:
             logger.error("cfn-guard binary not found! Please install it.")
             return score, "SYS_ERR", "cfn-guard execution failed."
             
-    return score, "PASS", "YAML template is robust and passed all checks."
+        # Optional Stage 4: Semantic Intent Validation (LLM-as-a-judge)
+        if score >= 1.0 and intent_text:
+            try:
+                from src.student import _call_openai
+                judge_prompt = f"Does the following declarative AWS SAM architecture cleanly satisfy the exact user intent defined below?\n\nUser Intent: {intent_text}\n\nAWS SAM YAML:\n{yaml_content}\n\nStrictly reply with 'YES' if it satisfies it or 'NO' if it completely missed the semantic architecture requirement."
+                res = _call_openai(judge_prompt, api_key=os.environ.get("OPENAI_API_KEY", ""), model_id="gpt-4o-mini")
+                if "YES" in res.upper():
+                    score += 0.20
+                    return score, "PASS", "YAML template is robust, secure, and semantically verified."
+                else:
+                    return score, "SEMANTIC_FAILURE", "YAML template compiled physically but failed LLM semantic validation intent bounds."
+            except Exception as e:
+                logger.warning("Semantic validation judge error: %s", e)
+            
+    return score, "PASS", "YAML template is robust and passed physical verification natively."
 
 
 def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> tuple[float, list]:
@@ -157,7 +172,7 @@ def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> t
     if not prompt_text:
         return 0.0, []
         
-    student_results = call_student_llms(prompt_text)
+    student_results = call_student_llms(prompt_text, intent_text=intent_text)
     scores = []
     details = []
     
@@ -170,15 +185,15 @@ def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> t
         final_error_trace = ""
         
         for attempt in range(3):
-            score, rule_id, error_trace = _score_single_yaml(current_code)
+            score, rule_id, error_trace = _score_single_yaml(current_code, intent_text=intent_text)
             
             penalty = attempt * 0.10
             effective_score = max(0.0, score - penalty)
             best_score = max(best_score, effective_score)
             final_error_trace = error_trace
             
-            if score >= 1.0:
-                logger.info("Model %s scored %.2f (Base: %.2f, Penalty: %.2f) on attempt %d", result["model"], effective_score, score, penalty, attempt + 1)
+            if score >= 1.20:
+                logger.info("Model %s scored %.2f (Base: %.2f, Penalty: %.2f) with complete semantic verification on attempt %d", result["model"], effective_score, score, penalty, attempt + 1)
                 return {"model": result["model"], "score": effective_score, "error": error_trace}
                 
             logger.debug("Model %s failed with %.2f on attempt %d. Error trace captured.", result["model"], score, attempt + 1)
