@@ -29,3 +29,8 @@ This document serves as an institutional knowledge base formalizing the critical
 **The Problem:** LLMs consistently failed `cfn-lint` verification repeatedly on early zero-shot runs because they forget to prepend strict AWS-required headers (e.g., `Transform: AWS::Serverless-2016-10-31`). 
 **The Lesson:** Never waste API training budget teaching an optimizer to add boilerplate strings. 
 **The Solution:** By capturing the raw object natively inside our Sanitization Middleware, we execute constant mechanical checks ensuring `AWSTemplateFormatVersion` is applied recursively, completely bypassing unnecessary verification cycles for trivial syntax exclusions.
+
+## 6. Flexible Heuristics vs. Rigid Regex (Markdown Extraction)
+**The Problem:** Open-source models (like Llama 3.3) consistently hallucinate arbitrary multi-block structures (injecting ` ```bash ` deployment guides physically above the architecture configuration). Extracting just the "first" block fails. Our first attempt at extracting *all* blocks using rigid `\n` newline bounds crashed because RLHF models aggressively inject carriage returns (`\r\n`) and trailing spaces within their formatting boundaries.
+**The Lesson:** Hardcoded regex boundaries instantly fracture against stochastic text generation. 
+**The Solution:** We deployed a highly abstracted regex string (`r"```[a-zA-Z]*\s*(.*?)\s*```"`) utilizing wildcard whitespace (`\s*`) across the entire string length, extracted into an array. We then programmatically sorted the sequence array dynamically by byte-length descending, ensuring that the target extraction is systematically always the largest declarative YAML payload regardless of sequence position or hallucinated formatting constraints.
