@@ -8,7 +8,7 @@ The optimization pipeline outputs a single `optimized_factory.json` directly int
 
 **Required Action:** 
 - Reroute the `compiled.save()` logic inside `src/factory.py` to deposit the parameters inside the isolated `results/optimization/run_[ID]` directories natively alongside their execution logs.
-- Implement a physical configuration alias (e.g. symlinks, or a `CHAMPION_RUN_ID` constant within the `.env` mapping) to instruct `generate.py` exactly which checkpoint schema to utilize during zero-shot extraction.
+- Implement a physical configuration alias (e.g. symlinks, or a `CHAMPION_RUN_ID` constant within the `.env` mapping) inherently connected to the `--resume` execution parameter. This ensures the optimizer seamlessly extracts and compounds parameters from specific, versioned historical runs instead of blindly pulling from a single static root file.
 
 ## 2. Dynamic Policy Extraction Integration
 **Current State:** 
