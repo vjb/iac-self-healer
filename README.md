@@ -16,17 +16,14 @@ graph TD
     D -->|Phase 1.5 Native| SAM["sam validate --lint"]
     SAM -->|Phase 2 Static| E["cfn-lint Syntax Verification"]
     E -->|Phase 3 Policy| F["cfn-guard Compliance Verification"]
-    F -->|Phase 4 Physical| P2["LocalStack Pro Docker OS Hardware"]
-    
-    P2 -->|Satisfies Strict IAM Constraints| G{"Semantic Equivalence Judge"}
-    G -->|YES - Perfect Match| H["Score 2.00 - Full Pipeline Verification"]
+    F -->|Satisfies Strict Policy Constraints| G{"Semantic Equivalence Judge"}
+    G -->|YES - Perfect Match| H["Score 1.20 - Full Pipeline Verification"]
     
     %% Feedback Loops
     D -->|Syntax Exception| J["Math Penalty and Vector Optimization"]
     SAM -->|Macro Violation Trace| J
     E -->|Top 3 Violations Array| J
     F -->|Raw AST Trace| J
-    P2 -->|Physical Hardware Boto3 Error Trace| J
     G -->|NO - Technical Delta| J
     
     J -->|Retry Attempt Loop| C
@@ -60,7 +57,6 @@ cp .env.example .env
 Review the `.env` structure:
 * `OPENAI_API_KEY`: API authentication key.
 * `OPENROUTER_API_KEY`: API authentication key utilized for OpenRouter requests.
-* `LOCALSTACK_AUTH_TOKEN`: Pro/Ultimate environment variable required to trigger strict `ENFORCE_IAM=1` sandbox matrices globally.
 
 ## Installation
 
@@ -96,6 +92,6 @@ venv\Scripts\python.exe scripts/optimize.py --auto medium --resume
 
 ## Known Limitations & Future Work
 
-1. **Nested OS Virtualization:** The Phase 2 LocalStack container instance functionally operates in runtime isolation. Serverless Lambdas dynamically requesting Docker layers (e.g. nested Python/Go compilation instructions) trigger execution exceptions without an explicit mapping to `/var/run/docker.sock` passed internally into the `subprocess` bindings.
+1. **Local Deployment Emulation:** The system currently relies on static CLI analysis (`cfn-lint` and `cfn-guard`) to mathematically seal syntax bounds. Production integration requires an active event-driven deployment trace loop (e.g., dynamically triggering `sam deploy` against ephemeral AWS stack executions) to verify physical IAM role policies against live Cloud configurations.
 2. **Security Protocol Generalization:** The `cfn-guard` policies exclusively check JSON syntax structures by mapping them to local logic files. A language model implicitly trained against the pipeline architecture could format schema implementations to bypass string pattern matching algorithms, leaving the underlying architecture explicitly vulnerable to zero-day logic exploits.
 3. **Windows Operating System Dependency:** The virtual environment binary routing (`cfn-guard.exe`) relies on standard Windows NT file path formats. A Linux machine requires structural path rewriting inside `evaluators.py`.
