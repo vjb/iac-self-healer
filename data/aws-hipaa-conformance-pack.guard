@@ -1,1 +1,32 @@
-rule S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED { AWS::S3::Bucket BucketEncryption[*] exists }
+# AWS HIPAA Conformance Pack: Serverless Compliance Framework
+
+# Rule 1: S3 Data At-Rest Encryption (HIPAA Standard 164.312)
+rule S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED {
+    AWS::S3::Bucket BucketEncryption.ServerSideEncryptionConfiguration[*].ServerSideEncryptionByDefault.SSEAlgorithm == "aws:kms"
+}
+
+# Rule 2: DynamoDB At-Rest Encryption 
+rule DYNAMODB_ENCRYPTION_ENABLED {
+    AWS::DynamoDB::Table SSESpecification.SSEEnabled == true
+}
+
+# Rule 3: API Gateway Execution Logging (HIPAA Audit Controls 164.312(b))
+rule API_GW_EXECUTION_LOGGING_ENABLED {
+    AWS::ApiGateway::Stage MethodSettings[*].LoggingLevel IN ["INFO", "ERROR"]
+    AWS::ApiGateway::Stage MethodSettings[*].DataTraceEnabled == true
+}
+
+# Rule 4: SNS Topics must be encrypted with KMS
+rule SNS_ENCRYPTED_KMS {
+    AWS::SNS::Topic KmsMasterKeyId exists
+}
+
+# Rule 5: SQS Queues must be encrypted with KMS
+rule SQS_ENCRYPTED_KMS {
+    AWS::SQS::Queue KmsMasterKeyId exists
+}
+
+# Rule 6: Lambda Functions must restrict tracing/logging via X-Ray
+rule LAMBDA_TRACING_ENABLED {
+    AWS::Lambda::Function TracingConfig.Mode == "Active"
+}
