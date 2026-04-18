@@ -95,17 +95,23 @@ def get_sam_reference(intent: str) -> str:
         except Exception as e:
             logger.warning("ChromaDB query failed: %s", e)
             
-    # Load physical WAFR .guard rules to enforce absolute bounds
-    wafr_rules = ""
-    guard_path = os.path.join(PROJECT_ROOT, "data", "aws-wafr-conformance-pack.guard")
-    if os.path.exists(guard_path):
-        with open(guard_path, "r", encoding="utf-8") as f:
-            wafr_rules = f.read()
+    # Load physical WAFR & HIPAA .guard rules to enforce absolute bounds
+    compliance_rules = ""
+    wafr_path = os.path.join(PROJECT_ROOT, "data", "aws-wafr-conformance-pack.guard")
+    hipaa_path = os.path.join(PROJECT_ROOT, "data", "aws-hipaa-conformance-pack.guard")
+    
+    if os.path.exists(wafr_path):
+        with open(wafr_path, "r", encoding="utf-8") as f:
+            compliance_rules += f.read() + "\n"
+            
+    if os.path.exists(hipaa_path):
+        with open(hipaa_path, "r", encoding="utf-8") as f:
+            compliance_rules += f.read() + "\n"
 
     strict_bounds = (
         "\n\n=== EXPLICIT COMPLIANCE & FRAMEWORK BOUNDS ===\n"
-        "1. PHYSICAL WAFR RULES: You MUST guarantee your output inherently constructs the properties dictated by these rules to prevent cfn-guard crashes:\n"
-        f"{wafr_rules}\n\n"
+        "1. PHYSICAL WAFR & HIPAA RULES: You MUST guarantee your output inherently constructs the properties dictated by these rules to prevent cfn-guard crashes:\n"
+        f"{compliance_rules}\n\n"
         "2. DEPRECATION TRAP: Runtimes like python3.9 are absolutely forbidden. You MUST explicitly enforce python3.12 or higher in your prompt constraints."
     )
     
