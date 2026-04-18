@@ -7,3 +7,5 @@ python-dotenv
 flake8
 tenacity
 pytest
+scikit-learn
+numpy
