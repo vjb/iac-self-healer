@@ -7,8 +7,8 @@ This repository provides a static evaluation pipeline for optimizing generated I
 ```mermaid
 graph TD
     Z["AWS aws-samples Repository"] -->|Extract Validation Defaults| A
-    A["MIPROv2 Bayesian Optimizer - GPT-4o-Mini"] -->|K-Means Semantic Routing (K=4)| B[(ChromaDB Vector Store)]
-    B -->|Query nearest dynamic centroid (n=2)| C{"Concurrent Tier-2 Array - Llama 3, Haiku, GPT-4o-Mini"}
+    A["MIPROv2 Bayesian Optimizer - GPT-4o-Mini"] -->|"K-Means Semantic Routing [K=4]"| B[(ChromaDB Vector Store)]
+    B -->|"Query nearest dynamic centroid [n=2]"| C{"Concurrent Tier-2 Array - Llama 3, Haiku, GPT-4o-Mini"}
     
     C -->|Generates SAM YAML into RAM Disk| D["yaml.safe_load Parser"]
     D -->|Phase 1.5 Native| SAM["sam validate --lint"]
