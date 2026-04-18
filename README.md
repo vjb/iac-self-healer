@@ -23,6 +23,7 @@ graph TD
     
     %% Feedback Loops
     D -->|Syntax Exception| J["Math Penalty and Vector Optimization"]
+    SAM -->|Macro Violation Trace| J
     E -->|Top 3 Violations Array| J
     F -->|Raw AST Trace| J
     P2 -->|Physical Hardware Boto3 Error Trace| J
