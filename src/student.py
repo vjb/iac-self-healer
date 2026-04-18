@@ -177,8 +177,6 @@ def call_student_llms(prompt_text: str, intent_text: str = None) -> list:
     import random
     
     available_models = []
-    if openai_key:
-        available_models.append("openai/gpt-4o-mini")
     if openrouter_key:
         available_models.append("anthropic/claude-3-haiku")
         available_models.append("meta-llama/llama-3.3-70b-instruct")

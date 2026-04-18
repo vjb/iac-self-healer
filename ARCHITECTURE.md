@@ -35,12 +35,12 @@ This dynamic semantic separation physically guarantees the generated matrix cont
 
 ### Compilation Boundary Bypass (Semantic Generation)
 Compliance enforcement objects defined within `cfn-guard` reject YAML templates that omit target parameters. The evaluation pipeline executes a dedicated Python generation request against the internal AWS `aws-samples` GitHub repository to bypass static boundaries.
-1. `scratch/scraper.py` parses AWS SAM outputs.
+1. `scripts/scraper.py` parses AWS SAM outputs.
 2. The code functionally validates the structures against the primary evaluator script, computing `AES256` keys to strictly conform external samples with local schema restrictions manually in execution variables.
 3. It stores standard baseline implementations within `results/optimization/run_seed_champions`. MIPROv2 parses these sample benchmarks into evaluation targets locally as DSPy reference files.
 
 ### Phase 2: Ephemeral Hardware Execution Sandbox
-While static evaluation boundaries guarantee optimal formatting parameters computationally, functional execution requires physical cloud testing. The architecture natively implements a decoupled Phase 2 optimizer (`scratch/test_localstack.py`) that boots ephemeral container environments logically mapping physical IAM bounds:
+While static evaluation boundaries guarantee optimal formatting parameters computationally, functional execution requires physical cloud testing. The architecture natively implements a decoupled Phase 2 optimizer (`scripts/test_localstack.py`) that boots ephemeral container environments logically mapping physical IAM bounds:
 
 ```mermaid
 graph TD

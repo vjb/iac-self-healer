@@ -93,32 +93,59 @@ def get_sam_reference(intent: str) -> str:
             from chromadb.utils import embedding_functions
             
             centroids_path = os.path.join(PROJECT_ROOT, "data", "kmeans_centroids.json")
-            nearest_cluster_id = None
+            sub_cluster_0_id = None
+            sub_cluster_1_id = None
             
             # Apply semantic KMS routing if centroids are natively available
             if os.path.exists(centroids_path):
                 with open(centroids_path, "r") as f:
                     c_data = json.load(f)
-                    centroids = np.array(c_data["centroids"])
+                    sub_centroids_map = c_data.get("sub_centroids", {})
                     
                 ef = embedding_functions.DefaultEmbeddingFunction()
                 query_emb = np.array(ef([intent])[0])
-                distances = np.linalg.norm(centroids - query_emb, axis=1)
-                nearest_cluster_id = int(np.argmin(distances))
-            
-            # Formulate constrained query execution
-            query_kwargs = {
-                "query_texts": [f"{intent} CRITICAL COMPILER WARNING constraints"],
-                "n_results": 2  # Drastically limits context window payload bounds!
-            }
-            if nearest_cluster_id is not None:
-                query_kwargs["where"] = {"cluster": nearest_cluster_id}
                 
-            res = collection.query(**query_kwargs)
+                # Find best sub-cluster for Primary Cluster 0 (Documentation)
+                if "0" in sub_centroids_map and sub_centroids_map["0"]:
+                    sub_centroids_0 = np.array(sub_centroids_map["0"])
+                    dist_0 = np.linalg.norm(sub_centroids_0 - query_emb, axis=1)
+                    sub_cluster_0_id = int(np.argmin(dist_0))
+                    
+                # Find best sub-cluster for Primary Cluster 1 (Errors)
+                if "1" in sub_centroids_map and sub_centroids_map["1"]:
+                    sub_centroids_1 = np.array(sub_centroids_map["1"])
+                    dist_1 = np.linalg.norm(sub_centroids_1 - query_emb, axis=1)
+                    sub_cluster_1_id = int(np.argmin(dist_1))
+            
             docs = []
-            if res and res.get('documents') and res['documents'][0]:
-                for d in res['documents'][0]:
-                    docs.append(d)
+            
+            # Path 1: Ground Truth Documentation (Cluster 0)
+            kwargs_0 = {
+                "query_texts": [intent],
+                "n_results": 2
+            }
+            if sub_cluster_0_id is not None:
+                kwargs_0["where"] = {"$and": [{"cluster": 0}, {"sub_cluster": sub_cluster_0_id}]}
+            else:
+                kwargs_0["where"] = {"cluster": 0}
+                
+            res_0 = collection.query(**kwargs_0)
+            if res_0 and res_0.get('documents') and res_0['documents'][0]:
+                docs.extend(res_0['documents'][0])
+                
+            # Path 2: Hallucination Oracle / Error Bounds (Cluster 1)
+            kwargs_1 = {
+                "query_texts": [f"{intent} CRITICAL COMPILER WARNING constraints errors"],
+                "n_results": 1
+            }
+            if sub_cluster_1_id is not None:
+                kwargs_1["where"] = {"$and": [{"cluster": 1}, {"sub_cluster": sub_cluster_1_id}]}
+            else:
+                kwargs_1["where"] = {"cluster": 1}
+                
+            res_1 = collection.query(**kwargs_1)
+            if res_1 and res_1.get('documents') and res_1['documents'][0]:
+                docs.extend(res_1['documents'][0])
                 
             if docs:
                 base_docs = "\n\n---\n\n".join(docs)

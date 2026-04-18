@@ -51,19 +51,54 @@ def cluster_and_tag_db():
 
     # Re-run with optimal K
     kmeans = KMeans(n_clusters=best_k, random_state=42, n_init=10)
-    labels = kmeans.fit_predict(X)
+    primary_labels = kmeans.fit_predict(X)
 
-    # Construct and save centroids
-    centroids = kmeans.cluster_centers_.tolist()
+    primary_centroids = kmeans.cluster_centers_.tolist()
+    sub_centroids_map = {}
+    
+    # Layer 2: Hierarchical Sub-Clustering
+    sub_labels = np.zeros(len(X), dtype=int)
+    for i in range(best_k):
+        indices = np.where(primary_labels == i)[0]
+        if len(indices) < 5:
+            sub_centroids_map[str(i)] = []
+            continue
+            
+        sub_X = X[indices]
+        max_sub_k = min(10, len(sub_X) - 1)
+        best_sub_k = 2
+        best_sub_score = -1
+        
+        for k in range(2, max_sub_k + 1):
+            sub_km = KMeans(n_clusters=k, random_state=42, n_init='auto')
+            l = sub_km.fit_predict(sub_X)
+            score = silhouette_score(sub_X, l)
+            if score > best_sub_score:
+                best_sub_score = score
+                best_sub_k = k
+                
+        sub_km = KMeans(n_clusters=best_sub_k, random_state=42, n_init=10)
+        curr_sub_labels = sub_km.fit_predict(sub_X)
+        for idx_array, real_idx in enumerate(indices):
+            sub_labels[real_idx] = curr_sub_labels[idx_array]
+            
+        sub_centroids_map[str(i)] = sub_km.cluster_centers_.tolist()
+        logger.info("  Primary %d -> Derived Sub-Clusters: %d", i, best_sub_k)
+
     with open(OUT_JSON, "w", encoding="utf-8") as f:
-        json.dump({"k": best_k, "centroids": centroids}, f)
-    logger.info("Successfully exported mathematical centroids to %s", OUT_JSON)
+        json.dump({
+            "k": best_k, 
+            "centroids": primary_centroids,
+            "sub_centroids": sub_centroids_map
+        }, f)
+    logger.info("Successfully exported hierarchical centroids to %s", OUT_JSON)
 
-    # 3. Update ChromaDB metadatas to bind the new cluster assignments
+    # 3. Update ChromaDB metadatas to bind the new dual cluster assignments
     updated_metadatas = []
     for i in range(len(ids)):
         meta = metadatas[i] if metadatas and i < len(metadatas) and metadatas[i] is not None else {}
-        meta["cluster"] = int(labels[i])
+        meta["cluster"] = int(primary_labels[i])
+        meta["sub_cluster"] = int(sub_labels[i])
         updated_metadatas.append(meta)
 
     # Write the updated metadata back to ChromaDB
