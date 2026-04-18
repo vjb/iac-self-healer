@@ -38,3 +38,25 @@ Compliance enforcement objects defined within `cfn-guard` reject YAML templates 
 1. `scratch/scraper.py` parses AWS SAM outputs.
 2. The code functionally validates the structures against the primary evaluator script, computing `AES256` keys to strictly conform external samples with local schema restrictions manually in execution variables.
 3. It stores standard baseline implementations within `results/optimization/run_seed_champions`. MIPROv2 parses these sample benchmarks into evaluation targets locally as DSPy reference files.
+
+### Phase 2: Ephemeral Hardware Execution Sandbox
+While static evaluation boundaries guarantee optimal formatting parameters computationally, functional execution requires physical cloud testing. The architecture natively implements a decoupled Phase 2 optimizer (`scratch/test_localstack.py`) that boots ephemeral container environments logically mapping physical IAM bounds:
+
+```mermaid
+graph TD
+    A["Phase 1 Output: Semantic Champion YAML"] --> B["Boto3 CloudFormation Handler"]
+    B -->|Initialize via subprocess| C["LocalStack Pro Docker Container"]
+    C -->|Validates Pro Auth Token| D{"ENFORCE_IAM=1 Execution Bounds"}
+    
+    D -->|Executes Native Creation| E["Physical Cloud Endpoint Synthesis"]
+    
+    E -->|Template and Runtime Syntax Failure| F["Native Boto3 Exception Dump"]
+    E -->|Perfect IAM and Runtime Match| G["Validation Matrix Success - Score: 2.00"]
+    
+    F -->|Log Physical Stack Errors natively| H["ChromaDB Oracle Record"]
+    G --> I["Docker OS Container Destruction"]
+    H --> I
+    I -->|Clean RAM Matrix| J["Next Iteration Evaluation"]
+```
+
+The Phase 2 loop explicitly bypasses standard Python `testcontainers` wrappers directly to interface securely with native LocalStack Pro Docker instances. This enables strict OS-level container destruction independent of Boto3 timeout handlers, ensuring memory leaks do not disrupt long-running DSPy inference sweeps dynamically.
