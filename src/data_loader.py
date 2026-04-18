@@ -123,13 +123,23 @@ def record_compiler_failure(intent: str, error_trace: str):
         # Utilizes greedy slash matching to handle both raw strings and JSON-escaped formats natively
         sanitized_trace = re.sub(r'(?:[\\/]+\?[\\/]+)?R:[\\/]+[a-zA-Z0-9_]+[\\/]+template\.yaml', '[VOLATILE_PATH]', error_trace)
         
-        bug_id = "bug_" + hashlib.md5((intent + sanitized_trace).encode('utf-8')).hexdigest()[:15]
+        # De-Noise the vector embedding bounds: Separate physical text summary from dense AST JSON Payload
+        trace_parts = sanitized_trace.split("---", 1)
+        plain_text_summary = trace_parts[0].strip()
+        heavy_json_payload = trace_parts[1].strip() if len(trace_parts) > 1 else "{}"
+        
+        bug_id = "bug_" + hashlib.md5((intent + plain_text_summary).encode('utf-8')).hexdigest()[:15]
         warning_msg = f"CRITICAL COMPILER WARNING related to intent '{intent[:100]}...':\n"
-        warning_msg += f"The following error previously occurred during SAM YAML execution:\n{sanitized_trace}\n"
+        warning_msg += f"The following error previously occurred during SAM YAML execution:\n{plain_text_summary}\n"
         warning_msg += "Constraint: You MUST avoid the syntactic patterns that lead to this exception!"
         if len(warning_msg) > 1500: warning_msg = warning_msg[:1500] + "\n...[truncated]"
         
         # Use upsert to gracefully overwrite exact duplicate structural hashes natively
-        collection.upsert(documents=[warning_msg], ids=[bug_id])
+        # Safely offload massive JSON limits to metadatas array so NLP embedding models evaluate purely semantic constraints!
+        collection.upsert(
+            documents=[warning_msg], 
+            ids=[bug_id],
+            metadatas=[{"full_ast_json": heavy_json_payload[:5000]}]
+        )
     except Exception as e:
         logger.warning(f"Oracle: Failed to record compiler failure to ChromaDB: {e}")
