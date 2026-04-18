@@ -12,9 +12,9 @@ Language Model generation for functional Infrastructure as Code configurations g
 ## Core Implementations
 
 ### Sequential Optimization Loop (DSPy MIPROv2)
-The script executes a DSPy MIPROv2 vector loop isolated primarily across two model instances:
-1. `Prompt_Model` (gpt-4o): Parses compilation exceptions and dynamically refines prompt text instructions according to explicit constraints.
-2. `Task_Model` (claude-3.7-sonnet): Executes optimized prompts directly and returns target format payloads. Secondary engines (like Llama and Deepseek) are not utilized due to validation execution limitations.
+The script executes a DSPy MIPROv2 vector loop orchestrating dynamic validation interactions across distinctly bounded architecture models:
+1. **The Optimizer** (`gpt-4o`): Parses compilation exceptions and dynamically refines baseline prompt text instructions according to mathematical ChromaDB gradients.
+2. **The Evaluators** (`gpt-4o` and `claude-3.7-sonnet`): Execute the optimized prompts directly to generate the target SAM payloads. The optimization engine strictly averages the compilation scores across both disparate models to objectively verify prompt generalization over internal model bias.
 
 ### The Evaluator Pipeline (`src/evaluators.py`)
 Model API endpoints ingest defined string structures and generate Serverless YAML output syntax. The YAML operates seamlessly inside an execution pipeline:

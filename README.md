@@ -31,7 +31,7 @@ graph TD
 ## Core Evaluation Components
 
 1. **Pre-emptive Data Ingestion:** The system parses `d1uauaxba7bl26.cloudfront.net` during initialization to download documented AWS CloudFormation schema parameters into a local ChromaDB instance.
-2. **Dual-Model Execution:** Processing is divided across two models. Instruction synthesis utilizes `gpt-4o`, while continuous trace execution runs on `anthropic/claude-3.7-sonnet`.
+2. **Multi-Architecture Validation:** Prompt instruction synthesis utilizes `gpt-4o` natively as the primary optimizer matrix. To evaluate generated prompts efficiently, the pipeline enforces strict testing simultaneously against multiple distinct foundation models (`gpt-4o` and `anthropic/claude-3.7-sonnet`). By averaging their compilation scores, the engine prevents neural bias and enforces true prompt generalization across distinct semantic architectures.
 3. **Continuous Scoring Functions (`math.exp`):** The optimization gradients scale linearly against partial code outputs. A template passing 15 of 20 validation checks calculates a mathematically higher score multiplier than a template with complete structural failure, bypassing discrete boolean logic gates. The pipeline computes the evaluation vector using exponential parameter decay:
 
    ```math
