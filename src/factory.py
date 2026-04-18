@@ -59,13 +59,16 @@ def train(auto="light", num_candidates=7, num_trials=15, resume=False, results_d
     if not api_key:
         raise ValueError("OPENAI_API_KEY not set in .env")
     
-    prompt_model = dspy.LM('openai/gpt-4o', api_key=api_key, temperature=0.7)
+    prompt_model = dspy.LM('openai/gpt-4o-mini', api_key=api_key, temperature=0.7)
     task_model = dspy.LM('openai/gpt-4o-mini', api_key=api_key, temperature=0.0)
     dspy.configure(lm=task_model)
     
-    trainset = load_training_intents()
-    if not trainset:
+    full_trainset = load_training_intents()
+    if not full_trainset:
         raise ValueError("No training intents found. Create data/training_intents.json")
+        
+    import random
+    trainset = random.sample(full_trainset, min(10, len(full_trainset)))
     
     logger.info("Starting MIPROv2 optimization")
     logger.info("  Auto: %s", auto)

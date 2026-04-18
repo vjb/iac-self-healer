@@ -147,15 +147,15 @@ def call_student_llms(prompt_text: str, intent_text: str = None) -> list:
     
     results = []
     
-    def _fetch_openai():
+    def _fetch_openai(model_id):
         if not openai_key: return None
         try:
-            code = _call_openai(prompt_text, openai_key, system_prompt=system_prompt)
-            logger.info("GPT-4o student: generated %d chars of code", len(code))
-            return {"model": "gpt-4o", "code": code, "error": None}
+            code = _call_openai(prompt_text, openai_key, system_prompt=system_prompt, model_id=model_id)
+            logger.info("%s student: generated %d chars of code", model_id, len(code))
+            return {"model": model_id, "code": code, "error": None}
         except Exception as e:
-            logger.error("GPT-4o student failed: %s", e)
-            return {"model": "gpt-4o", "code": "", "error": str(e)}
+            logger.error("%s student failed: %s", model_id, e)
+            return {"model": model_id, "code": "", "error": str(e)}
 
     def _fetch_openrouter(model_id):
         if not openrouter_key: return None
@@ -178,23 +178,24 @@ def call_student_llms(prompt_text: str, intent_text: str = None) -> list:
     
     available_models = []
     if openai_key:
-        available_models.append("gpt-4o")
+        available_models.append("openai/gpt-4o-mini")
     if openrouter_key:
-        available_models.append("anthropic/claude-3.7-sonnet")
+        available_models.append("anthropic/claude-3-haiku")
+        available_models.append("meta-llama/llama-3.3-70b-instruct")
         
     if not available_models:
         return []
         
-    # Randomly select ONE model per evaluation to save API costs 
-    selected_model = random.choice(available_models)
-    logger.debug("Cost-saver active: Selected %s for this evaluation loop.", selected_model)
-    
-    if selected_model == "gpt-4o":
-        res = _fetch_openai()
-    else:
-        res = _fetch_openrouter(selected_model)
-        
-    if res:
-        results.append(res)
+    def dispatch(model_str):
+        if model_str.startswith("openai/"):
+            return _fetch_openai(model_str.split("/")[1])
+        else:
+            return _fetch_openrouter(model_str)
+            
+    logger.debug("Executing ensemble evaluation array across %d cheap student models natively.", len(available_models))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        for res in executor.map(dispatch, available_models):
+            if res:
+                results.append(res)
                 
     return results

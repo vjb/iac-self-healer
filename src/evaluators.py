@@ -16,6 +16,7 @@ import logging
 import yaml
 import json
 import math
+import shutil
 
 from src.student import call_student_llms
 
@@ -83,6 +84,8 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
             
         # Stage 1.5: Specification Validation (SAM CLI)
         sam_bin = "sam.cmd" if os.name == 'nt' else "sam"
+        if os.name == 'nt' and not shutil.which("sam.cmd"):
+            sam_bin = r"C:\Program Files\Amazon\AWSSAMCLI\bin\sam.cmd"
         try:
             sam_result = subprocess.run(
                 [sam_bin, "validate", "--lint", "--template-file", template_file],

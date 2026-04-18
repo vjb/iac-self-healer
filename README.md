@@ -7,10 +7,8 @@ This repository provides a static evaluation pipeline for optimizing generated I
 ```mermaid
 graph TD
     Z["AWS aws-samples Repository"] -->|Extract Validation Defaults| A
-    A["MIPROv2 Bayesian Optimizer - GPT-4o"] -->|Multi-Q Cross-Cluster RAG| B[(ChromaDB Vector Store)]
-    B -->|Query 1: Official API Specs| C{"Student Evaluators - GPT-4o and Claude 3.7"}
-    B -->|Query 2: WAFR Security Tracebacks| C
-    B -->|Query 3: Version Deprecation Limits| C
+    A["MIPROv2 Bayesian Optimizer - GPT-4o-Mini"] -->|K-Means Semantic Routing [K=4]| B[(ChromaDB Vector Store)]
+    B -->|Query nearest dynamic centroid [n=2]| C{"Concurrent Tier-2 Array - Llama 3, Haiku, GPT-4o-Mini"}
     
     C -->|Generates SAM YAML into RAM Disk| D["yaml.safe_load Parser"]
     D -->|Phase 1.5 Native| SAM["sam validate --lint"]
@@ -34,7 +32,8 @@ graph TD
 ## Core Evaluation Components
 
 1. **Pre-emptive Data Ingestion:** The system parses `d1uauaxba7bl26.cloudfront.net` during initialization to download documented AWS CloudFormation schema parameters into a local ChromaDB instance.
-2. **Cost-Optimized Model Selection:** Prompt instruction synthesis utilizes `gpt-4o` natively as the primary optimizer engine. To evaluate generated permutations efficiently while halving API limits, the pipeline randomly executes evaluation across distinct foundation models via `random.choice(['gpt-4o', 'anthropic/claude-3.7-sonnet'])` per optimization loop. This prevents neural bias and enforces true prompt generalization without doubling generation limits.
+2. **Cost-Optimized Model Selection:** Prompt instruction synthesis utilizes `gpt-4o-mini` natively as the primary optimizer engine. To execute mathematically sound generalization without destroying budgets, the mathematical bounds execute natively as a Concurrent Array over strict tier-2 hardware (`llama-3.3-70b-instruct`, `claude-3-haiku`, `gpt-4o-mini`). This enforces true zero-shot structural generalization natively by mapping true simultaneous logic responses across disparate reasoning engines instead of stochastic randomization.
+3. **Semantic Mathematical Routing:** Native execution boundaries severely restrict ChromaDB context bloat. Background K-Means cluster recalculation runs statically against compiled trace constraints, locking semantic geometric vectors. Instead of blindly executing brute-force queries resulting in massive multi-vector context payload inflation, the data loader statically calculates the exact geometric centroid of runtime targets, locking fetches strictly to `where={"cluster": nearest_id}` and forcing limit parameters bounding `n_results=2`.
 3. **Continuous Scoring Functions (`math.exp`):** The optimization gradients scale linearly against partial code outputs. A template passing 15 of 20 validation checks calculates a mathematically higher score multiplier than a template with complete structural failure, bypassing discrete boolean logic gates. The pipeline computes the evaluation vector using exponential parameter decay:
 
    ```math

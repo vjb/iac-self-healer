@@ -88,25 +88,43 @@ def get_sam_reference(intent: str) -> str:
     base_docs = "Use AWS SAM declarative syntax. Transform: AWS::Serverless-2016-10-31 is required."
     if collection and collection.count() > 0:
         try:
-            # 1. Primary Vector Search: Target explicit Formal Framework Clusters
-            res_spec = collection.query(query_texts=[f"{intent} AWS::Serverless declarative Transform Serverless-2016-10-31"], n_results=3)
-            # 2. Secondary Vector Search: Target explicit WAFR Security Tracebacks
-            res_sec = collection.query(query_texts=[f"{intent} CRITICAL COMPILER WARNING FAILED rules aws-wafr-conformance"], n_results=2)
-            # 3. Tertiary Vector Search: Target generic Compilation & Runtime Warnings
-            res_dep = collection.query(query_texts=[f"{intent} cfn-lint failure SAM Macro Violation deprecation"], n_results=2)
-
+            import json
+            import numpy as np
+            from chromadb.utils import embedding_functions
+            
+            centroids_path = os.path.join(PROJECT_ROOT, "data", "kmeans_centroids.json")
+            nearest_cluster_id = None
+            
+            # Apply semantic KMS routing if centroids are natively available
+            if os.path.exists(centroids_path):
+                with open(centroids_path, "r") as f:
+                    c_data = json.load(f)
+                    centroids = np.array(c_data["centroids"])
+                    
+                ef = embedding_functions.DefaultEmbeddingFunction()
+                query_emb = np.array(ef([intent])[0])
+                distances = np.linalg.norm(centroids - query_emb, axis=1)
+                nearest_cluster_id = int(np.argmin(distances))
+            
+            # Formulate constrained query execution
+            query_kwargs = {
+                "query_texts": [f"{intent} CRITICAL COMPILER WARNING constraints"],
+                "n_results": 2  # Drastically limits context window payload bounds!
+            }
+            if nearest_cluster_id is not None:
+                query_kwargs["where"] = {"cluster": nearest_cluster_id}
+                
+            res = collection.query(**query_kwargs)
             docs = []
-            if res_spec and res_spec.get('documents') and res_spec['documents'][0]:
-                docs.extend(res_spec['documents'][0])
-            if res_sec and res_sec.get('documents') and res_sec['documents'][0]:
-                docs.append(f"\n[ORACLE WAFR SECURITY FEEDBACK TO AVOID]\n" + "\n".join(res_sec['documents'][0]))
-            if res_dep and res_dep.get('documents') and res_dep['documents'][0]:
-                docs.append(f"\n[ORACLE SYNTAX DEPRECATION FEEDBACK TO AVOID]\n" + "\n".join(res_dep['documents'][0]))
+            if res and res.get('documents') and res['documents'][0]:
+                for d in res['documents'][0]:
+                    docs.append(d)
                 
             if docs:
                 base_docs = "\n\n---\n\n".join(docs)
+                
         except Exception as e:
-            logger.warning("ChromaDB Multi-Q query failed: %s", e)
+            logger.warning("ChromaDB routed query failed: %s", e)
             
     # Load physical WAFR .guard rules to enforce absolute bounds
     wafr_rules = ""
