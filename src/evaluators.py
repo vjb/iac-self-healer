@@ -81,6 +81,25 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
         with open(template_file, 'w', encoding='utf-8') as f:
             f.write(yaml_content)
             
+        # Stage 1.5: Specification Validation (SAM CLI)
+        sam_bin = "sam.cmd" if os.name == 'nt' else "sam"
+        try:
+            sam_result = subprocess.run(
+                [sam_bin, "validate", "--lint", "--template-file", template_file],
+                capture_output=True, text=True
+            )
+            if sam_result.returncode != 0:
+                logger.debug("Stage 1.5 FAIL: sam validate failed")
+                # Apply continuous decay to grant partial credit for surviving native YAML parse
+                error_output = f"{sam_result.stdout}\n{sam_result.stderr}".strip()
+                num_errors = error_output.lower().count("error") or 1
+                score += 0.20 * math.exp(-0.5 * num_errors)
+                return score, "SAM_VALIDATION_ERROR", f"[SAM Macro Violation]: {error_output}"
+            else:
+                score += 0.20
+        except FileNotFoundError:
+            logger.warning("SAM CLI not found on system! Skipping sam validate.")
+            
         # Stage 2: Specification Validation (cfn-lint)
         cfn_lint_bin = os.path.join(VENV_SCRIPTS, "cfn-lint.exe") if os.name == 'nt' else os.path.join(VENV_SCRIPTS, "cfn-lint")
         if not os.path.exists(cfn_lint_bin):
@@ -96,7 +115,7 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
                     errors = json.loads(result.stdout)
                     if errors:
                         num_errors = len(errors)
-                        lint_score = 0.40 * math.exp(-0.5 * num_errors)
+                        lint_score = 0.30 * math.exp(-0.5 * num_errors)
                         score += lint_score
                         first_err = errors[0]
                         rule_id = first_err.get("Rule", {}).get("Id", "E0000")
@@ -113,7 +132,7 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
                 except json.JSONDecodeError:
                     return score, "CFN_LINT_CRASH", f"cfn-lint output parsing failed: {result.stdout}"
             else:
-                score += 0.40
+                score += 0.30
         except FileNotFoundError:
             logger.error("cfn-lint binary not found! Please run pip install cfn-lint")
             return score, "SYS_ERR", "cfn-lint execution failed."
@@ -140,7 +159,7 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
                     if "not_compliant" in out_json:
                         if out_json["not_compliant"]:
                             num_violations = len(out_json["not_compliant"])
-                            guard_score = 0.40 * math.exp(-0.5 * num_violations)
+                            guard_score = 0.30 * math.exp(-0.5 * num_violations)
                             score += guard_score
                             rule_obj = out_json["not_compliant"][0]
                             rule_name = rule_obj.get("Rule", {}).get("Name", "UNKNOWN_GUARD_RULE")
@@ -150,9 +169,9 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
                             msg = f"[cfn-guard violation] Rule {rule_name} breached AWS WAFR constraints (Total Violations: {num_violations}). Trace node output: {trace_snippet}"
                             return score, rule_name, msg
                 except json.JSONDecodeError:
-                    return score, "CFN_GUARD_CRASH", f"cfn-guard error: {result.stderr or result.stdout}"
+                    return score, "CFN_GUARD_CRASH", f"cfn-guard error: {result.stdout}\n{result.stderr}"
             else:
-                score += 0.40
+                score += 0.30
                 
         except FileNotFoundError:
             logger.error("cfn-guard binary not found! Please install it.")

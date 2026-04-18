@@ -174,22 +174,27 @@ def call_student_llms(prompt_text: str, intent_text: str = None) -> list:
             logger.warning("OpenRouter student [%s] failed: %s", model_id, e)
             return {"model": model_id, "code": "", "error": str(e)}
 
-    # Parallelize LLM API requests
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-        futures = []
-        if openai_key:
-            futures.append(executor.submit(_fetch_openai))
-            
-        if openrouter_key:
-            or_models = [
-                "anthropic/claude-3.7-sonnet"
-            ]
-            for m in or_models:
-                futures.append(executor.submit(_fetch_openrouter, m))
-                
-        for future in concurrent.futures.as_completed(futures):
-            res = future.result()
-            if res:
-                results.append(res)
+    import random
+    
+    available_models = []
+    if openai_key:
+        available_models.append("gpt-4o")
+    if openrouter_key:
+        available_models.append("anthropic/claude-3.7-sonnet")
+        
+    if not available_models:
+        return []
+        
+    # Randomly select ONE model per evaluation to save API costs 
+    selected_model = random.choice(available_models)
+    logger.debug("Cost-saver active: Selected %s for this evaluation loop.", selected_model)
+    
+    if selected_model == "gpt-4o":
+        res = _fetch_openai()
+    else:
+        res = _fetch_openrouter(selected_model)
+        
+    if res:
+        results.append(res)
                 
     return results

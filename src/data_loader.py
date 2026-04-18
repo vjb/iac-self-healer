@@ -93,7 +93,7 @@ def get_sam_reference(intent: str) -> str:
             # 2. Secondary Vector Search: Target explicit WAFR Security Tracebacks
             res_sec = collection.query(query_texts=[f"{intent} CRITICAL COMPILER WARNING FAILED rules aws-wafr-conformance"], n_results=2)
             # 3. Tertiary Vector Search: Target generic Compilation & Runtime Warnings
-            res_dep = collection.query(query_texts=[f"{intent} cfn-lint failure deprecation resource"], n_results=1)
+            res_dep = collection.query(query_texts=[f"{intent} cfn-lint failure SAM Macro Violation deprecation"], n_results=2)
 
             docs = []
             if res_spec and res_spec.get('documents') and res_spec['documents'][0]:
