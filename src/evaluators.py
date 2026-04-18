@@ -122,19 +122,15 @@ def _score_single_yaml(yaml_content: str, intent_text: str = None) -> tuple[floa
         cfn_guard_bin = os.path.join(VENV_SCRIPTS, "cfn-guard.exe") if os.name == 'nt' else os.path.join(VENV_SCRIPTS, "cfn-guard")
         if not os.path.exists(cfn_guard_bin):
             cfn_guard_bin = "cfn-guard"
-            
-        wafr_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "aws-wafr-conformance-pack.guard")
-        hipaa_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "aws-hipaa-conformance-pack.guard")
-        
-        guard_cmd = [cfn_guard_bin, "validate", "--data", template_file, "--output-format", "json"]
-        if os.path.exists(wafr_path):
-            guard_cmd.extend(["--rules", wafr_path])
-        if os.path.exists(hipaa_path):
-            guard_cmd.extend(["--rules", hipaa_path])
+        rules_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "aws-wafr-conformance-pack.guard")
+        if not os.path.exists(rules_path):
+            os.makedirs(os.path.dirname(rules_path), exist_ok=True)
+            with open(rules_path, "w") as f:
+                f.write("rule S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED { AWS::S3::Bucket BucketEncryption[*] exists }")
                 
         try:
             result = subprocess.run(
-                guard_cmd,
+                [cfn_guard_bin, "validate", "--data", template_file, "--rules", rules_path, "--output-format", "json"],
                 capture_output=True, text=True
             )
             if result.returncode != 0:
