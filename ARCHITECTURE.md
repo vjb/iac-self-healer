@@ -11,14 +11,14 @@ Language Model generation for functional Infrastructure as Code configurations g
 
 ## Core Implementations
 
-### Two-Model Bayesian Loop (DSPy MIPROv2)
-The script executes a `DSPy MIPROv2` vector loop isolated primarily across two model instances:
+### Sequential Optimization Loop (DSPy MIPROv2)
+The script executes a DSPy MIPROv2 vector loop isolated primarily across two model instances:
 1. `Prompt_Model` (gpt-4o): Parses compilation exceptions and dynamically refines prompt text instructions according to explicit constraints.
 2. `Task_Model` (claude-3.7-sonnet): Executes optimized prompts directly and returns target format payloads. Secondary engines (like Llama and Deepseek) are not utilized due to validation execution limitations.
 
 ### The Evaluator Pipeline (`src/evaluators.py`)
 Model API endpoints ingest defined string structures and generate Serverless YAML output syntax. The YAML operates seamlessly inside an execution pipeline:
-1. **Volatile Memory Formatting:** As absolute compiler paths (`cfn-lint`) require static bytes to process checks securely, the script generates the active test file directly to a physical RAM Disk path (`R:\`). This isolates disk writing structures, eliminating traditional file I/O latency.
+1. **RAM Disk Pathing:** As absolute compiler paths (`cfn-lint`) require static bytes to process checks securely, the script generates the active test file directly to a physical RAM Disk path (`R:\`). This isolates disk writing structures, eliminating traditional file I/O latency.
 2. **Format Standard Loading:** `yaml.safe_load` secures the physical variables securely in memory.
 3. **Specification Verification:** The `cfn-lint` validation parameters execute against the syntax directly, providing JSON error structures.
 4. **Operations Compliance Enforcement:** The `cfn-guard validate` engine checks exact variables against defined parameters embedded internally.

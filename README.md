@@ -7,10 +7,10 @@ This repository provides a static evaluation pipeline for optimizing generated I
 ```mermaid
 graph TD
     Z["AWS aws-samples Repository"] -->|Extract Validation Defaults| A
-    A["MIPROv2 Bayesian Optimizer - GPT-4o"] -->|Queries Constraints| B[(ChromaDB Vector Oracle)]
-    B -->|Ingests Document Parameters| C{"Student Evaluators - GPT-4o & Claude 3.7"}
+    A["MIPROv2 Bayesian Optimizer (GPT-4o)"] -->|Queries Constraints| B[(ChromaDB Vector Store)]
+    B -->|Ingests Document Parameters| C{"Student Evaluators (GPT-4o & Claude 3.7)"}
     
-    C -->|Generates SAM YAML into Volatile RAM| D["yaml.safe_load Parser"]
+    C -->|Generates SAM YAML into RAM Disk| D["yaml.safe_load Parser"]
     D -->|Validates| E["cfn-lint Syntax Verification"]
     E -->|Validates| F["cfn-guard Compliance Verification"]
     
@@ -25,7 +25,7 @@ graph TD
     
     J -->|Retry Attempt Loop| C
     J -->|Exhausted| K["Record Compiler Failure Log"]
-    K -->|Inject Persistent Hallucination Vectors| B
+    K -->|Record Compilation Errors| B
 ```
 
 ## Core Evaluation Components
@@ -41,7 +41,7 @@ graph TD
    Where `L` represents the total count of `cfn-lint` syntax errors, `G` represents the total count of `cfn-guard` compliance violations, `S ∈ {0, 1}` maps structural intent via the LLM semantic judge, and `A ∈ {0, 1, 2}` tracks recursive generation attempt penalties.
 4. **Semantic Verification:** To achieve maximum execution parameters, the script utilizes `gpt-4o` to physically compare output semantic alignments against input specifications, validating structures beyond basic `cfn-lint` syntax.
 5. **Bootstrapped Dataset Execution:** The codebase implements an extraction script that queries the `aws-samples/serverless-patterns` repository. It filters and provides compliant SAM architectures mapped to explicitly defined architecture targets. MIPROv2 passes these examples into the DSPy instances as execution parameters.
-6. **Volatile OS Integration (RAM Disk):** The codebase performs temporary verification workloads into a volatile system RAM drive (e.g., `R:\`) to bypass physical SSD input/output latency associated with the execution of the `cfn-lint` and `cfn-guard` binaries.
+6. **RAM Disk Target Generation:** The codebase performs temporary verification workloads into a volatile system RAM drive (e.g., `R:\`) to bypass physical SSD input/output latency associated with the execution of the `cfn-lint` and `cfn-guard` binaries.
 
 ## Step 0: Environment Configuration
 
@@ -76,7 +76,7 @@ Initialize the vector database locally (Requires Internet Connection):
 venv\Scripts\python.exe scripts/ingest_sam_docs.py
 ```
 
-Begin standard parameter alignment with standard optimization thresholds:
+Begin parameter alignment with standard optimization thresholds:
 
 ```bash
 venv\Scripts\python.exe scripts/optimize.py --auto medium
@@ -91,5 +91,5 @@ venv\Scripts\python.exe scripts/optimize.py --auto medium --resume
 ## Known Limitations & Future Work
 
 1. **Missing Deployment Integration:** The system validates code via `cfn-lint` strictly against AWS Serverless syntax and physical constraints. It does not invoke `sam deploy` against an active target AWS physical environment. Current verification is structurally semantic and statically evaluated. Production usage requires an explicit isolated deployment test pipeline.
-2. **Security Protocol Generalization:** The `cfn-guard` policies exclusively check JSON syntax structures by mapping them to local logic files. A language model implicitly trained against the pipeline architecture could artificially format schema implementations to bypass string pattern matching algorithms, leaving the underlying architecture explicitly vulnerable to production security exploits.
-3. **Windows Operating System Dependency:** The virtual environment binary routing (`cfn-guard.exe`) relies on standard Windows NT file path formats. A standard Linux machine requires structural path rewriting inside `evaluators.py`.
+2. **Security Protocol Generalization:** The `cfn-guard` policies exclusively check JSON syntax structures by mapping them to local logic files. A language model implicitly trained against the pipeline architecture could format schema implementations to bypass string pattern matching algorithms, leaving the underlying architecture explicitly vulnerable to production security exploits.
+3. **Windows Operating System Dependency:** The virtual environment binary routing (`cfn-guard.exe`) relies on standard Windows NT file path formats. A Linux machine requires structural path rewriting inside `evaluators.py`.

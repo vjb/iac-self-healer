@@ -33,7 +33,7 @@ This document tracks technical mechanics and structural engineering changes appl
 **The Lesson:** Hardcoded regex boundaries exhibit high failure rates against unstructured language outputs. 
 **The Solution:** A logical regex string (`r"```[a-zA-Z]*\s*(.*?)\s*```"`) utilizing wildcard whitespace (`\s*`) across the entire string length was applied. The process programmatically sorts the sequence array by byte-length descending, ensuring that the target object is systematically the largest declarative YAML payload extracted.
 
-## 7. Zero-Trust Compliance Injection
+## 7. Compliance Rule Integration
 **The Problem:** Generative agents failed strict AWS WAFR compliance bounds (such as `PublicAccessBlockConfiguration` on S3 resources) even when instructed to generate secure architectures because they lacked technical parameter bounds in context.
 **The Lesson:** Enforcing enterprise compliance checks through generated instructions is unreliable against compiler verification.
 **The Solution:** Mathematical `cfn-guard` scripts were physically mapped into the embedding vector context. Exposing the structural compiler boundaries directly inside the prompt payload ensures the models validate conditions dynamically prior to output generation.
@@ -43,7 +43,7 @@ This document tracks technical mechanics and structural engineering changes appl
 **The Lesson:** Zero-shot autonomous configuration logic requires integration against optimized statistical inference weights.
 **The Solution:** The pipeline execution parameters were modified to rely strictly on `anthropic/claude-3.7-sonnet` and `gpt-4o`. Removing underperforming processing engines eliminated wait states, scaling computation times and modifying the validation success metric boundary to `0.81`.
 
-## 9. Volatile I/O Optimization (RAM Disks)
+## 9. RAM Disk I/O Routing
 **The Problem:** The pipeline design required creating thousands of recursive `template.yaml` files natively across the local SSD to pass schema payloads to external `cfn-lint` and `cfn-guard` processes, logging high I/O latency.
 **The Lesson:** External compiled deterministic routines incur execution delays when bound against primary OS storage mediums. 
-**The Solution:** The tempfile path generation script redirects execution templates directly into a volatile RAM Disk partition (`R:\`). Because the entire evaluation sequence executes synchronously inside memory bounds, linter file-read latency dropped to near-zero margins.
+**The Solution:** The tempfile path generation script redirects execution templates directly into a RAM Disk partition (`R:\`). Because the entire evaluation sequence executes synchronously inside memory bounds, linter file-read latency dropped to near-zero margins.
