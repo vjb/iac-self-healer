@@ -257,6 +257,25 @@ def evaluate_prompt_with_details(prompt_text: str, intent_text: str = None) -> t
         
     avg_score = sum(scores) / len(scores) if scores else 0.0
     logger.info("Metric result: %.3f (avg of %d resolving models)", avg_score, len(scores))
+    
+    # Real-Time Asynchronous Telemetry Dump (Physical JSONL Tracker)
+    import time
+    run_dir = os.environ.get("CURRENT_RUN_DIR")
+    if run_dir and os.path.exists(run_dir):
+        telemetry = {
+            "timestamp": int(time.time()),
+            "intent": intent_text,
+            "avg_score": avg_score,
+            "prompt": prompt_text,
+            "model_details": details
+        }
+        telemetry_path = os.path.join(run_dir, "live_telemetry.jsonl")
+        try:
+            with open(telemetry_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(telemetry) + "\n")
+        except Exception as e:
+            logger.debug(f"Live telemetry JSONL write securely bypassed due to stream overlap: {e}")
+            
     return avg_score, details
 
 def sam_compile_metric(example, prediction, trace=None):

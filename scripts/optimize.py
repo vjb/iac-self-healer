@@ -35,6 +35,8 @@ def optimize(auto="light", num_candidates=7, num_trials=15, resume=False):
     results_dir = os.path.join("results", "optimization", f"run_{run_timestamp}")
     os.makedirs(results_dir, exist_ok=True)
     
+    os.environ["CURRENT_RUN_DIR"] = results_dir
+    
     # Attach telemetry to specific run folder
     fh = logging.FileHandler(os.path.join(results_dir, "run_log.txt"), encoding="utf-8")
     fh.setLevel(logging.DEBUG)
