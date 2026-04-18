@@ -34,7 +34,7 @@ graph TD
 ## Core Evaluation Components
 
 1. **Pre-emptive Data Ingestion:** The system parses `d1uauaxba7bl26.cloudfront.net` during initialization to download documented AWS CloudFormation schema parameters into a local ChromaDB instance.
-2. **Cost-Optimized Model Selection:** Prompt instruction synthesis utilizes `gpt-4o` natively as the primary optimizer matrix. To evaluate generated permutations efficiently while halving API margins, the pipeline randomly executes evaluation across distinct foundation models via `random.choice(['gpt-4o', 'anthropic/claude-3.7-sonnet'])` per optimization loop. This prevents neural bias and enforces true prompt generalization without doubling generation limits.
+2. **Cost-Optimized Model Selection:** Prompt instruction synthesis utilizes `gpt-4o` natively as the primary optimizer engine. To evaluate generated permutations efficiently while halving API limits, the pipeline randomly executes evaluation across distinct foundation models via `random.choice(['gpt-4o', 'anthropic/claude-3.7-sonnet'])` per optimization loop. This prevents neural bias and enforces true prompt generalization without doubling generation limits.
 3. **Continuous Scoring Functions (`math.exp`):** The optimization gradients scale linearly against partial code outputs. A template passing 15 of 20 validation checks calculates a mathematically higher score multiplier than a template with complete structural failure, bypassing discrete boolean logic gates. The pipeline computes the evaluation vector using exponential parameter decay:
 
    ```math
