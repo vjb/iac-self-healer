@@ -47,3 +47,8 @@ This document tracks technical mechanics and structural engineering changes appl
 **The Problem:** The pipeline design required creating thousands of recursive `template.yaml` files natively across the local SSD to pass schema payloads to external `cfn-lint` and `cfn-guard` processes, logging high I/O latency.
 **The Lesson:** External compiled deterministic routines incur execution delays when bound against primary OS storage mediums. 
 **The Solution:** The tempfile path generation script redirects execution templates directly into a RAM Disk partition (`R:\`). Because the entire evaluation sequence executes synchronously inside memory bounds, linter file-read latency dropped to near-zero margins.
+
+## 10. Multi-Fidelity Oracle Execution (Phase 2 Integration)
+**The Problem:** Structural prompt parameters successfully generated `cfn-lint` verified code, but physically crashed during dynamic validation due to open variable instantiations (e.g., `Parameters: VpcId` without default mappings). Static code evaluation fundamentally cannot verify physical execution targets dynamically.
+**The Lesson:** A deterministic mathematical validation structure must execute both "static" rule checks and "physical" hardware compilation traces concurrently.
+**The Solution:** A decoupled two-stage inference matrix handles validation logic. Phase 1 filters strictly against JSON/YAML schema definitions (fast loop). Phase 2 injects the surviving Champion parameters directly into an ephemeral LocalStack Pro Docker engine, logging native Boto3 target evaluation errors and mathematically recording them against the DSPy Vector database for deep hardware alignment bounds.

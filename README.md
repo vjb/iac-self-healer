@@ -7,21 +7,25 @@ This repository provides a static evaluation pipeline for optimizing generated I
 ```mermaid
 graph TD
     Z["AWS aws-samples Repository"] -->|Extract Validation Defaults| A
-    A["MIPROv2 Bayesian Optimizer (GPT-4o)"] -->|Queries Constraints| B[(ChromaDB Vector Store)]
-    B -->|Ingests Document Parameters| C{"Student Evaluators (GPT-4o & Claude 3.7)"}
+    A["MIPROv2 Bayesian Optimizer (GPT-4o)"] -->|Multi-Q Cross-Cluster RAG| B[(ChromaDB Vector Store)]
+    B -->|Query 1: Official API Specs| C{"Student Evaluators (GPT-4o & Claude 3.7)"}
+    B -->|Query 2: WAFR Security Tracebacks| C
+    B -->|Query 3: Version Deprecation Limits| C
     
     C -->|Generates SAM YAML into RAM Disk| D["yaml.safe_load Parser"]
-    D -->|Validates| E["cfn-lint Syntax Verification"]
-    E -->|Validates| F["cfn-guard Compliance Verification"]
+    D -->|Phase 1 (Static)| E["cfn-lint Syntax Verification"]
+    E -->|Phase 1 (Static)| F["cfn-guard Compliance Verification"]
+    F -->|Phase 2 (Physical)| P2["LocalStack Pro Docker OS Hardware"]
     
-    F -->|Satisfies Structural Rules| G{"Semantic Equivalence Judge"}
-    G -->|YES - Perfect Match| H["Score 1.20 - Validation Success"]
+    P2 -->|Satisfies Strict IAM Constraints| G{"Semantic Equivalence Judge"}
+    G -->|YES - Perfect Match| H["Score 2.00 - Full Pipeline Verification"]
     
-    %% Information Feedback Loops
-    D -->|Exception| J["Math Penalty & Retry Execution"]
-    E -->|Returns Top 3 Violations Array| J
-    F -->|Returns Raw AST JSON Trace| J
-    G -->|NO - Returns Technical Delta| J
+    %% Feedback Loops
+    D -->|Syntax Exception| J["Math Penalty & Vector Optimization"]
+    E -->|Top 3 Violations Array| J
+    F -->|Raw AST Trace| J
+    P2 -->|Physical Hardware Boto3 Error Trace| J
+    G -->|NO - Technical Delta| J
     
     J -->|Retry Attempt Loop| C
     J -->|Exhausted| K["Record Compiler Failure Log"]
@@ -90,6 +94,6 @@ venv\Scripts\python.exe scripts/optimize.py --auto medium --resume
 
 ## Known Limitations & Future Work
 
-1. **Missing Deployment Integration:** The system validates code via `cfn-lint` strictly against AWS Serverless syntax and physical constraints. It does not invoke `sam deploy` against an active target AWS physical environment. Current verification is structurally semantic and statically evaluated. Production usage requires an explicit isolated deployment test pipeline.
-2. **Security Protocol Generalization:** The `cfn-guard` policies exclusively check JSON syntax structures by mapping them to local logic files. A language model implicitly trained against the pipeline architecture could format schema implementations to bypass string pattern matching algorithms, leaving the underlying architecture explicitly vulnerable to production security exploits.
+1. **Nested OS Virtualization:** The Phase 2 LocalStack container instance functionally operates in runtime isolation. Serverless Lambdas dynamically requesting Docker layers (e.g. nested Python/Go compilation instructions) trigger execution exceptions without an explicit mapping to `/var/run/docker.sock` passed internally into the `subprocess` bindings.
+2. **Security Protocol Generalization:** The `cfn-guard` policies exclusively check JSON syntax structures by mapping them to local logic files. A language model implicitly trained against the pipeline architecture could format schema implementations to bypass string pattern matching algorithms, leaving the underlying architecture explicitly vulnerable to zero-day logic exploits.
 3. **Windows Operating System Dependency:** The virtual environment binary routing (`cfn-guard.exe`) relies on standard Windows NT file path formats. A Linux machine requires structural path rewriting inside `evaluators.py`.

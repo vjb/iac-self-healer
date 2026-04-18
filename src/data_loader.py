@@ -88,12 +88,25 @@ def get_sam_reference(intent: str) -> str:
     base_docs = "Use AWS SAM declarative syntax. Transform: AWS::Serverless-2016-10-31 is required."
     if collection and collection.count() > 0:
         try:
-            results = collection.query(query_texts=[intent], n_results=5)
-            documents = results.get('documents', [[]])
-            if documents and documents[0]:
-                base_docs = "\n\n---\n\n".join(documents[0])
+            # 1. Primary Vector Search: Target explicit Formal Framework Clusters
+            res_spec = collection.query(query_texts=[f"{intent} AWS::Serverless declarative Transform Serverless-2016-10-31"], n_results=3)
+            # 2. Secondary Vector Search: Target explicit WAFR Security Tracebacks
+            res_sec = collection.query(query_texts=[f"{intent} CRITICAL COMPILER WARNING FAILED rules aws-wafr-conformance"], n_results=2)
+            # 3. Tertiary Vector Search: Target generic Compilation & Runtime Warnings
+            res_dep = collection.query(query_texts=[f"{intent} cfn-lint failure deprecation resource"], n_results=1)
+
+            docs = []
+            if res_spec and res_spec.get('documents') and res_spec['documents'][0]:
+                docs.extend(res_spec['documents'][0])
+            if res_sec and res_sec.get('documents') and res_sec['documents'][0]:
+                docs.append(f"\n[ORACLE WAFR SECURITY FEEDBACK TO AVOID]\n" + "\n".join(res_sec['documents'][0]))
+            if res_dep and res_dep.get('documents') and res_dep['documents'][0]:
+                docs.append(f"\n[ORACLE SYNTAX DEPRECATION FEEDBACK TO AVOID]\n" + "\n".join(res_dep['documents'][0]))
+                
+            if docs:
+                base_docs = "\n\n---\n\n".join(docs)
         except Exception as e:
-            logger.warning("ChromaDB query failed: %s", e)
+            logger.warning("ChromaDB Multi-Q query failed: %s", e)
             
     # Load physical WAFR .guard rules to enforce absolute bounds
     wafr_rules = ""

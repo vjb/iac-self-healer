@@ -26,7 +26,12 @@ Model API endpoints ingest defined string structures and generate Serverless YAM
 6. **Semantic Output Parsing:** `gpt-4o` executes direct string comparison logic against outputs. When external linting boundaries process smoothly (`1.00`), a semantic judge verifies the physical requirements against the functional intent structure.
 
 ### Dynamic Pipeline Data Handling (`src/data_loader.py`)
-A custom initialization specification parses the AWS schema network directly. Whenever an API run logs a `cfn-lint` failure, ChromaDB records the variables internally, providing evaluation loop state feedback against failure cases.
+A custom initialization specification parses the AWS schema network directly. During DSPy retrieval evaluation loops, the script executes a **Multi-Q Cross-Cluster Strategy**:
+1. It queries ChromaDB explicitly for AWS API boundaries (Targeting mathematical Spec isolation).
+2. It executes a secondary query isolating strictly `cfn-guard` exceptions (Targeting Security Tracebacks natively without user prompt keywords).
+3. It performs a final query mapping API Version Deprecation bounds (Isolating `cfn-lint` structural limits).
+
+This dynamic semantic separation physically guarantees the generated matrix contains equal distributions of framework instruction AND compilation warnings dynamically independent of the query constraints!
 
 ### Compilation Boundary Bypass (Semantic Generation)
 Compliance enforcement objects defined within `cfn-guard` reject YAML templates that omit target parameters. The evaluation pipeline executes a dedicated Python generation request against the internal AWS `aws-samples` GitHub repository to bypass static boundaries.
