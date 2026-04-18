@@ -7,21 +7,21 @@ This repository provides a static evaluation pipeline for optimizing generated I
 ```mermaid
 graph TD
     Z["AWS aws-samples Repository"] -->|Extract Validation Defaults| A
-    A["MIPROv2 Bayesian Optimizer (GPT-4o)"] -->|Multi-Q Cross-Cluster RAG| B[(ChromaDB Vector Store)]
-    B -->|Query 1: Official API Specs| C{"Student Evaluators (GPT-4o & Claude 3.7)"}
+    A["MIPROv2 Bayesian Optimizer - GPT-4o"] -->|Multi-Q Cross-Cluster RAG| B[(ChromaDB Vector Store)]
+    B -->|Query 1: Official API Specs| C{"Student Evaluators - GPT-4o and Claude 3.7"}
     B -->|Query 2: WAFR Security Tracebacks| C
     B -->|Query 3: Version Deprecation Limits| C
     
     C -->|Generates SAM YAML into RAM Disk| D["yaml.safe_load Parser"]
-    D -->|Phase 1 (Static)| E["cfn-lint Syntax Verification"]
-    E -->|Phase 1 (Static)| F["cfn-guard Compliance Verification"]
-    F -->|Phase 2 (Physical)| P2["LocalStack Pro Docker OS Hardware"]
+    D -->|Phase 1 Static| E["cfn-lint Syntax Verification"]
+    E -->|Phase 1 Static| F["cfn-guard Compliance Verification"]
+    F -->|Phase 2 Physical| P2["LocalStack Pro Docker OS Hardware"]
     
     P2 -->|Satisfies Strict IAM Constraints| G{"Semantic Equivalence Judge"}
     G -->|YES - Perfect Match| H["Score 2.00 - Full Pipeline Verification"]
     
     %% Feedback Loops
-    D -->|Syntax Exception| J["Math Penalty & Vector Optimization"]
+    D -->|Syntax Exception| J["Math Penalty and Vector Optimization"]
     E -->|Top 3 Violations Array| J
     F -->|Raw AST Trace| J
     P2 -->|Physical Hardware Boto3 Error Trace| J
