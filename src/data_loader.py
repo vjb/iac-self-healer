@@ -120,8 +120,8 @@ def record_compiler_failure(intent: str, error_trace: str):
         import re
         
         # Sanitize random volatile RAM paths out of the trace so duplicate errors hash symmetrically
-        # Utilizes greedy slash matching to handle both raw strings and JSON-escaped formats natively
-        sanitized_trace = re.sub(r'(?:[\\/]+\?[\\/]+)?R:[\\/]+[a-zA-Z0-9_]+[\\/]+template\.yaml', '[VOLATILE_PATH]', error_trace)
+        # Utilizes explicit backslash literal limits to correctly match deep cfn-guard formatting strings flawlessly natively!
+        sanitized_trace = re.sub(r'(?:\\\\?\?\\)?R:\\[a-zA-Z0-9_]+\\template\.yaml', '<RAM_DISK_FILE>', error_trace)
         
         # De-Noise the vector embedding bounds: Separate physical text summary from dense AST JSON Payload
         trace_parts = sanitized_trace.split("---", 1)
